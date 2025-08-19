@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Upload Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .upload-area { 
+            border: 2px dashed #ccc; 
+            padding: 40px; 
+            text-align: center; 
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .upload-area:hover { border-color: #007bff; }
+        .results { margin-top: 20px; padding: 20px; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>PDF Upload Debug Test</h1>
+    
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+        <p>Click here to upload a PDF file</p>
+    </div>
+    
+    <div id="results" class="results" style="display: none;">
+        <h3>Results:</h3>
+        <div id="output"></div>
+    </div>
+
+    <!-- Use a different PDF.js version -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        // Set worker path
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        console.log('Debug script loaded');
+        
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            console.log('File input changed');
+            const file = e.target.files[0];
+            
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
+            
+            console.log('File selected:', {
+                name: file.name,
+                size: file.size,
+                type: file.type
+            });
+            
+            const results = document.getElementById('results');
+            const output = document.getElementById('output');
+            results.style.display = 'block';
+            
+            output.innerHTML = `
+                <p><strong>File:</strong> ${file.name}</p>
+                <p><strong>Size:</strong> ${file.size} bytes</p>
+                <p><strong>Type:</strong> ${file.type}</p>
+                <p><strong>Status:</strong> Processing...</p>
+            `;
+            
+            try {
+                // Test PDF reading
+                const arrayBuffer = await file.arrayBuffer();
+                console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
+                
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                console.log('PDF loaded, pages:', pdf.numPages);
+                
+                let fullText = '';
+                for (let i = 1; i <= Math.min(pdf.numPages, 3); i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\\n\\n';
+                }
+                
+                console.log('Text extracted, length:', fullText.length);
+                
+                output.innerHTML = `
+                    <p><strong>File:</strong> ${file.name}</p>
+                    <p><strong>Size:</strong> ${file.size} bytes</p>
+                    <p><strong>Type:</strong> ${file.type}</p>
+                    <p><strong>Pages:</strong> ${pdf.numPages}</p>
+                    <p><strong>Text Length:</strong> ${fullText.length} characters</p>
+                    <p><strong>Status:</strong> ✅ SUCCESS!</p>
+                    <details>
+                        <summary>First 500 characters of text:</summary>
+                        <pre>${fullText.substring(0, 500)}...</pre>
+                    </details>
+                `;
+                
+            } catch (error) {
+                console.error('Error processing PDF:', error);
+                output.innerHTML = `
+                    <p><strong>File:</strong> ${file.name}</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Status:</strong> ❌ FAILED</p>
+                `;
+            }
+        });
+        
+        // Test if PDF.js is loaded
+        console.log('PDF.js version:', pdfjsLib.version);
+    </script>
+</body>
+</html>
