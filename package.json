@@ -1,0 +1,25 @@
+{
+  "name": "brand-studio-create",
+  "version": "1.0.0",
+  "description": "Automated briefing analysis dashboard for Brand Studio CREATE",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'Static site - no build required'",
+    "start": "python -m http.server 8000"
+  },
+  "keywords": [
+    "briefing",
+    "dashboard",
+    "pdf",
+    "analysis",
+    "rossel",
+    "create"
+  ],
+  "author": "Tom Vandevenne <tom.vandevenne@rossel.be>",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
