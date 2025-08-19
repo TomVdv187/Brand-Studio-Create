@@ -3,160 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand Studio Create - Briefing Dashboard</title>
+    <title>Brand Studio CREATE - Briefing Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Brand Studio Create</h1>
-            <p>Automated Briefing Analysis Dashboard</p>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <i class="fas fa-bolt brand-icon"></i>
+                    <h1>Brand Studio CREATE</h1>
+                </div>
+                <p class="tagline">AI-Powered Briefing Analysis Platform</p>
+            </div>
         </header>
 
-        <div class="upload-section">
-            <div class="upload-area" id="uploadArea">
-                <input type="file" id="fileInput" accept=".pdf" style="display: none;">
-                <div class="upload-content">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10,9 9,9 8,9"></polyline>
-                    </svg>
-                    <h3>Upload Briefing PDF</h3>
-                    <p>Click to select or drag and drop your briefing PDF here</p>
-                    <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                        Select PDF File
-                    </button>
-                </div>
-            </div>
-            <div class="processing" id="processing" style="display: none;">
-                <div class="spinner"></div>
-                <p>Processing briefing...</p>
-            </div>
-        </div>
-
-        <div class="dashboard" id="dashboard" style="display: none;">
-            <div class="decision-banner" id="decisionBanner">
-                <div class="decision-content">
-                    <div class="decision-icon" id="decisionIcon"></div>
-                    <div class="decision-text">
-                        <h2 id="decisionTitle"></h2>
-                        <p id="decisionMessage"></p>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-container">
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3>Upload Your Briefing</h3>
+                            <p>Drag and drop your PDF file here, or click to browse</p>
+                            <button type="button" class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-plus"></i>
+                                Choose File
+                            </button>
+                            <div class="file-info">
+                                <small>Supports PDF files up to 10MB</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Processing State -->
+                    <div class="processing-state" id="processingState" style="display: none;">
+                        <div class="processing-animation">
+                            <div class="spinner"></div>
+                        </div>
+                        <h3>Analyzing Briefing</h3>
+                        <p>Extracting data and evaluating against CREATE criteria...</p>
+                        <div class="progress-steps">
+                            <div class="step active" id="step1">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Reading PDF</span>
+                            </div>
+                            <div class="step" id="step2">
+                                <i class="fas fa-brain"></i>
+                                <span>AI Analysis</span>
+                            </div>
+                            <div class="step" id="step3">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Validation</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="info-grid">
-                <div class="info-card">
-                    <h3>Contact Information</h3>
-                    <div class="info-row">
-                        <label>Responsable Commercial:</label>
-                        <span id="responsable_commercial">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Agence Média:</label>
-                        <span id="agence_media">-</span>
-                    </div>
-                </div>
-
-                <div class="info-card">
-                    <h3>Advertiser</h3>
-                    <div class="info-row">
-                        <label>Group/Annonceur:</label>
-                        <span id="group_or_annonceur">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Brand/Product:</label>
-                        <span id="brand_or_product">-</span>
+            <!-- Dashboard Section -->
+            <div class="dashboard" id="dashboard" style="display: none;">
+                <!-- Decision Header -->
+                <div class="decision-header" id="decisionHeader">
+                    <div class="decision-content">
+                        <div class="decision-icon" id="decisionIcon"></div>
+                        <div class="decision-info">
+                            <h2 id="decisionTitle"></h2>
+                            <p id="decisionMessage"></p>
+                        </div>
+                        <button class="btn-secondary" onclick="resetDashboard()">
+                            <i class="fas fa-plus"></i>
+                            New Briefing
+                        </button>
                     </div>
                 </div>
 
-                <div class="info-card">
-                    <h3>Brief Details</h3>
-                    <div class="info-row">
-                        <label>Type:</label>
-                        <span id="brief_type">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Urgency:</label>
-                        <span id="urgency">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Typologie:</label>
-                        <span id="typologie_annonceur">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Languages:</label>
-                        <span id="presentation_languages">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Target Persona:</label>
-                        <span id="target_persona">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Objectives:</label>
-                        <span id="objectives">-</span>
-                    </div>
-                </div>
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Contact & Advertiser Section -->
+                    <div class="card-section">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-user-tie"></i>
+                                <h3>Contact Information</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="field-group">
+                                    <label>Responsable Commercial</label>
+                                    <span id="responsable_commercial" class="field-value">-</span>
+                                </div>
+                                <div class="field-group">
+                                    <label>Agence Média</label>
+                                    <span id="agence_media" class="field-value">-</span>
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="info-card">
-                    <h3>Constraints & Budget</h3>
-                    <div class="info-row">
-                        <label>Min Budget (CREATE):</label>
-                        <span id="min_budget_create_eur">€10,000</span>
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-building"></i>
+                                <h3>Advertiser</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="field-group">
+                                    <label>Group/Annonceur</label>
+                                    <span id="group_or_annonceur" class="field-value">-</span>
+                                </div>
+                                <div class="field-group">
+                                    <label>Brand/Product</label>
+                                    <span id="brand_or_product" class="field-value">-</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <label>Confirmed Budget:</label>
-                        <span id="budget_confirmed_eur_range">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Proposal Deadline:</label>
-                        <span id="proposal_deadline">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Lead Time Required:</label>
-                        <span id="lead_time_business_days_after_valid_brief">10 business days</span>
-                    </div>
-                </div>
 
-                <div class="info-card">
-                    <h3>Creative Requirements</h3>
-                    <div class="info-row">
-                        <label>Sports Focus:</label>
-                        <span id="sports_focus">-</span>
+                    <!-- Brief Details Section -->
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <i class="fas fa-file-alt"></i>
+                            <h3>Brief Details</h3>
+                        </div>
+                        <div class="card-body grid-3">
+                            <div class="field-group">
+                                <label>Type</label>
+                                <span id="brief_type" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Urgency</label>
+                                <span id="urgency" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Typologie</label>
+                                <span id="typologie_annonceur" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Languages</label>
+                                <span id="presentation_languages" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Target Persona</label>
+                                <span id="target_persona" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Objectives</label>
+                                <span id="objectives" class="field-value">-</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <label>Min Activity/Week:</label>
-                        <span id="audience_activity_min_sessions_per_week">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Do Not:</label>
-                        <span id="do_not">-</span>
-                    </div>
-                    <div class="info-row">
-                        <label>Prefer:</label>
-                        <span id="prefer">-</span>
-                    </div>
-                </div>
 
-                <div class="info-card full-width">
-                    <h3>Key Messages</h3>
-                    <p id="key_messages">-</p>
-                </div>
+                    <!-- Budget & Constraints Section -->
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <i class="fas fa-euro-sign"></i>
+                            <h3>Budget & Constraints</h3>
+                        </div>
+                        <div class="card-body grid-4">
+                            <div class="field-group">
+                                <label>Min Budget (CREATE)</label>
+                                <span id="min_budget_create_eur" class="field-value highlight">€10,000</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Confirmed Budget</label>
+                                <span id="budget_confirmed_eur_range" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Proposal Deadline</label>
+                                <span id="proposal_deadline" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Lead Time Required</label>
+                                <span id="lead_time_business_days_after_valid_brief" class="field-value highlight">10 business days</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="info-card full-width">
-                    <h3>Media Preferences</h3>
-                    <p id="media_specific_preferences">-</p>
-                </div>
+                    <!-- Creative Requirements Section -->
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <i class="fas fa-palette"></i>
+                            <h3>Creative Requirements</h3>
+                        </div>
+                        <div class="card-body grid-4">
+                            <div class="field-group">
+                                <label>Sports Focus</label>
+                                <span id="sports_focus" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Min Activity/Week</label>
+                                <span id="audience_activity_min_sessions_per_week" class="field-value">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Do Not Use</label>
+                                <span id="do_not" class="field-value warning">-</span>
+                            </div>
+                            <div class="field-group">
+                                <label>Preferred</label>
+                                <span id="prefer" class="field-value success">-</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="info-card full-width">
-                    <h3>Additional Notes</h3>
-                    <p id="notes">-</p>
+                    <!-- Messages & Notes Section -->
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <i class="fas fa-comment-alt"></i>
+                            <h3>Key Messages</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="message-content" id="key_messages">-</div>
+                        </div>
+                    </div>
+
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <i class="fas fa-broadcast-tower"></i>
+                            <h3>Media Preferences</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="message-content" id="media_specific_preferences">-</div>
+                        </div>
+                    </div>
+
+                    <div class="card full-width">
+                        <div class="card-header">
+                            <i class="fas fa-sticky-note"></i>
+                            <h3>Additional Notes</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="message-content" id="notes">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
