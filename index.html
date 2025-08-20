@@ -284,6 +284,71 @@
             50% { opacity: 1; }
         }
 
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--gray-200);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .error-banner {
+            background: linear-gradient(135deg, #fee2e2 0%, white 100%);
+            border: 1px solid var(--error);
+            border-left: 4px solid var(--error);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .error-banner.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-banner h3 {
+            color: var(--error);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-banner p {
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .retry-btn {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .retry-btn:hover {
+            background: #dc2626;
+        }
+
         /* Results Section */
         .results-section {
             display: none;
@@ -675,9 +740,14 @@
                                 <div class="upload-info">
                                     <small><i class="fas fa-info-circle"></i> Supports PDF files up to 10MB</small>
                                     <br><br>
-                                    <button type="button" onclick="testDashboard()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
-                                        🧪 Test Dashboard
-                                    </button>
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
+                                        <button type="button" onclick="testDashboard()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
+                                            🧪 Test Dashboard
+                                        </button>
+                                        <button type="button" onclick="simulateProcessing()" style="background: #0ea5e9; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
+                                            🎭 Demo Flow
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -691,7 +761,19 @@
                         <h2>Analyzing Briefing</h2>
                         <p>Extracting data and evaluating against CREATE criteria...</p>
                         <div class="processing-status" id="processingStatus">Initializing...</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
                     </div>
+                </section>
+
+                <!-- Error Section -->
+                <section class="error-banner" id="errorBanner">
+                    <h3><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Processing Error</span></h3>
+                    <p id="errorMessage">An error occurred while processing your file.</p>
+                    <button class="retry-btn" onclick="handleRetry()">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
                 </section>
 
                 <!-- Results Section -->
@@ -704,10 +786,16 @@
                                 <p id="decisionMessage"></p>
                                 <div class="decision-score" id="decisionScore"></div>
                             </div>
-                            <button class="btn-secondary" onclick="resetDashboard()">
-                                <i class="fas fa-upload"></i>
-                                New Briefing
-                            </button>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <button class="btn-secondary" onclick="exportData()">
+                                    <i class="fas fa-download"></i>
+                                    Export JSON
+                                </button>
+                                <button class="btn-secondary" onclick="resetDashboard()">
+                                    <i class="fas fa-upload"></i>
+                                    New Briefing
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -903,34 +991,109 @@
             console.log('- Is HTTPS:', window.location.protocol === 'https:');
             console.log('- Performance timing available:', typeof performance !== 'undefined');
             
-            // Test file input accessibility
-            const fileInput = document.getElementById('fileInput');
-            const uploadBtn = document.getElementById('uploadBtn');
-            const uploadArea = document.getElementById('uploadArea');
-            
+            // Test all DOM elements
             console.log('📋 Element Check:');
-            console.log('- File input found:', !!fileInput);
-            console.log('- Upload button found:', !!uploadBtn);
-            console.log('- Upload area found:', !!uploadArea);
+            Object.entries(elements).forEach(([key, element]) => {
+                console.log(`- ${key}:`, !!element ? '✅' : '❌');
+            });
             
-            if (fileInput) {
-                console.log('- File input accepts:', fileInput.accept);
-                console.log('- File input disabled:', fileInput.disabled);
-            }
+            // Test extraction patterns
+            console.log('🔍 Testing extraction patterns...');
+            const testText = `
+                RESPONSABLE COMMERCIAL: Karolien Van Gaever
+                AGENCE MÉDIA: Group M - Essence Mediacom
+                ANNONCEUR: Coca-Cola
+                MARQUE: Powerade
+                CIBLE: 18-54 - sportifs
+                BUDGET CONFIRMÉ: 20-25K€
+                DATE LIMITE: 01/04/2025
+                MESSAGES CLÉS: Choisissez Powerade quand vous faites du sport
+                SPORTS: padel, hockey, basket, running
+            `;
             
-            // Test worker loading
-            if (typeof pdfjsLib !== 'undefined') {
-                console.log('🔧 Testing PDF.js worker...');
-                try {
-                    // Create a simple test to verify worker is working
-                    const testArrayBuffer = new ArrayBuffer(8);
-                    console.log('- ArrayBuffer test: ✅');
-                } catch (e) {
-                    console.log('- ArrayBuffer test: ❌', e.message);
+            const testData = {
+                contact: extractPattern(testText, [/responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i]),
+                agency: extractPattern(testText, [/agence[\\s\\w]*média[\\s]*:?\\s*([A-Za-z\\s&\\-\\.]+)/i]),
+                advertiser: extractPattern(testText, [/annonceur[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i]),
+                brand: extractPattern(testText, [/marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i]),
+                target: extractPattern(testText, [/cible[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i]),
+                budget: extractBudget(testText),
+                date: extractDate(testText),
+                sports: extractSportsFocus(testText)
+            };
+            
+            console.log('🎯 Test Extraction Results:', testData);
+            
+            // Test CREATE evaluation
+            console.log('⚖️ Testing CREATE evaluation...');
+            const mockBriefing = {
+                meta: { source_file: 'test.pdf', extraction_ts: '2025-08-20' },
+                contact: { responsable_commercial: 'Test User', agence_media: 'Test Agency' },
+                advertiser: { group_or_annonceur: 'Test Company', brand_or_product: 'Test Product' },
+                brief: { target_persona: '18-54 sportifs' },
+                constraints: {
+                    budget_confirmed_eur_range: '25000-30000',
+                    proposal_deadline: '2025-09-15'
                 }
-            }
+            };
             
-            alert('Dashboard diagnostics complete! PDF.js is loaded and ready. Try uploading a PDF file.');
+            const testEvaluation = evaluateCreateCriteria(mockBriefing);
+            console.log('📊 Test Evaluation:', testEvaluation);
+            
+            alert('Dashboard diagnostics complete! All systems tested. Check console for detailed results.');
+        };
+
+        window.simulateProcessing = function() {
+            console.log('🎭 Simulating processing flow...');
+            showProcessing();
+            startProgressAnimation();
+            
+            let step = 0;
+            const steps = [
+                { status: 'Reading PDF...', progress: 20 },
+                { status: 'Extracting text...', progress: 40 },
+                { status: 'Analyzing content...', progress: 60 },
+                { status: 'Evaluating criteria...', progress: 80 },
+                { status: 'Finalizing results...', progress: 100 }
+            ];
+            
+            const interval = setInterval(() => {
+                if (step < steps.length) {
+                    updateStatus(steps[step].status);
+                    setProgress(steps[step].progress);
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    stopProgressAnimation();
+                    
+                    // Show mock results
+                    setTimeout(() => {
+                        const mockData = {
+                            briefing: {
+                                meta: { source_file: 'test.pdf', extraction_ts: '2025-08-20' },
+                                contact: { responsable_commercial: 'Test User', agence_media: 'Test Agency' },
+                                advertiser: { group_or_annonceur: 'Test Company', brand_or_product: 'Test Product' },
+                                brief: { target_persona: '18-54 sportifs', key_messages: 'Test message', sports_focus: ['padel', 'running'], notes: 'Test notes' },
+                                constraints: { budget_confirmed_eur_range: '25000-30000', proposal_deadline: '2025-09-15' }
+                            }
+                        };
+                        
+                        const mockEvaluation = {
+                            overall_decision: 'GO',
+                            score: 85,
+                            max_score: 100,
+                            criteria: {
+                                budget: { status: 'PASS', score: 40, message: '€25,000 ≥ €10,000' },
+                                timeline: { status: 'PASS', score: 30, message: '26 days ≥ 10 days' },
+                                required_fields: { status: 'PASS', score: 30, message: 'All required fields present' }
+                            }
+                        };
+                        
+                        currentData = { briefing: mockData.briefing, evaluation: mockEvaluation };
+                        showResults(mockData.briefing, mockEvaluation);
+                    }, 500);
+                }
+            }, 1000);
         };
     </script>
     <script>
@@ -952,6 +1115,8 @@
         let isProcessing = false;
         let currentData = null;
         let elements = {};
+        let lastFile = null;
+        let progressInterval = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -989,8 +1154,12 @@
                 uploadSection: document.getElementById('uploadSection'),
                 processingSection: document.getElementById('processingSection'),
                 processingStatus: document.getElementById('processingStatus'),
+                progressFill: document.getElementById('progressFill'),
                 resultsSection: document.getElementById('resultsSection'),
-                decisionBanner: document.getElementById('decisionBanner')
+                decisionBanner: document.getElementById('decisionBanner'),
+                errorBanner: document.getElementById('errorBanner'),
+                errorTitle: document.getElementById('errorTitle'),
+                errorMessage: document.getElementById('errorMessage')
             };
 
             // Check elements
@@ -1178,11 +1347,18 @@
             try {
                 // Show processing
                 showProcessing();
+                lastFile = file;
+                
+                // Start progress tracking
+                startProgressAnimation();
+                
                 updateStatus('Reading PDF...');
+                setProgress(10);
 
                 // Extract text
                 const text = await extractPDFText(file);
                 console.log(`📝 Extracted ${text.length} characters`);
+                setProgress(40);
 
                 updateStatus('Analyzing content...');
                 await delay(500);
@@ -1190,6 +1366,7 @@
                 // Extract data
                 const briefingData = extractBriefingData(text, file.name);
                 console.log('📊 Data:', briefingData);
+                setProgress(70);
 
                 updateStatus('Evaluating CREATE criteria...');
                 await delay(500);
@@ -1197,9 +1374,15 @@
                 // Evaluate
                 const evaluation = evaluateCreateCriteria(briefingData);
                 console.log('🎯 Evaluation:', evaluation);
+                setProgress(90);
+
+                updateStatus('Finalizing results...');
+                await delay(300);
+                setProgress(100);
 
                 // Store and display
                 currentData = { briefing: briefingData, evaluation };
+                stopProgressAnimation();
                 showResults(briefingData, evaluation);
 
                 const processEndTime = performance.now();
@@ -1209,8 +1392,10 @@
                 console.error('💥 Error:', error);
                 const processEndTime = performance.now();
                 console.log(`⏱️ File processing failed after ${processEndTime - processStartTime}ms`);
-                alert(`Error: ${error.message}`);
-                resetToUpload();
+                
+                stopProgressAnimation();
+                showError(error);
+                hideProcessing();
             } finally {
                 isProcessing = false;
             }
@@ -1277,6 +1462,8 @@
 
         // Extract briefing data following claude.md schema exactly
         function extractBriefingData(text, fileName) {
+            console.log('🔍 Extracting data from text length:', text.length);
+            
             return {
                 meta: {
                     source_file: fileName,
@@ -1284,60 +1471,90 @@
                 },
                 contact: {
                     responsable_commercial: extractPattern(text, [
-                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s]+)/i,
-                        /contact[\\s]*:?\\s*([A-Za-z\\s]+)/i,
+                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i,
+                        /contact[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i,
+                        /commercial[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i,
                         // Specific known contacts
-                        /karolien\\s+van\\s+gaever/i
+                        /karolien\\s+van\\s+gaever/i,
+                        /tom\\s+vandevenne/i
                     ]),
                     agence_media: extractPattern(text, [
-                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-z\\s&-]+)/i,
-                        // Common agencies
-                        /group\\s*m/i,
+                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-z\\s&\\-\\.]+)/i,
+                        /media[\\s]*agenc[ey][\\s]*:?\\s*([A-Za-z\\s&\\-\\.]+)/i,
+                        // Common agencies - more flexible matching
+                        /group\\s*m[\\s\\-]*essence\\s*mediacom/i,
                         /essence\\s*mediacom/i,
-                        /havas/i,
-                        /publicis/i,
-                        /wpp/i,
-                        /dentsu/i
+                        /group\\s*m(?!edia)/i,
+                        /havas[\\s\\w]*/i,
+                        /publicis[\\s\\w]*/i,
+                        /wpp[\\s\\w]*/i,
+                        /dentsu[\\s\\w]*/i,
+                        /mindshare/i,
+                        /zenith/i,
+                        /starcom/i
                     ])
                 },
                 advertiser: {
                     group_or_annonceur: extractPattern(text, [
-                        /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
-                        /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
-                        /client[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
-                        // Common advertisers (generic patterns)
-                        /coca[-\\s]*cola/i,
-                        /oneplus/i,
-                        /unilever/i,
-                        /nestl[eé]/i,
-                        /danone/i
+                        /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
+                        /annonceur[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
+                        /client[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
+                        /advertiser[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
+                        // Common advertisers with more flexible patterns
+                        /coca[\\s\\-]*cola[\\s\\w]*/i,
+                        /oneplus[\\s\\w]*/i,
+                        /unilever[\\s\\w]*/i,
+                        /nestl[eé][\\s\\w]*/i,
+                        /danone[\\s\\w]*/i,
+                        /proximus[\\s\\w]*/i,
+                        /telenet[\\s\\w]*/i,
+                        /bnp\\s*paribas/i,
+                        /ing\\s*bank/i
                     ]),
                     brand_or_product: extractPattern(text, [
-                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i,
-                        /produit[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i,
-                        /gamme[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i,
-                        /brand[\\s]*:?\\s*([A-Za-z\\s0-9]+)/i,
-                        /product[\\s]*:?\\s*([A-Za-z\\s0-9]+)/i
+                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
+                        /produit[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
+                        /gamme[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
+                        /brand[\\s]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
+                        /product[\\s]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
+                        // Specific product patterns
+                        /powerade/i,
+                        /nord[\\s]*\\d+/i,
+                        /iphone[\\s]*\\d*/i,
+                        /galaxy[\\s]*\\w*/i
                     ])
                 },
                 brief: {
                     type: extractPattern(text, [
-                        /type[\\s\\w]*brief[\\s]*:?\\s*([A-Za-z\\s]+)/i,
-                        /typologie[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
+                        /type[\\s\\w]*brief[\\s]*:?\\s*([A-Za-z\\s\\-]+)/i,
+                        /typologie[\\s\\w]*brief[\\s]*:?\\s*([A-Za-z\\s\\-]+)/i,
+                        /brief[\\s]*type[\\s]*:?\\s*([A-Za-z\\s\\-]+)/i
                     ]),
                     urgency: extractUrgency(text),
                     typologie_annonceur: extractPattern(text, [
-                        /typologie[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s]+)/i
+                        /typologie[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s\\-]+)/i,
+                        /type[\\s\\w]*client[\\s]*:?\\s*([A-Za-z\\s\\-]+)/i,
+                        /advertiser[\\s\\w]*type[\\s]*:?\\s*([A-Za-z\\s\\-]+)/i
                     ]),
                     presentation_languages: extractLanguages(text),
                     attachments_present: extractAttachments(text),
                     target_persona: extractPattern(text, [
-                        /cible[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
-                        /persona[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
-                        /target[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
-                        /doelgroep[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
-                        // Age range patterns
-                        /\\d{1,2}[-–]\\d{1,2}[\\s]*[-–]?[\\s]*[A-Za-z\\s]+/i
+                        /cible[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
+                        /persona[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
+                        /target[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
+                        /doelgroep[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
+                        /audience[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
+                        // Age range patterns - more flexible
+                        /\\d{1,2}[\\s]*[-–][\\s]*\\d{1,2}[\\s]*[A-Za-z\\s,\\-\\+\\.]+/i,
+                        // Specific target patterns
+                        /studenten/i,
+                        /sportifs/i,
+                        /athletes/i,
+                        /professionals/i,
+                        /women/i,
+                        /men/i,
+                        /jeunes/i,
+                        /young[\\s]*adults/i
                     ]),
                     objectives: extractObjectives(text),
                     start_momentum_reason: extractPattern(text, [
@@ -1865,12 +2082,169 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
+        // Progress and error handling functions
+        function startProgressAnimation() {
+            if (progressInterval) clearInterval(progressInterval);
+            let progress = 0;
+            progressInterval = setInterval(() => {
+                progress = Math.min(progress + Math.random() * 2, 95);
+                if (elements.progressFill) {
+                    elements.progressFill.style.width = progress + '%';
+                }
+            }, 100);
+        }
+
+        function stopProgressAnimation() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function setProgress(percentage) {
+            if (elements.progressFill) {
+                elements.progressFill.style.width = percentage + '%';
+            }
+        }
+
+        function showError(error) {
+            if (elements.errorBanner) {
+                elements.errorTitle.textContent = getErrorTitle(error);
+                elements.errorMessage.textContent = getErrorMessage(error);
+                elements.errorBanner.classList.add('show');
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    hideError();
+                }, 10000);
+            }
+        }
+
+        function hideError() {
+            if (elements.errorBanner) {
+                elements.errorBanner.classList.remove('show');
+            }
+        }
+
+        function hideProcessing() {
+            elements.processingSection.style.display = 'none';
+        }
+
+        function getErrorTitle(error) {
+            if (error.name === 'InvalidPDFException') return 'Invalid PDF File';
+            if (error.name === 'PasswordException') return 'Password Protected PDF';
+            if (error.message.includes('network') || error.message.includes('fetch')) return 'Network Error';
+            if (error.message.includes('memory') || error.message.includes('size')) return 'File Too Large';
+            return 'Processing Error';
+        }
+
+        function getErrorMessage(error) {
+            if (error.name === 'InvalidPDFException') {
+                return 'The uploaded file is not a valid PDF or may be corrupted. Please check the file and try again.';
+            }
+            if (error.name === 'PasswordException') {
+                return 'This PDF is password protected. Please provide an unlocked version of the file.';
+            }
+            if (error.message.includes('network') || error.message.includes('fetch')) {
+                return 'Unable to load required resources. Please check your internet connection and try again.';
+            }
+            if (error.message.includes('memory') || error.message.includes('size')) {
+                return 'The file is too large to process. Please try with a smaller PDF file (under 10MB).';
+            }
+            return error.message || 'An unexpected error occurred while processing your file.';
+        }
+
+        function handleRetry() {
+            hideError();
+            if (lastFile) {
+                console.log('🔄 Retrying with last file:', lastFile.name);
+                processFile(lastFile);
+            } else {
+                resetToUpload();
+            }
+        }
+
         function resetDashboard() {
             console.log('🔄 Reset');
+            hideError();
+            lastFile = null;
             resetToUpload();
         }
 
         window.resetDashboard = resetDashboard;
+
+        // Export functionality
+        function exportData() {
+            if (!currentData || !currentData.briefing) {
+                alert('No data to export. Please process a PDF first.');
+                return;
+            }
+
+            // Transform data to match CLAUDE.md schema exactly
+            const exportData = transformToClaudeSchema(currentData.briefing);
+            
+            // Create download
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `briefing-${currentData.briefing.meta.source_file.replace('.pdf', '')}-${currentData.briefing.meta.extraction_ts}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            console.log('📤 Data exported:', exportFileDefaultName);
+        }
+
+        function transformToClaudeSchema(briefingData) {
+            return {
+                meta: {
+                    source_file: briefingData.meta.source_file,
+                    extraction_ts: briefingData.meta.extraction_ts || briefingData.meta.extraction_date
+                },
+                contact: {
+                    responsable_commercial: briefingData.contact.responsable_commercial,
+                    agence_media: briefingData.contact.agence_media
+                },
+                advertiser: {
+                    group_or_annonceur: briefingData.advertiser.group_annonceur || briefingData.advertiser.group_or_annonceur,
+                    brand_or_product: briefingData.advertiser.brand_product || briefingData.advertiser.brand_or_product
+                },
+                brief: {
+                    type: briefingData.brief.type || null,
+                    urgency: briefingData.brief.urgency || null,
+                    typologie_annonceur: briefingData.brief.typologie_annonceur || null,
+                    presentation_languages: briefingData.brief.presentation_languages || null,
+                    attachments_present: briefingData.brief.attachments_present || null,
+                    target_persona: briefingData.brief.target_persona,
+                    objectives: briefingData.brief.objectives || null,
+                    start_momentum_reason: briefingData.brief.start_momentum_reason || null,
+                    end_date: briefingData.brief.end_date || null,
+                    key_messages: briefingData.brief.key_messages,
+                    media_specific_preferences: briefingData.brief.media_specific_preferences || null,
+                    history_with_rossel: briefingData.brief.history_with_rossel || null,
+                    other_campaigns_with_rossel: briefingData.brief.other_campaigns_with_rossel || null,
+                    notes: briefingData.brief.notes
+                },
+                constraints: {
+                    min_budget_create_eur: 10000,
+                    budget_confirmed_eur_range: briefingData.constraints.budget_confirmed ? 
+                        briefingData.constraints.budget_confirmed.range : null,
+                    proposal_deadline: briefingData.constraints.proposal_deadline,
+                    lead_time_business_days_after_valid_brief: 10,
+                    do_not: briefingData.constraints.do_not || null,
+                    prefer: briefingData.constraints.prefer || null
+                },
+                creative: {
+                    sports_focus: briefingData.brief.sports_focus || briefingData.creative?.sports_focus || null,
+                    audience_activity_min_sessions_per_week: briefingData.creative?.audience_activity_min_sessions_per_week || null
+                }
+            };
+        }
+
+        window.exportData = exportData;
+        window.handleRetry = handleRetry;
 
         // Enhanced test function (already defined globally above)
         // This version adds more detailed diagnostics after dashboard initialization
