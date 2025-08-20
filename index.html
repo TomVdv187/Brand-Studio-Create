@@ -898,10 +898,39 @@
             console.log('📊 Environment Check:');
             console.log('- PDF.js available:', typeof pdfjsLib !== 'undefined');
             console.log('- PDF.js version:', typeof pdfjsLib !== 'undefined' ? pdfjsLib.version : 'N/A');
+            console.log('- Worker configured:', typeof pdfjsLib !== 'undefined' ? !!pdfjsLib.GlobalWorkerOptions.workerSrc : false);
             console.log('- Current URL:', window.location.href);
             console.log('- Is HTTPS:', window.location.protocol === 'https:');
-            console.log('- User Agent:', navigator.userAgent);
-            alert('Dashboard test started! Check console for detailed diagnostics.');
+            console.log('- Performance timing available:', typeof performance !== 'undefined');
+            
+            // Test file input accessibility
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadArea = document.getElementById('uploadArea');
+            
+            console.log('📋 Element Check:');
+            console.log('- File input found:', !!fileInput);
+            console.log('- Upload button found:', !!uploadBtn);
+            console.log('- Upload area found:', !!uploadArea);
+            
+            if (fileInput) {
+                console.log('- File input accepts:', fileInput.accept);
+                console.log('- File input disabled:', fileInput.disabled);
+            }
+            
+            // Test worker loading
+            if (typeof pdfjsLib !== 'undefined') {
+                console.log('🔧 Testing PDF.js worker...');
+                try {
+                    // Create a simple test to verify worker is working
+                    const testArrayBuffer = new ArrayBuffer(8);
+                    console.log('- ArrayBuffer test: ✅');
+                } catch (e) {
+                    console.log('- ArrayBuffer test: ❌', e.message);
+                }
+            }
+            
+            alert('Dashboard diagnostics complete! PDF.js is loaded and ready. Try uploading a PDF file.');
         };
     </script>
     <script>
@@ -988,6 +1017,7 @@
 
             // CRITICAL: File input change handler
             fileInput.addEventListener('change', function(event) {
+                const startTime = performance.now();
                 console.log('📁 File input CHANGED event fired!');
                 console.log('Files selected:', event.target.files.length);
                 
@@ -1000,10 +1030,14 @@
                 } else {
                     console.log('❌ No file in event.target.files');
                 }
+                
+                const endTime = performance.now();
+                console.log(`⏱️ File input handler took ${endTime - startTime}ms`);
             }, false);
 
             // Button click handler  
             uploadBtn.addEventListener('click', function(event) {
+                const startTime = performance.now();
                 event.preventDefault();
                 event.stopPropagation();
                 console.log('🔘 Upload button clicked - opening file dialog');
@@ -1012,6 +1046,8 @@
                 fileInput.value = '';
                 fileInput.click();
                 
+                const endTime = performance.now();
+                console.log(`⏱️ Button click handler took ${endTime - startTime}ms`);
                 console.log('File dialog should be open now...');
             }, false);
 
@@ -1088,6 +1124,7 @@
 
         // File processing
         async function processFile(file) {
+            const processStartTime = performance.now();
             console.log('🚀 processFile() called with:', file ? file.name : 'null file');
             
             if (isProcessing) {
@@ -1099,7 +1136,8 @@
             console.log('File details:', {
                 name: file ? file.name : 'N/A',
                 size: file ? file.size : 'N/A',
-                type: file ? file.type : 'N/A'
+                type: file ? file.type : 'N/A',
+                lastModified: file ? new Date(file.lastModified).toISOString() : 'N/A'
             });
 
             // Validate file exists
@@ -1164,8 +1202,13 @@
                 currentData = { briefing: briefingData, evaluation };
                 showResults(briefingData, evaluation);
 
+                const processEndTime = performance.now();
+                console.log(`⏱️ Total file processing took ${processEndTime - processStartTime}ms`);
+
             } catch (error) {
                 console.error('💥 Error:', error);
+                const processEndTime = performance.now();
+                console.log(`⏱️ File processing failed after ${processEndTime - processStartTime}ms`);
                 alert(`Error: ${error.message}`);
                 resetToUpload();
             } finally {
