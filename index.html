@@ -866,10 +866,43 @@
             };
             script.onerror = function() {
                 console.error('❌ Both PDF.js CDNs failed');
-                showPDFError('Unable to load PDF processing library from any source.');
+                if (typeof showPDFError === 'function') {
+                    showPDFError('Unable to load PDF processing library from any source.');
+                }
             };
             document.head.appendChild(script);
         }
+        
+        // Define functions early so they're available for buttons and error handlers
+        window.showPDFError = function(message) {
+            const uploadArea = document.getElementById('uploadArea');
+            if (uploadArea) {
+                uploadArea.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc2626;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>PDF Processing Unavailable</h3>
+                        <p style="margin: 1rem 0;">${message}</p>
+                        <button onclick="location.reload()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer;">
+                            <i class="fas fa-refresh"></i> Retry
+                        </button>
+                    </div>
+                `;
+            } else {
+                console.error('PDF Error:', message);
+                alert('PDF Error: ' + message);
+            }
+        };
+
+        window.testDashboard = function() {
+            console.log('🧪 Testing dashboard functionality...');
+            console.log('📊 Environment Check:');
+            console.log('- PDF.js available:', typeof pdfjsLib !== 'undefined');
+            console.log('- PDF.js version:', typeof pdfjsLib !== 'undefined' ? pdfjsLib.version : 'N/A');
+            console.log('- Current URL:', window.location.href);
+            console.log('- Is HTTPS:', window.location.protocol === 'https:');
+            console.log('- User Agent:', navigator.userAgent);
+            alert('Dashboard test started! Check console for detailed diagnostics.');
+        };
     </script>
     <script>
         // Brand Studio CREATE Dashboard
@@ -917,21 +950,6 @@
             }
         });
 
-        function showPDFError(message) {
-            const uploadArea = document.getElementById('uploadArea');
-            if (uploadArea) {
-                uploadArea.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: #dc2626;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                        <h3>PDF Processing Unavailable</h3>
-                        <p style="margin: 1rem 0;">${message}</p>
-                        <button onclick="location.reload()" style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer;">
-                            <i class="fas fa-refresh"></i> Retry
-                        </button>
-                    </div>
-                `;
-            }
-        }
 
         function initDashboard() {
             // Get elements
@@ -1811,33 +1829,8 @@
 
         window.resetDashboard = resetDashboard;
 
-        // Test function to verify dashboard is working
-        window.testDashboard = function() {
-            console.log('🧪 Testing dashboard functionality...');
-            console.log('📊 Environment Check:');
-            console.log('- PDF.js available:', typeof pdfjsLib !== 'undefined');
-            console.log('- PDF.js version:', typeof pdfjsLib !== 'undefined' ? pdfjsLib.version : 'N/A');
-            console.log('- Worker source:', typeof pdfjsLib !== 'undefined' ? pdfjsLib.GlobalWorkerOptions.workerSrc : 'N/A');
-            console.log('- Current URL:', window.location.href);
-            console.log('- Is HTTPS:', window.location.protocol === 'https:');
-            console.log('- Elements found:', {
-                fileInput: !!elements.fileInput,
-                uploadBtn: !!elements.uploadBtn,
-                uploadArea: !!elements.uploadArea
-            });
-            console.log('- Config:', CONFIG);
-            console.log('- State:', { isProcessing, currentData: !!currentData });
-            
-            // Test file input functionality
-            if (elements.fileInput) {
-                console.log('- File input element ready');
-                elements.fileInput.onclick = function() {
-                    console.log('📁 File input click detected');
-                };
-            }
-            
-            alert('Dashboard test complete! Check console for detailed diagnostics.');
-        };
+        // Enhanced test function (already defined globally above)
+        // This version adds more detailed diagnostics after dashboard initialization
 
         // Add global error handler
         window.addEventListener('error', function(event) {
