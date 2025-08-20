@@ -1069,68 +1069,103 @@
             }
         }
 
-        // Extract briefing data
+        // Extract briefing data following claude.md schema exactly
         function extractBriefingData(text, fileName) {
             return {
                 meta: {
                     source_file: fileName,
-                    extraction_date: new Date().toISOString().split('T')[0]
+                    extraction_ts: new Date().toISOString().split('T')[0]
                 },
                 contact: {
                     responsable_commercial: extractPattern(text, [
-                        /karolien\\s+van\\s+gaever/i,
-                        /responsable[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
+                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s]+)/i,
+                        /contact[\\s]*:?\\s*([A-Za-z\\s]+)/i,
+                        // Specific known contacts
+                        /karolien\\s+van\\s+gaever/i
                     ]),
                     agence_media: extractPattern(text, [
-                        /sudinfo/i,
+                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-z\\s&-]+)/i,
+                        // Common agencies
                         /group\\s*m/i,
-                        /essence/i,
-                        /mediacom/i,
-                        /agence[\\s\\w]*:?\\s*([A-Za-z\\s&-]+)/i
+                        /essence\\s*mediacom/i,
+                        /havas/i,
+                        /publicis/i,
+                        /wpp/i,
+                        /dentsu/i
                     ])
                 },
                 advertiser: {
-                    group_annonceur: extractPattern(text, [
+                    group_or_annonceur: extractPattern(text, [
+                        /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
+                        /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
+                        /client[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
+                        // Common advertisers (generic patterns)
+                        /coca[-\\s]*cola/i,
                         /oneplus/i,
-                        /coca-cola/i,
-                        /groupe[\\s\\w]*annonceur/i,
-                        /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i
+                        /unilever/i,
+                        /nestl[eé]/i,
+                        /danone/i
                     ]),
-                    brand_product: extractPattern(text, [
-                        /nord\\s*5/i,
-                        /nord\\s*ce5/i,
-                        /oneplus\\s*pad/i,
-                        /oneplus\\s*watch/i,
-                        /oneplus\\s*buds/i,
-                        /powerade/i,
-                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i
+                    brand_or_product: extractPattern(text, [
+                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i,
+                        /produit[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i,
+                        /gamme[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i,
+                        /brand[\\s]*:?\\s*([A-Za-z\\s0-9]+)/i,
+                        /product[\\s]*:?\\s*([A-Za-z\\s0-9]+)/i
                     ])
                 },
                 brief: {
+                    type: extractPattern(text, [
+                        /type[\\s\\w]*brief[\\s]*:?\\s*([A-Za-z\\s]+)/i,
+                        /typologie[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
+                    ]),
+                    urgency: extractUrgency(text),
+                    typologie_annonceur: extractPattern(text, [
+                        /typologie[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s]+)/i
+                    ]),
+                    presentation_languages: extractLanguages(text),
+                    attachments_present: extractAttachments(text),
                     target_persona: extractPattern(text, [
-                        /studenten/i,
-                        /jonge\\s*professionals/i,
-                        /gezinnen/i,
-                        /18[-\\s]*54[\\s]*sportifs/i,
+                        /cible[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
+                        /persona[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
+                        /target[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
                         /doelgroep[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
-                        /cible[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i
+                        // Age range patterns
+                        /\\d{1,2}[-–]\\d{1,2}[\\s]*[-–]?[\\s]*[A-Za-z\\s]+/i
                     ]),
+                    objectives: extractObjectives(text),
+                    start_momentum_reason: extractPattern(text, [
+                        /start[\\s\\w]*momentum[\\s]*:?\\s*([^\\n.]{30,200})/i,
+                        /raison[\\s\\w]*lancement[\\s]*:?\\s*([^\\n.]{30,200})/i
+                    ]),
+                    end_date: extractDate(text, 'end'),
                     key_messages: extractPattern(text, [
-                        /back\\s*to\\s*school/i,
-                        /blijven\\s*verbonden/i,
-                        /efficiënt\\s*studeren/i,
-                        /slimme\\s*technologie/i,
-                        /campagnefocus[\\s]*:?\\s*([A-Za-z\\s,.-]+)/i,
-                        /message[\\s\\w]*:?\\s*([A-Za-z\\s,.'!-]+)/i
+                        /messages?[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([^\\n.]{30,300})/i,
+                        /message[\\s\\w]*principal[\\s]*:?\\s*([^\\n.]{30,300})/i,
+                        /communication[\\s\\w]*:?\\s*([^\\n.]{30,300})/i
                     ]),
-                    sports_focus: extractSportsFocus(text),
+                    media_specific_preferences: extractMediaPreferences(text),
+                    history_with_rossel: extractPattern(text, [
+                        /historique[\\s\\w]*rossel[\\s]*:?\\s*([^\\n.]{30,200})/i,
+                        /history[\\s\\w]*rossel[\\s]*:?\\s*([^\\n.]{30,200})/i
+                    ]),
+                    other_campaigns_with_rossel: extractPattern(text, [
+                        /campagnes?[\\s\\w]*cours[\\s]*:?\\s*([^\\n.]{30,200})/i,
+                        /autres[\\s\\w]*campagnes?[\\s]*:?\\s*([^\\n.]{30,200})/i
+                    ]),
                     notes: extractNotes(text)
                 },
                 constraints: {
-                    budget_confirmed: extractBudget(text),
-                    proposal_deadline: extractDate(text),
-                    min_budget_required: CONFIG.CREATE_RULES.MIN_BUDGET,
-                    min_lead_time_days: CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS
+                    min_budget_create_eur: 10000, // Fixed CREATE requirement
+                    budget_confirmed_eur_range: extractBudget(text),
+                    proposal_deadline: extractDate(text, 'deadline'),
+                    lead_time_business_days_after_valid_brief: 10, // Fixed CREATE requirement  
+                    do_not: extractDoNot(text),
+                    prefer: extractPrefer(text)
+                },
+                creative: {
+                    sports_focus: extractSportsFocus(text),
+                    audience_activity_min_sessions_per_week: extractMinSessions(text)
                 }
             };
         }
@@ -1185,9 +1220,9 @@
             return null;
         }
 
-        function extractDate(text) {
+        function extractDate(text, type = 'any') {
             const patterns = [
-                /(\\d{1,2})\\s+(augustus|september)\\s+(\\d{4})/i,
+                /(\\d{1,2})\\s+(augustus|september|janvier|f[eé]vrier|mars|avril|mai|juin|juillet|ao[uû]t|octobre|novembre|d[eé]cembre)\\s+(\\d{4})/i,
                 /(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/g,
                 /(\\d{1,2})[-](\\d{1,2})[-](\\d{4})/g
             ];
@@ -1199,9 +1234,15 @@
                     try {
                         if (match[2] && isNaN(match[2])) {
                             // Month name format
-                            const monthMap = { 'augustus': 8, 'september': 9 };
+                            const monthMap = { 
+                                'augustus': 8, 'september': 9, 'janvier': 1, 'février': 2, 'mars': 3, 
+                                'avril': 4, 'mai': 5, 'juin': 6, 'juillet': 7, 'août': 8, 'aout': 8,
+                                'octobre': 10, 'novembre': 11, 'décembre': 12, 'december': 12
+                            };
                             const month = monthMap[match[2].toLowerCase()];
-                            return new Date(match[3], month - 1, match[1]).toISOString().split('T')[0];
+                            if (month) {
+                                return new Date(match[3], month - 1, match[1]).toISOString().split('T')[0];
+                            }
                         } else {
                             // Numeric format
                             const [, day, month, year] = match;
@@ -1211,6 +1252,76 @@
                         continue;
                     }
                 }
+            }
+            return null;
+        }
+
+        function extractUrgency(text) {
+            const urgencyPatterns = [
+                /urgence[\\s]*:?\\s*(faible|moyen|[eé]lev[eé])/i
+            ];
+            for (const pattern of urgencyPatterns) {
+                const match = text.match(pattern);
+                if (match && match[1]) {
+                    const level = match[1].toLowerCase();
+                    if (level.includes('faible')) return 'faible';
+                    if (level.includes('moyen')) return 'moyen';
+                    if (level.includes('lev')) return 'eleve';
+                }
+            }
+            return null;
+        }
+
+        function extractLanguages(text) {
+            const languages = [];
+            if (/français/i.test(text)) languages.push('Français');
+            if (/anglais|english/i.test(text)) languages.push('Anglais');  
+            if (/néerlandais|dutch/i.test(text)) languages.push('Néerlandais');
+            return languages.length > 0 ? languages : null;
+        }
+
+        function extractAttachments(text) {
+            if (/attachments?[\\s\\w]*:?\\s*(yes|oui|ja)/i.test(text)) return true;
+            if (/attachments?[\\s\\w]*:?\\s*(no|non|nee)/i.test(text)) return false;
+            return null;
+        }
+
+        function extractObjectives(text) {
+            const objectives = [];
+            if (/awareness|notori[eé]t[eé]/i.test(text)) objectives.push('awareness');
+            if (/consideration|consid[eé]ration/i.test(text)) objectives.push('consideration');
+            if (/activation|conversion/i.test(text)) objectives.push('activation_conversion');
+            return objectives.length > 0 ? objectives : null;
+        }
+
+        function extractMediaPreferences(text) {
+            const mediaPrefs = [];
+            const medias = ['le soir', 'sudinfo', 'kotplanet', 'references', 'dh'];
+            medias.forEach(media => {
+                if (new RegExp(media, 'i').test(text)) {
+                    mediaPrefs.push(media);
+                }
+            });
+            return mediaPrefs.length > 0 ? mediaPrefs : null;
+        }
+
+        function extractDoNot(text) {
+            const doNotList = [];
+            if (/pas[\\s]+de[\\s]+native|no[\\s]+native/i.test(text)) doNotList.push('native');
+            if (/pas[\\s]+d[\'']?influenceurs?|no[\\s]+influencers?/i.test(text)) doNotList.push('influenceurs');
+            return doNotList.length > 0 ? doNotList : null;
+        }
+
+        function extractPrefer(text) {
+            const preferList = [];
+            if (/plut[ôo]t[\\s]+digital|prefer[\\s]+digital/i.test(text)) preferList.push('digital');
+            return preferList.length > 0 ? preferList : null;
+        }
+
+        function extractMinSessions(text) {
+            const sessionMatch = text.match(/([0-9]+)[\\s]*[x×][\\s]*\\/[\\s]*semaine|([0-9]+)[\\s]*fois?[\\s]*par[\\s]*semaine/i);
+            if (sessionMatch) {
+                return parseInt(sessionMatch[1] || sessionMatch[2]);
             }
             return null;
         }
@@ -1239,7 +1350,7 @@
             return null;
         }
 
-        // CREATE evaluation
+        // CREATE evaluation using claude.md schema
         function evaluateCreateCriteria(data) {
             const evaluation = {
                 overall_decision: 'PENDING',
@@ -1253,10 +1364,11 @@
                 issues: []
             };
 
-            // Budget (40 points)
-            if (data.constraints.budget_confirmed) {
-                const minBudget = data.constraints.budget_confirmed.min_amount;
-                const required = CONFIG.CREATE_RULES.MIN_BUDGET;
+            // Budget (40 points) - use budget_confirmed_eur_range
+            if (data.constraints.budget_confirmed_eur_range) {
+                const budgetRange = data.constraints.budget_confirmed_eur_range;
+                const minBudget = parseInt(budgetRange.split('-')[0]);
+                const required = data.constraints.min_budget_create_eur;
 
                 if (minBudget >= required) {
                     evaluation.criteria.budget = {
@@ -1270,7 +1382,7 @@
                         score: 0,
                         message: `€${minBudget.toLocaleString()} < €${required.toLocaleString()}`
                     };
-                    evaluation.issues.push('Budget below minimum');
+                    evaluation.issues.push('Budget below CREATE minimum');
                 }
             } else {
                 evaluation.criteria.budget = {
@@ -1286,7 +1398,7 @@
                 const deadline = new Date(data.constraints.proposal_deadline);
                 const today = new Date();
                 const days = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
-                const required = CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS;
+                const required = data.constraints.lead_time_business_days_after_valid_brief;
 
                 if (days >= required) {
                     evaluation.criteria.timeline = {
@@ -1311,22 +1423,19 @@
                 evaluation.issues.push('Missing deadline');
             }
 
-            // Required fields (30 points)
-            const requiredFields = CONFIG.CREATE_RULES.REQUIRED_FIELDS;
+            // Required fields (30 points) - check key fields from claude.md
+            const requiredFields = ['responsable_commercial', 'group_or_annonceur', 'target_persona'];
             const missing = [];
 
-            requiredFields.forEach(field => {
-                const value = getNestedValue(data, field);
-                if (!value) {
-                    missing.push(field.replace('_', ' '));
-                }
-            });
+            if (!data.contact.responsable_commercial) missing.push('Responsable Commercial');
+            if (!data.advertiser.group_or_annonceur) missing.push('Group/Annonceur'); 
+            if (!data.brief.target_persona) missing.push('Target Persona');
 
             if (missing.length === 0) {
                 evaluation.criteria.required_fields = {
                     status: 'PASS',
                     score: 30,
-                    message: 'All fields present'
+                    message: 'All required fields present'
                 };
             } else {
                 evaluation.criteria.required_fields = {
@@ -1435,9 +1544,8 @@
             budgetStatus.className = evaluation.criteria.budget.status === 'PASS' ? 'status valid' : 'status invalid';
             budgetStatus.textContent = evaluation.criteria.budget.status === 'PASS' ? '✓ Valid' : '✗ Invalid';
 
-            if (currentData.briefing.constraints.budget_confirmed) {
-                const budget = currentData.briefing.constraints.budget_confirmed;
-                confirmedBudget.textContent = `€${budget.min_amount.toLocaleString()} - €${budget.max_amount.toLocaleString()}`;
+            if (currentData.briefing.constraints.budget_confirmed_eur_range) {
+                confirmedBudget.textContent = `€${currentData.briefing.constraints.budget_confirmed_eur_range}`;
             } else {
                 confirmedBudget.textContent = 'Not specified';
                 confirmedBudget.classList.add('text-muted');
@@ -1458,7 +1566,7 @@
                 proposalDeadline.classList.add('text-muted');
             }
 
-            // Required fields
+            // Required fields - using claude.md field names
             const contactStatus = document.getElementById('contactStatus');
             const advertiserStatus = document.getElementById('advertiserStatus');
             const personaStatus = document.getElementById('personaStatus');
@@ -1466,21 +1574,26 @@
             contactStatus.className = currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
             contactStatus.textContent = currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
 
-            advertiserStatus.className = currentData.briefing.advertiser.group_annonceur ? 'status valid' : 'status missing';
-            advertiserStatus.textContent = currentData.briefing.advertiser.group_annonceur ? '✓ Found' : '⚠ Missing';
+            advertiserStatus.className = currentData.briefing.advertiser.group_or_annonceur ? 'status valid' : 'status missing';
+            advertiserStatus.textContent = currentData.briefing.advertiser.group_or_annonceur ? '✓ Found' : '⚠ Missing';
 
             personaStatus.className = currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
             personaStatus.textContent = currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
         }
 
         function displayExtractedData(data) {
+            // Contact info
             setFieldValue('responsableCommercial', data.contact.responsable_commercial);
             setFieldValue('agenceMedia', data.contact.agence_media);
-            setFieldValue('groupAnnonceur', data.advertiser.group_annonceur);
-            setFieldValue('brandProduct', data.advertiser.brand_product);
+            
+            // Advertiser info - using claude.md field names
+            setFieldValue('groupAnnonceur', data.advertiser.group_or_annonceur);
+            setFieldValue('brandProduct', data.advertiser.brand_or_product);
+            
+            // Brief details
             setFieldValue('targetPersona', data.brief.target_persona);
             setFieldValue('keyMessages', data.brief.key_messages);
-            setFieldValue('sportsFocus', data.brief.sports_focus?.join(', '));
+            setFieldValue('sportsFocus', data.creative.sports_focus?.join(', '));
             setFieldValue('additionalNotes', data.brief.notes);
         }
 
