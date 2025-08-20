@@ -45,6 +45,12 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             padding: 2rem 0;
             text-align: center;
+            animation: slideDown 0.8s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .brand {
@@ -56,103 +62,168 @@
         }
 
         .brand-icon {
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: #fbbf24;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .brand h1 {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: white;
             text-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .tagline {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             color: rgba(255, 255, 255, 0.9);
             font-weight: 300;
         }
 
         /* Main Content */
         .main {
-            padding: 4rem 0;
+            padding: 3rem 0;
         }
 
-        /* Upload Section */
+        /* Upload Section - SMALLER SIZE */
         .upload-card {
-            max-width: 700px;
+            max-width: 500px; /* Reduced from 700px */
             margin: 0 auto 3rem;
             background: white;
             border-radius: 1.5rem;
             box-shadow: var(--shadow);
             overflow: hidden;
+            animation: fadeInUp 0.8s ease;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .upload-area {
-            padding: 4rem 2rem;
+            padding: 2.5rem 1.5rem; /* Reduced padding */
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 3px dashed var(--gray-200);
             border-radius: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
         }
 
         .upload-area:hover {
             border-color: var(--primary);
             background: var(--gray-50);
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
         }
 
         .upload-area.dragging {
             border-color: var(--primary);
             background: #eff6ff;
-            transform: scale(1.02);
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3);
         }
 
         .upload-icon {
-            font-size: 5rem;
+            font-size: 3.5rem; /* Reduced from 5rem */
             color: var(--primary);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         .upload-content h2 {
-            font-size: 2.5rem;
+            font-size: 1.75rem; /* Reduced from 2.5rem */
             font-weight: 600;
             color: var(--gray-900);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .upload-content p {
             color: var(--gray-600);
-            margin-bottom: 2rem;
-            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 1rem; /* Reduced from 1.25rem */
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             border: none;
-            padding: 1rem 2.5rem;
+            padding: 0.75rem 2rem; /* Reduced padding */
             border-radius: 0.75rem;
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            box-shadow: 0 8px 15px -3px rgb(0 0 0 / 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+            box-shadow: 0 15px 25px -5px rgb(0 0 0 / 0.2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .upload-info {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             color: var(--gray-600);
+            font-size: 0.875rem;
         }
 
         /* Processing Section */
@@ -165,18 +236,24 @@
         .processing-card {
             background: white;
             border-radius: 1.5rem;
-            padding: 4rem 3rem;
+            padding: 3rem 2rem;
             text-align: center;
             box-shadow: var(--shadow);
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .spinner {
-            width: 80px;
-            height: 80px;
-            border: 5px solid var(--gray-200);
-            border-top: 5px solid var(--primary);
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--gray-200);
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 2rem;
@@ -188,7 +265,7 @@
         }
 
         .processing-card h2 {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 600;
             color: var(--gray-900);
             margin-bottom: 1rem;
@@ -199,6 +276,12 @@
             font-weight: 500;
             font-size: 1rem;
             margin-top: 1rem;
+            animation: fadeInOut 1.5s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
         }
 
         /* Results Section */
@@ -216,10 +299,16 @@
         .decision-banner {
             background: white;
             border-radius: 1.5rem;
-            padding: 3rem;
+            padding: 2.5rem;
             margin-bottom: 3rem;
             box-shadow: var(--shadow);
             border-left: 8px solid;
+            animation: slideInFromLeft 0.8s ease;
+        }
+
+        @keyframes slideInFromLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .decision-banner.go {
@@ -239,16 +328,22 @@
         }
 
         .decision-icon {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: white;
             flex-shrink: 0;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
         }
 
         .decision-banner.go .decision-icon {
@@ -264,14 +359,14 @@
         }
 
         .decision-info h2 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--gray-900);
             margin-bottom: 0.5rem;
         }
 
         .decision-info p {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             color: var(--gray-600);
             margin-bottom: 1rem;
         }
@@ -299,13 +394,14 @@
         .btn-secondary:hover {
             background: var(--gray-50);
             border-color: var(--gray-300);
+            transform: translateY(-1px);
         }
 
         /* Evaluation Cards */
         .evaluation-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 3rem;
         }
 
@@ -315,6 +411,16 @@
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
             overflow: hidden;
             transition: transform 0.2s ease;
+            animation: slideUp 0.6s ease;
+        }
+
+        .eval-card:nth-child(1) { animation-delay: 0.1s; }
+        .eval-card:nth-child(2) { animation-delay: 0.2s; }
+        .eval-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .eval-card:hover {
@@ -336,7 +442,7 @@
         }
 
         .eval-header h3 {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 600;
             color: var(--gray-900);
         }
@@ -399,8 +505,8 @@
         /* Data Grid */
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
         }
 
         .data-card {
@@ -408,7 +514,13 @@
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
             overflow: hidden;
+            animation: fadeInUp 0.8s ease;
         }
+
+        .data-card:nth-child(1) { animation-delay: 0.1s; }
+        .data-card:nth-child(2) { animation-delay: 0.2s; }
+        .data-card:nth-child(3) { animation-delay: 0.3s; }
+        .data-card:nth-child(4) { animation-delay: 0.4s; }
 
         .data-card.full-width {
             grid-column: 1 / -1;
@@ -429,7 +541,7 @@
         }
 
         .data-header h3 {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 600;
             color: var(--gray-900);
         }
@@ -481,7 +593,7 @@
             padding: 1.5rem;
             border-radius: 0.5rem;
             border: 1px solid var(--gray-200);
-            min-height: 5rem;
+            min-height: 4rem;
             line-height: 1.6;
             color: var(--gray-700);
         }
@@ -501,6 +613,10 @@
                 font-size: 2rem;
             }
             
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+            
             .decision-content {
                 flex-direction: column;
                 text-align: center;
@@ -514,6 +630,16 @@
             .data-content.grid-3 {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Loading Animation for form */
+        .form-loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .form-loading .upload-area {
+            animation: pulse 1.5s ease-in-out infinite;
         }
     </style>
 </head>
@@ -720,6 +846,680 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Brand Studio CREATE Dashboard
+        console.log('🚀 Dashboard Loading...');
+
+        // Configuration
+        const CONFIG = {
+            PDF_WORKER_URL: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js',
+            MAX_FILE_SIZE: 10 * 1024 * 1024,
+            CREATE_RULES: {
+                MIN_BUDGET: 10000,
+                MIN_LEAD_TIME_DAYS: 10,
+                REQUIRED_FIELDS: ['responsable_commercial', 'group_annonceur', 'target_persona']
+            }
+        };
+
+        // State
+        let isProcessing = false;
+        let currentData = null;
+        let elements = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 DOM Ready');
+            
+            if (typeof pdfjsLib !== 'undefined') {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = CONFIG.PDF_WORKER_URL;
+                console.log('📚 PDF.js configured');
+                initDashboard();
+            } else {
+                console.error('❌ PDF.js failed to load');
+                alert('PDF.js failed to load. Please refresh.');
+            }
+        });
+
+        function initDashboard() {
+            // Get elements
+            elements = {
+                fileInput: document.getElementById('fileInput'),
+                uploadBtn: document.getElementById('uploadBtn'),
+                uploadArea: document.getElementById('uploadArea'),
+                uploadSection: document.getElementById('uploadSection'),
+                processingSection: document.getElementById('processingSection'),
+                processingStatus: document.getElementById('processingStatus'),
+                resultsSection: document.getElementById('resultsSection'),
+                decisionBanner: document.getElementById('decisionBanner')
+            };
+
+            // Check elements
+            for (const [key, element] of Object.entries(elements)) {
+                if (!element) {
+                    console.error(`❌ Missing element: ${key}`);
+                    return;
+                }
+            }
+
+            setupEventListeners();
+            console.log('✅ Dashboard ready');
+        }
+
+        function setupEventListeners() {
+            const { fileInput, uploadBtn, uploadArea } = elements;
+
+            // File input
+            fileInput.addEventListener('change', function(e) {
+                console.log('📁 File input changed');
+                if (e.target.files[0]) {
+                    processFile(e.target.files[0]);
+                }
+            });
+
+            // Button click
+            uploadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔘 Button clicked');
+                fileInput.click();
+            });
+
+            // Area click
+            uploadArea.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📦 Area clicked');
+                if (!isProcessing) {
+                    fileInput.click();
+                }
+            });
+
+            // Drag & drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragging');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                if (!uploadArea.contains(e.relatedTarget)) {
+                    uploadArea.classList.remove('dragging');
+                }
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragging');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    console.log('📥 File dropped:', files[0].name);
+                    processFile(files[0]);
+                }
+            });
+
+            // Prevent defaults
+            document.addEventListener('dragover', e => e.preventDefault());
+            document.addEventListener('drop', e => e.preventDefault());
+
+            console.log('🎧 Events configured');
+        }
+
+        // File processing
+        async function processFile(file) {
+            if (isProcessing) {
+                console.log('⏳ Already processing');
+                return;
+            }
+
+            console.log('🔄 Processing file:', file.name, file.size, 'bytes');
+
+            // Validate
+            if (!file) {
+                alert('No file selected.');
+                return;
+            }
+
+            if (file.type !== 'application/pdf') {
+                alert('Please upload a PDF file only.');
+                return;
+            }
+
+            if (file.size > CONFIG.MAX_FILE_SIZE) {
+                alert('File too large. Max 10MB.');
+                return;
+            }
+
+            if (file.size === 0) {
+                alert('File is empty.');
+                return;
+            }
+
+            isProcessing = true;
+
+            try {
+                // Show processing
+                showProcessing();
+                updateStatus('Reading PDF...');
+
+                // Extract text
+                const text = await extractPDFText(file);
+                console.log(`📝 Extracted ${text.length} characters`);
+
+                updateStatus('Analyzing content...');
+                await delay(500);
+
+                // Extract data
+                const briefingData = extractBriefingData(text, file.name);
+                console.log('📊 Data:', briefingData);
+
+                updateStatus('Evaluating CREATE criteria...');
+                await delay(500);
+
+                // Evaluate
+                const evaluation = evaluateCreateCriteria(briefingData);
+                console.log('🎯 Evaluation:', evaluation);
+
+                // Store and display
+                currentData = { briefing: briefingData, evaluation };
+                showResults(briefingData, evaluation);
+
+            } catch (error) {
+                console.error('💥 Error:', error);
+                alert(`Error: ${error.message}`);
+                resetToUpload();
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // PDF text extraction
+        async function extractPDFText(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+
+                let fullText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    try {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        const pageText = content.items
+                            .filter(item => item.str && item.str.trim())
+                            .map(item => item.str)
+                            .join(' ');
+
+                        if (pageText.trim()) {
+                            fullText += pageText + '\\n\\n';
+                        }
+                    } catch (pageError) {
+                        console.warn(`Page ${i} error:`, pageError);
+                    }
+                }
+
+                if (!fullText.trim()) {
+                    throw new Error('No text found in PDF');
+                }
+
+                return fullText.trim();
+
+            } catch (error) {
+                throw new Error(`PDF read error: ${error.message}`);
+            }
+        }
+
+        // Extract briefing data
+        function extractBriefingData(text, fileName) {
+            return {
+                meta: {
+                    source_file: fileName,
+                    extraction_date: new Date().toISOString().split('T')[0]
+                },
+                contact: {
+                    responsable_commercial: extractPattern(text, [
+                        /karolien\\s+van\\s+gaever/i,
+                        /responsable[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
+                    ]),
+                    agence_media: extractPattern(text, [
+                        /sudinfo/i,
+                        /group\\s*m/i,
+                        /essence/i,
+                        /mediacom/i,
+                        /agence[\\s\\w]*:?\\s*([A-Za-z\\s&-]+)/i
+                    ])
+                },
+                advertiser: {
+                    group_annonceur: extractPattern(text, [
+                        /oneplus/i,
+                        /coca-cola/i,
+                        /groupe[\\s\\w]*annonceur/i,
+                        /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i
+                    ]),
+                    brand_product: extractPattern(text, [
+                        /nord\\s*5/i,
+                        /nord\\s*ce5/i,
+                        /oneplus\\s*pad/i,
+                        /oneplus\\s*watch/i,
+                        /oneplus\\s*buds/i,
+                        /powerade/i,
+                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9]+)/i
+                    ])
+                },
+                brief: {
+                    target_persona: extractPattern(text, [
+                        /studenten/i,
+                        /jonge\\s*professionals/i,
+                        /gezinnen/i,
+                        /18[-\\s]*54[\\s]*sportifs/i,
+                        /doelgroep[\\s]*:?\\s*([A-Za-z0-9\\s,-]+)/i,
+                        /cible[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i
+                    ]),
+                    key_messages: extractPattern(text, [
+                        /back\\s*to\\s*school/i,
+                        /blijven\\s*verbonden/i,
+                        /efficiënt\\s*studeren/i,
+                        /slimme\\s*technologie/i,
+                        /campagnefocus[\\s]*:?\\s*([A-Za-z\\s,.-]+)/i,
+                        /message[\\s\\w]*:?\\s*([A-Za-z\\s,.'!-]+)/i
+                    ]),
+                    sports_focus: extractSportsFocus(text),
+                    notes: extractNotes(text)
+                },
+                constraints: {
+                    budget_confirmed: extractBudget(text),
+                    proposal_deadline: extractDate(text),
+                    min_budget_required: CONFIG.CREATE_RULES.MIN_BUDGET,
+                    min_lead_time_days: CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS
+                }
+            };
+        }
+
+        function extractPattern(text, patterns) {
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const result = match[1] || match[0];
+                    return cleanText(result);
+                }
+            }
+            return null;
+        }
+
+        function cleanText(text) {
+            return text.trim()
+                .replace(/\\s+/g, ' ')
+                .replace(/^[:\\-]\\s*/, '')
+                .substring(0, 200);
+        }
+
+        function extractBudget(text) {
+            const patterns = [
+                /€\\s*(\\d{1,3})[.,](\\d{3})/i,
+                /(\\d+)[-–](\\d+)\\s*k/i,
+                /budget[\\s\\w]*:?\\s*€?\\s*(\\d+)/i
+            ];
+
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    let amount = parseInt(match[1]) || 0;
+                    if (match[0].toLowerCase().includes('k')) {
+                        amount *= 1000;
+                    }
+                    if (match[2]) {
+                        const high = parseInt(match[2]) * (match[0].toLowerCase().includes('k') ? 1000 : 1);
+                        return {
+                            range: `${amount}-${high}`,
+                            min_amount: amount,
+                            max_amount: high
+                        };
+                    }
+                    return {
+                        range: amount.toString(),
+                        min_amount: amount,
+                        max_amount: amount
+                    };
+                }
+            }
+            return null;
+        }
+
+        function extractDate(text) {
+            const patterns = [
+                /(\\d{1,2})\\s+(augustus|september)\\s+(\\d{4})/i,
+                /(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/g,
+                /(\\d{1,2})[-](\\d{1,2})[-](\\d{4})/g
+            ];
+
+            for (const pattern of patterns) {
+                const matches = [...text.matchAll(pattern)];
+                if (matches.length > 0) {
+                    const match = matches[0];
+                    try {
+                        if (match[2] && isNaN(match[2])) {
+                            // Month name format
+                            const monthMap = { 'augustus': 8, 'september': 9 };
+                            const month = monthMap[match[2].toLowerCase()];
+                            return new Date(match[3], month - 1, match[1]).toISOString().split('T')[0];
+                        } else {
+                            // Numeric format
+                            const [, day, month, year] = match;
+                            return new Date(year, month - 1, day).toISOString().split('T')[0];
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function extractSportsFocus(text) {
+            const activities = ['school', 'studeren', 'technologie', 'smartphone', 'tablet'];
+            const found = activities.filter(activity => 
+                new RegExp(activity, 'i').test(text)
+            );
+            return found.length > 0 ? found : null;
+        }
+
+        function extractNotes(text) {
+            const patterns = [
+                /awareness[\\s\\w]*:?\\s*([^\\n.]{30,200})/i,
+                /doelstelling[\\s\\w]*:?\\s*([^\\n.]{30,200})/i,
+                /detail[\\s\\w]*:?\\s*([^\\n.]{30,200})/i
+            ];
+
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match && match[1]) {
+                    return cleanText(match[1]);
+                }
+            }
+            return null;
+        }
+
+        // CREATE evaluation
+        function evaluateCreateCriteria(data) {
+            const evaluation = {
+                overall_decision: 'PENDING',
+                score: 0,
+                max_score: 100,
+                criteria: {
+                    budget: { status: 'FAIL', score: 0, message: '' },
+                    timeline: { status: 'FAIL', score: 0, message: '' },
+                    required_fields: { status: 'FAIL', score: 0, message: '' }
+                },
+                issues: []
+            };
+
+            // Budget (40 points)
+            if (data.constraints.budget_confirmed) {
+                const minBudget = data.constraints.budget_confirmed.min_amount;
+                const required = CONFIG.CREATE_RULES.MIN_BUDGET;
+
+                if (minBudget >= required) {
+                    evaluation.criteria.budget = {
+                        status: 'PASS',
+                        score: 40,
+                        message: `€${minBudget.toLocaleString()} ≥ €${required.toLocaleString()}`
+                    };
+                } else {
+                    evaluation.criteria.budget = {
+                        status: 'FAIL',
+                        score: 0,
+                        message: `€${minBudget.toLocaleString()} < €${required.toLocaleString()}`
+                    };
+                    evaluation.issues.push('Budget below minimum');
+                }
+            } else {
+                evaluation.criteria.budget = {
+                    status: 'FAIL',
+                    score: 0,
+                    message: 'No budget confirmed'
+                };
+                evaluation.issues.push('Budget not found');
+            }
+
+            // Timeline (30 points)
+            if (data.constraints.proposal_deadline) {
+                const deadline = new Date(data.constraints.proposal_deadline);
+                const today = new Date();
+                const days = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                const required = CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS;
+
+                if (days >= required) {
+                    evaluation.criteria.timeline = {
+                        status: 'PASS',
+                        score: 30,
+                        message: `${days} days ≥ ${required} days`
+                    };
+                } else {
+                    evaluation.criteria.timeline = {
+                        status: 'FAIL',
+                        score: 0,
+                        message: `${days} days < ${required} days`
+                    };
+                    evaluation.issues.push('Insufficient lead time');
+                }
+            } else {
+                evaluation.criteria.timeline = {
+                    status: 'FAIL',
+                    score: 0,
+                    message: 'No deadline found'
+                };
+                evaluation.issues.push('Missing deadline');
+            }
+
+            // Required fields (30 points)
+            const requiredFields = CONFIG.CREATE_RULES.REQUIRED_FIELDS;
+            const missing = [];
+
+            requiredFields.forEach(field => {
+                const value = getNestedValue(data, field);
+                if (!value) {
+                    missing.push(field.replace('_', ' '));
+                }
+            });
+
+            if (missing.length === 0) {
+                evaluation.criteria.required_fields = {
+                    status: 'PASS',
+                    score: 30,
+                    message: 'All fields present'
+                };
+            } else {
+                evaluation.criteria.required_fields = {
+                    status: 'FAIL',
+                    score: Math.max(0, 30 - (missing.length * 10)),
+                    message: `Missing: ${missing.join(', ')}`
+                };
+                evaluation.issues.push(`Missing: ${missing.join(', ')}`);
+            }
+
+            // Calculate score
+            evaluation.score = Object.values(evaluation.criteria)
+                .reduce((total, criterion) => total + criterion.score, 0);
+
+            // Final decision
+            const criticalPassed = evaluation.criteria.budget.status === 'PASS' && 
+                                   evaluation.criteria.timeline.status === 'PASS';
+
+            if (criticalPassed && evaluation.score >= 80) {
+                evaluation.overall_decision = 'GO';
+            } else if (criticalPassed && evaluation.score >= 60) {
+                evaluation.overall_decision = 'CONDITIONAL';
+            } else {
+                evaluation.overall_decision = 'NO-GO';
+            }
+
+            return evaluation;
+        }
+
+        function getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => {
+                if (current && current[key] !== undefined && current[key] !== null) {
+                    return current[key];
+                }
+                const parts = key.split('_');
+                if (parts.length > 1) {
+                    let value = current;
+                    for (const part of parts) {
+                        if (value && value[part] !== undefined && value[part] !== null) {
+                            value = value[part];
+                        } else {
+                            return null;
+                        }
+                    }
+                    return value;
+                }
+                return null;
+            }, obj);
+        }
+
+        // UI functions
+        function showProcessing() {
+            elements.uploadSection.style.display = 'none';
+            elements.processingSection.style.display = 'flex';
+            elements.resultsSection.style.display = 'none';
+        }
+
+        function updateStatus(message) {
+            elements.processingStatus.textContent = message;
+        }
+
+        function showResults(briefingData, evaluation) {
+            elements.uploadSection.style.display = 'none';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'block';
+
+            displayDecisionBanner(evaluation);
+            displayEvaluationDetails(evaluation);
+            displayExtractedData(briefingData);
+        }
+
+        function displayDecisionBanner(evaluation) {
+            const banner = elements.decisionBanner;
+            const icon = document.getElementById('decisionIcon');
+            const title = document.getElementById('decisionTitle');
+            const message = document.getElementById('decisionMessage');
+            const score = document.getElementById('decisionScore');
+
+            banner.className = 'decision-banner';
+
+            if (evaluation.overall_decision === 'GO') {
+                banner.classList.add('go');
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+                title.textContent = 'GO - Brief Approved';
+                message.textContent = 'All CREATE criteria met.';
+            } else if (evaluation.overall_decision === 'CONDITIONAL') {
+                banner.classList.add('nogo');
+                icon.innerHTML = '<i class="fas fa-exclamation"></i>';
+                title.textContent = 'CONDITIONAL - Review Required';
+                message.textContent = 'Core criteria met but needs review.';
+            } else {
+                banner.classList.add('nogo');
+                icon.innerHTML = '<i class="fas fa-times"></i>';
+                title.textContent = 'NO-GO - Brief Rejected';
+                message.textContent = 'CREATE criteria not met.';
+            }
+
+            score.textContent = `Score: ${evaluation.score}/${evaluation.max_score}`;
+        }
+
+        function displayEvaluationDetails(evaluation) {
+            // Budget
+            const budgetStatus = document.getElementById('budgetStatus');
+            const confirmedBudget = document.getElementById('confirmedBudget');
+
+            budgetStatus.className = evaluation.criteria.budget.status === 'PASS' ? 'status valid' : 'status invalid';
+            budgetStatus.textContent = evaluation.criteria.budget.status === 'PASS' ? '✓ Valid' : '✗ Invalid';
+
+            if (currentData.briefing.constraints.budget_confirmed) {
+                const budget = currentData.briefing.constraints.budget_confirmed;
+                confirmedBudget.textContent = `€${budget.min_amount.toLocaleString()} - €${budget.max_amount.toLocaleString()}`;
+            } else {
+                confirmedBudget.textContent = 'Not specified';
+                confirmedBudget.classList.add('text-muted');
+            }
+
+            // Timeline
+            const timelineStatus = document.getElementById('timelineStatus');
+            const proposalDeadline = document.getElementById('proposalDeadline');
+
+            timelineStatus.className = evaluation.criteria.timeline.status === 'PASS' ? 'status valid' : 'status invalid';
+            timelineStatus.textContent = evaluation.criteria.timeline.status === 'PASS' ? '✓ Adequate' : '✗ Insufficient';
+
+            if (currentData.briefing.constraints.proposal_deadline) {
+                const deadline = new Date(currentData.briefing.constraints.proposal_deadline);
+                proposalDeadline.textContent = deadline.toLocaleDateString();
+            } else {
+                proposalDeadline.textContent = 'Not specified';
+                proposalDeadline.classList.add('text-muted');
+            }
+
+            // Required fields
+            const contactStatus = document.getElementById('contactStatus');
+            const advertiserStatus = document.getElementById('advertiserStatus');
+            const personaStatus = document.getElementById('personaStatus');
+
+            contactStatus.className = currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
+            contactStatus.textContent = currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
+
+            advertiserStatus.className = currentData.briefing.advertiser.group_annonceur ? 'status valid' : 'status missing';
+            advertiserStatus.textContent = currentData.briefing.advertiser.group_annonceur ? '✓ Found' : '⚠ Missing';
+
+            personaStatus.className = currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
+            personaStatus.textContent = currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
+        }
+
+        function displayExtractedData(data) {
+            setFieldValue('responsableCommercial', data.contact.responsable_commercial);
+            setFieldValue('agenceMedia', data.contact.agence_media);
+            setFieldValue('groupAnnonceur', data.advertiser.group_annonceur);
+            setFieldValue('brandProduct', data.advertiser.brand_product);
+            setFieldValue('targetPersona', data.brief.target_persona);
+            setFieldValue('keyMessages', data.brief.key_messages);
+            setFieldValue('sportsFocus', data.brief.sports_focus?.join(', '));
+            setFieldValue('additionalNotes', data.brief.notes);
+        }
+
+        function setFieldValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value || '-';
+                if (!value) {
+                    element.classList.add('text-muted');
+                } else {
+                    element.classList.remove('text-muted');
+                }
+            }
+        }
+
+        function resetToUpload() {
+            elements.uploadSection.style.display = 'block';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'none';
+
+            elements.fileInput.value = '';
+            elements.uploadArea.classList.remove('dragging');
+
+            currentData = null;
+            isProcessing = false;
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function resetDashboard() {
+            console.log('🔄 Reset');
+            resetToUpload();
+        }
+
+        window.resetDashboard = resetDashboard;
+
+        console.log('✅ Dashboard Ready!');
+    </script>
 </body>
 </html>
