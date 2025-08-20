@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .upload-box {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .upload-box:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .upload-box.dragging {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        .field {
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .field strong {
+            display: inline-block;
+            width: 200px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .reset-btn {
+            background-color: #6c757d;
+        }
+        .reset-btn:hover {
+            background-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <h1>Brand Studio CREATE - PDF Upload Test</h1>
+    
+    <div class="upload-box" id="uploadBox">
+        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+        <p>📄 Click here or drag and drop a PDF file</p>
+        <button type="button" onclick="document.getElementById('fileInput').click()">
+            Choose PDF File
+        </button>
+    </div>
+    
+    <div class="status" id="status"></div>
+    
+    <div class="results" id="results">
+        <h3>Extracted Data:</h3>
+        <div id="extractedData"></div>
+        <button class="reset-btn" onclick="resetForm()">Upload Another File</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        console.log('🚀 Starting PDF upload test...');
+        
+        // Get DOM elements
+        const fileInput = document.getElementById('fileInput');
+        const uploadBox = document.getElementById('uploadBox');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const extractedData = document.getElementById('extractedData');
+        
+        // Test if PDF.js loaded
+        console.log('📚 PDF.js version:', pdfjsLib.version);
+        
+        // File input event
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('📄 File selected:', file.name);
+                handleFile(file);
+            }
+        });
+        
+        // Upload box click
+        uploadBox.addEventListener('click', function() {
+            console.log('📁 Upload box clicked');
+            fileInput.click();
+        });
+        
+        // Drag and drop
+        uploadBox.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadBox.classList.add('dragging');
+        });
+        
+        uploadBox.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadBox.classList.remove('dragging');
+        });
+        
+        uploadBox.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadBox.classList.remove('dragging');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                console.log('📦 File dropped:', files[0].name);
+                handleFile(files[0]);
+            }
+        });
+        
+        // Handle file processing
+        async function handleFile(file) {
+            console.log('🔄 Processing file:', file.name, file.type, file.size + ' bytes');
+            
+            // Validate file
+            if (file.type !== 'application/pdf') {
+                showStatus('Please select a PDF file only.', 'error');
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                showStatus('File is too large. Please select a PDF under 10MB.', 'error');
+                return;
+            }
+            
+            showStatus('Processing PDF file...', 'info');
+            
+            try {
+                // Extract text from PDF
+                const text = await extractPDFText(file);
+                console.log('📝 Text extracted:', text.length + ' characters');
+                
+                // Extract briefing data
+                const data = extractBriefingData(text, file.name);
+                console.log('📊 Data extracted:', data);
+                
+                // Show results
+                displayResults(data);
+                showStatus('✅ PDF processed successfully!', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showStatus('❌ Error processing PDF: ' + error.message, 'error');
+            }
+        }
+        
+        // Extract text from PDF
+        async function extractPDFText(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+            
+            let fullText = '';
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\\n';
+            }
+            
+            return fullText;
+        }
+        
+        // Extract briefing data using simple pattern matching
+        function extractBriefingData(text, fileName) {
+            return {
+                meta: {
+                    source_file: fileName,
+                    extraction_date: new Date().toISOString().split('T')[0]
+                },
+                contact: {
+                    responsable_commercial: findPattern(text, ['karolien van gaever', 'responsable']) || 'Not found',
+                    agence_media: findPattern(text, ['group m', 'essence', 'mediacom']) || 'Not found'
+                },
+                advertiser: {
+                    group_annonceur: findPattern(text, ['coca-cola', 'coca cola']) || 'Not found',
+                    brand_product: findPattern(text, ['powerade']) || 'Not found'
+                },
+                brief: {
+                    target_persona: findPattern(text, ['18-54', 'sportifs']) || 'Not found',
+                    key_messages: findPattern(text, ['choississez powerade', 'message']) || 'Not found',
+                    budget_range: findPattern(text, ['20-25k', '20k', '25k']) || 'Not found',
+                    sports_focus: findSports(text),
+                    notes: findPattern(text, ['intéressé par', 'complément']) || 'Not found'
+                },
+                decision: evaluateDecision(text)
+            };
+        }
+        
+        // Simple pattern finder
+        function findPattern(text, keywords) {
+            const lowerText = text.toLowerCase();
+            for (const keyword of keywords) {
+                if (lowerText.includes(keyword.toLowerCase())) {
+                    // Find the sentence containing this keyword
+                    const sentences = text.split(/[.\\n]/);
+                    for (const sentence of sentences) {
+                        if (sentence.toLowerCase().includes(keyword.toLowerCase())) {
+                            return sentence.trim().substring(0, 100) + (sentence.length > 100 ? '...' : '');
+                        }
+                    }
+                    return keyword;
+                }
+            }
+            return null;
+        }
+        
+        // Find sports mentions
+        function findSports(text) {
+            const sports = ['padel', 'hockey', 'basket', 'running', 'football'];
+            const found = sports.filter(sport => text.toLowerCase().includes(sport));
+            return found.length > 0 ? found.join(', ') : 'Not found';
+        }
+        
+        // Simple Go/No-Go evaluation
+        function evaluateDecision(text) {
+            const hasContact = text.toLowerCase().includes('karolien');
+            const hasAdvertiser = text.toLowerCase().includes('coca');
+            const hasBudget = text.toLowerCase().includes('20') || text.toLowerCase().includes('25');
+            
+            const score = [hasContact, hasAdvertiser, hasBudget].filter(Boolean).length;
+            
+            return {
+                status: score >= 2 ? 'GO' : 'NO-GO',
+                score: Math.round((score / 3) * 100) + '%',
+                reasons: [
+                    hasContact ? '✅ Contact found' : '❌ Contact missing',
+                    hasAdvertiser ? '✅ Advertiser found' : '❌ Advertiser missing',
+                    hasBudget ? '✅ Budget found' : '❌ Budget missing'
+                ]
+            };
+        }
+        
+        // Display results
+        function displayResults(data) {
+            let html = '';
+            
+            // Decision
+            html += `<div class="field"><strong>Decision:</strong> <span style="color: ${data.decision.status === 'GO' ? 'green' : 'red'}">${data.decision.status}</span> (${data.decision.score})</div>`;
+            html += `<div class="field"><strong>Reasons:</strong> ${data.decision.reasons.join(', ')}</div>`;
+            
+            // Contact
+            html += `<div class="field"><strong>Responsable:</strong> ${data.contact.responsable_commercial}</div>`;
+            html += `<div class="field"><strong>Agence:</strong> ${data.contact.agence_media}</div>`;
+            
+            // Advertiser
+            html += `<div class="field"><strong>Annonceur:</strong> ${data.advertiser.group_annonceur}</div>`;
+            html += `<div class="field"><strong>Marque:</strong> ${data.advertiser.brand_product}</div>`;
+            
+            // Brief
+            html += `<div class="field"><strong>Persona:</strong> ${data.brief.target_persona}</div>`;
+            html += `<div class="field"><strong>Messages:</strong> ${data.brief.key_messages}</div>`;
+            html += `<div class="field"><strong>Budget:</strong> ${data.brief.budget_range}</div>`;
+            html += `<div class="field"><strong>Sports:</strong> ${data.brief.sports_focus}</div>`;
+            html += `<div class="field"><strong>Notes:</strong> ${data.brief.notes}</div>`;
+            
+            extractedData.innerHTML = html;
+            results.style.display = 'block';
+        }
+        
+        // Show status messages
+        function showStatus(message, type) {
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+            
+            console.log(`📋 Status (${type}): ${message}`);
+        }
+        
+        // Reset form
+        function resetForm() {
+            fileInput.value = '';
+            status.style.display = 'none';
+            results.style.display = 'none';
+            console.log('🔄 Form reset');
+        }
+        
+        console.log('✅ PDF upload test ready');
+    </script>
+</body>
+</html>

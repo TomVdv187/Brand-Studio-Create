@@ -1,66 +1,64 @@
-// Brand Studio CREATE - Professional Dashboard
-// Enhanced PDF upload and processing with beautiful UX
+// Brand Studio CREATE - Professional Briefing Analysis Dashboard
+// Focus: GO/NO-GO Decision Engine with CREATE Rules
 
-console.log('🚀 Brand Studio CREATE Dashboard Loading...');
+console.log('🚀 Brand Studio CREATE Dashboard - Initializing...');
 
 // Configuration
 const CONFIG = {
-    PDFJS_VERSION: '2.16.105',
+    PDF_WORKER_URL: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js',
     MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-    PROCESSING_STEPS: [
-        { id: 'step1', name: 'Reading PDF', duration: 800 },
-        { id: 'step2', name: 'AI Analysis', duration: 1200 },
-        { id: 'step3', name: 'Validation', duration: 600 }
-    ]
+    CREATE_RULES: {
+        MIN_BUDGET: 10000, // €10,000 minimum
+        MIN_LEAD_TIME_DAYS: 10, // 10 business days minimum
+        REQUIRED_FIELDS: [
+            'responsable_commercial',
+            'group_annonceur', 
+            'target_persona'
+        ]
+    }
 };
 
-// Global state
-let app = {
+// Application state
+const App = {
     isProcessing: false,
     currentData: null,
-    elements: {},
-    processingTimeout: null
+    elements: {}
 };
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📋 DOM ready, initializing dashboard...');
-    loadPDFJS();
-});
+// Wait for DOM and PDF.js to load
+document.addEventListener('DOMContentLoaded', initializeApp);
 
-// Dynamic PDF.js loading
-function loadPDFJS() {
-    const script = document.createElement('script');
-    script.src = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${CONFIG.PDFJS_VERSION}/pdf.min.js`;
-    script.onload = () => {
-        console.log('📚 PDF.js loaded successfully');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${CONFIG.PDFJS_VERSION}/pdf.worker.min.js`;
-        initializeApp();
-    };
-    script.onerror = () => {
-        console.error('❌ Failed to load PDF.js');
-        showNotification('Failed to load PDF processing library', 'error');
-    };
-    document.head.appendChild(script);
+function initializeApp() {
+    console.log('📋 DOM ready - Setting up dashboard...');
+    
+    // Configure PDF.js
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = CONFIG.PDF_WORKER_URL;
+        console.log('📚 PDF.js configured successfully');
+        setupDashboard();
+    } else {
+        console.error('❌ PDF.js not loaded');
+        showError('PDF processing library failed to load. Please refresh the page.');
+    }
 }
 
-// Initialize application
-function initializeApp() {
-    console.log('🎯 Initializing Brand Studio CREATE...');
-    
+function setupDashboard() {
     // Cache DOM elements
-    app.elements = {
+    App.elements = {
         fileInput: document.getElementById('fileInput'),
+        uploadBtn: document.getElementById('uploadBtn'),
         uploadArea: document.getElementById('uploadArea'),
         uploadSection: document.getElementById('uploadSection'),
-        processingState: document.getElementById('processingState'),
-        dashboard: document.getElementById('dashboard'),
-        decisionHeader: document.getElementById('decisionHeader')
+        processingSection: document.getElementById('processingSection'),
+        processingStatus: document.getElementById('processingStatus'),
+        resultsSection: document.getElementById('resultsSection'),
+        decisionBanner: document.getElementById('decisionBanner')
     };
     
-    // Validate required elements
-    const required = ['fileInput', 'uploadArea', 'uploadSection'];
-    const missing = required.filter(id => !app.elements[id]);
+    // Verify required elements
+    const missing = Object.entries(App.elements)
+        .filter(([key, element]) => !element)
+        .map(([key]) => key);
     
     if (missing.length > 0) {
         console.error('❌ Missing required elements:', missing);
@@ -68,153 +66,143 @@ function initializeApp() {
     }
     
     setupEventListeners();
-    console.log('✅ Dashboard initialized successfully');
+    console.log('✅ Dashboard ready');
 }
 
-// Setup all event listeners
 function setupEventListeners() {
-    const { fileInput, uploadArea } = app.elements;
+    const { fileInput, uploadBtn, uploadArea } = App.elements;
     
-    // File input change
-    fileInput.addEventListener('change', handleFileSelect);
+    // File input change - FIX for "only works second time" issue
+    fileInput.addEventListener('change', function(event) {
+        console.log('📁 File input changed');
+        handleFileSelection(event);
+        // IMPORTANT: Don't reset file input here - let it complete first
+    });
     
-    // Upload area interactions
-    uploadArea.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('📁 Upload area clicked');
+    // Upload button click
+    uploadBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        console.log('🔘 Upload button clicked');
         fileInput.click();
     });
     
-    // Enhanced drag and drop with visual feedback
+    // Upload area click
+    uploadArea.addEventListener('click', function(event) {
+        event.preventDefault();
+        console.log('📦 Upload area clicked');
+        fileInput.click();
+    });
+    
+    // Drag and drop with proper event handling
     uploadArea.addEventListener('dragover', handleDragOver);
     uploadArea.addEventListener('dragleave', handleDragLeave);
     uploadArea.addEventListener('drop', handleDrop);
     
-    // Prevent default drag behaviors globally
-    ['dragover', 'drop'].forEach(eventName => {
-        document.addEventListener(eventName, e => e.preventDefault());
-    });
+    // Prevent default drag behaviors
+    document.addEventListener('dragover', e => e.preventDefault());
+    document.addEventListener('drop', e => e.preventDefault());
     
     console.log('🎧 Event listeners configured');
 }
 
-// File selection handler
-function handleFileSelect(event) {
+// File handling functions
+function handleFileSelection(event) {
     const file = event.target.files[0];
     if (file) {
-        console.log('📄 File selected:', file.name);
+        console.log('📄 File selected:', file.name, `(${(file.size/1024/1024).toFixed(2)}MB)`);
         processFile(file);
     }
 }
 
-// Drag over handler with professional visual feedback
 function handleDragOver(event) {
     event.preventDefault();
-    const { uploadArea } = app.elements;
-    uploadArea.classList.add('drag-over');
-    
-    // Add premium drag effect
-    uploadArea.style.transform = 'scale(1.02)';
-    uploadArea.style.borderColor = 'var(--primary)';
-    uploadArea.style.boxShadow = '0 20px 40px rgba(37, 99, 235, 0.15)';
+    App.elements.uploadArea.classList.add('dragging');
 }
 
-// Drag leave handler
 function handleDragLeave(event) {
     event.preventDefault();
-    const { uploadArea } = app.elements;
-    
-    // Only remove if truly leaving the upload area
-    if (!uploadArea.contains(event.relatedTarget)) {
-        uploadArea.classList.remove('drag-over');
-        uploadArea.style.transform = '';
-        uploadArea.style.borderColor = '';
-        uploadArea.style.boxShadow = '';
+    // Only remove class if truly leaving the upload area
+    if (!App.elements.uploadArea.contains(event.relatedTarget)) {
+        App.elements.uploadArea.classList.remove('dragging');
     }
 }
 
-// Drop handler
 function handleDrop(event) {
     event.preventDefault();
-    const { uploadArea } = app.elements;
-    
-    // Reset visual state
-    uploadArea.classList.remove('drag-over');
-    uploadArea.style.transform = '';
-    uploadArea.style.borderColor = '';
-    uploadArea.style.boxShadow = '';
+    App.elements.uploadArea.classList.remove('dragging');
     
     const files = event.dataTransfer.files;
     if (files.length > 0) {
-        console.log('📦 File dropped:', files[0].name);
+        console.log('📥 File dropped:', files[0].name);
         processFile(files[0]);
     }
 }
 
-// Main file processing function
+// Main file processing
 async function processFile(file) {
-    if (app.isProcessing) {
-        console.log('⏳ Already processing a file');
-        showNotification('Please wait for the current file to finish processing', 'warning');
+    if (App.isProcessing) {
+        console.log('⏳ Already processing - ignoring new upload');
         return;
     }
-    
-    console.log('🔄 Starting file processing:', {
-        name: file.name,
-        size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
-        type: file.type
-    });
     
     // Validate file
     const validation = validateFile(file);
     if (!validation.valid) {
-        showNotification(validation.message, 'error');
+        showError(validation.message);
         return;
     }
     
-    app.isProcessing = true;
+    App.isProcessing = true;
     
     try {
-        // Show processing state with animations
-        await showProcessingState();
+        // Show processing state
+        showProcessingState();
+        updateProcessingStatus('Reading PDF file...');
         
-        // Step 1: Extract PDF text
-        await updateProcessingStep(1);
+        // Extract text from PDF
         const pdfText = await extractPDFText(file);
-        console.log('📝 Text extracted:', `${pdfText.length} characters`);
+        console.log(`📝 Text extracted: ${pdfText.length} characters`);
         
-        // Step 2: AI Analysis
-        await updateProcessingStep(2);
-        const briefingData = await extractBriefingData(pdfText, file.name);
-        console.log('🤖 Data extracted:', Object.keys(briefingData).length, 'sections');
+        updateProcessingStatus('Analyzing briefing content...');
+        await delay(800); // Simulate AI processing
         
-        // Step 3: Validation
-        await updateProcessingStep(3);
-        await delay(500);
+        // Extract briefing data
+        const briefingData = extractBriefingData(pdfText, file.name);
+        console.log('📊 Data extracted:', briefingData);
+        
+        updateProcessingStatus('Evaluating CREATE criteria...');
+        await delay(600);
+        
+        // Evaluate against CREATE rules
+        const evaluation = evaluateCreateCriteria(briefingData);
+        console.log('🎯 CREATE evaluation:', evaluation);
+        
+        // Store current data
+        App.currentData = { briefing: briefingData, evaluation };
         
         // Show results
-        app.currentData = briefingData;
-        await showDashboard(briefingData);
-        
-        console.log('🎉 Processing completed successfully');
+        showResults(briefingData, evaluation);
         
     } catch (error) {
         console.error('💥 Processing failed:', error);
-        showNotification(`Processing failed: ${error.message}`, 'error');
-        showUploadSection();
+        showError(`Failed to process PDF: ${error.message}`);
+        resetToUpload();
     } finally {
-        app.isProcessing = false;
+        App.isProcessing = false;
     }
 }
 
-// File validation
 function validateFile(file) {
+    if (!file) {
+        return { valid: false, message: 'No file selected.' };
+    }
+    
     if (file.type !== 'application/pdf') {
         return { valid: false, message: 'Please upload a PDF file only.' };
     }
     
     if (file.size > CONFIG.MAX_FILE_SIZE) {
-        return { valid: false, message: 'File is too large. Please upload a PDF under 10MB.' };
+        return { valid: false, message: 'File too large. Please upload a PDF under 10MB.' };
     }
     
     if (file.size === 0) {
@@ -224,13 +212,11 @@ function validateFile(file) {
     return { valid: true };
 }
 
-// PDF text extraction with robust error handling
+// PDF text extraction
 async function extractPDFText(file) {
     try {
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        
-        console.log(`📖 PDF loaded: ${pdf.numPages} pages`);
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
         
         let fullText = '';
         
@@ -247,7 +233,6 @@ async function extractPDFText(file) {
                 if (pageText.trim()) {
                     fullText += pageText + '\\n\\n';
                 }
-                
             } catch (pageError) {
                 console.warn(`⚠️ Error reading page ${pageNum}:`, pageError);
                 continue;
@@ -255,174 +240,132 @@ async function extractPDFText(file) {
         }
         
         if (!fullText.trim()) {
-            throw new Error('No readable text found in the PDF. The file may be image-based or corrupted.');
+            throw new Error('No readable text found in the PDF. The file may be image-based or password protected.');
         }
         
         return fullText.trim();
         
     } catch (error) {
-        console.error('📚 PDF extraction failed:', error);
-        throw new Error(`Failed to read PDF: ${error.message}`);
+        console.error('📚 PDF extraction error:', error);
+        throw error;
     }
 }
 
-// Enhanced briefing data extraction
-async function extractBriefingData(pdfText, fileName) {
-    console.log('🔍 Extracting briefing data...');
+// Briefing data extraction with pattern matching
+function extractBriefingData(text, fileName) {
+    const lowerText = text.toLowerCase();
     
-    // Simulate AI processing time
-    await delay(800);
-    
-    const data = {
+    return {
         meta: {
             source_file: fileName,
-            extraction_ts: new Date().toISOString().split('T')[0]
+            extraction_date: new Date().toISOString().split('T')[0]
         },
         contact: {
-            responsable_commercial: extractField(pdfText, [
+            responsable_commercial: extractPattern(text, [
                 /karolien\\s+van\\s+gaever/i,
                 /responsable[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
-            ]) || null,
-            agence_media: extractField(pdfText, [
-                /group\\s*m\\s*-\\s*essence\\s*mediacom/i,
+            ]),
+            agence_media: extractPattern(text, [
+                /group\\s*m\\s*[-–]?\\s*essence\\s*mediacom/i,
                 /agence[\\s\\w]*:?\\s*([A-Za-z\\s&-]+)/i
-            ]) || null
+            ])
         },
         advertiser: {
-            group_or_annonceur: extractField(pdfText, [
+            group_annonceur: extractPattern(text, [
                 /coca-cola/i,
-                /annonceur[\\s\\w]*:?\\s*([A-Za-z\\s-]+)/i
-            ]) || null,
-            brand_or_product: extractField(pdfText, [
+                /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
+                /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i
+            ]),
+            brand_product: extractPattern(text, [
                 /powerade/i,
                 /marque[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i,
                 /produit[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
-            ]) || null
+            ])
         },
         brief: {
-            type: extractField(pdfText, [/briefing\\s*recu\\s*via\\s*agence\\s*media/i]) || null,
-            urgency: extractUrgency(pdfText),
-            typologie_annonceur: extractField(pdfText, [/national/i, /grands\\s*comptes/i]) || null,
-            presentation_languages: extractLanguages(pdfText),
-            attachments_present: null,
-            target_persona: extractField(pdfText, [
-                /18-54[\\s-]*sportifs/i,
-                /cible[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i
-            ]) || null,
-            objectives: extractObjectives(pdfText),
-            start_momentum_reason: extractField(pdfText, [
-                /tbc[\\s]*\\([^)]*saison[^)]*\\)/i,
-                /momentum[\\s\\w]*:?\\s*([A-Za-z\\s()]+)/i
-            ]) || null,
-            end_date: extractDate(pdfText, 'end'),
-            key_messages: extractField(pdfText, [
+            target_persona: extractPattern(text, [
+                /18[-\\s]*54[\\s]*[-–]?[\\s]*sportifs/i,
+                /cible[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i,
+                /persona[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i
+            ]),
+            key_messages: extractPattern(text, [
                 /choississez\\s*powerade\\s*quand\\s*vous\\s*faites\\s*du\\s*sport/i,
-                /message[\\s\\w]*:?\\s*([A-Za-z\\s,.'!-]+)/i
-            ]) || null,
-            media_specific_preferences: extractMediaPreferences(pdfText),
-            history_with_rossel: null,
-            other_campaigns_with_rossel: extractField(pdfText, [
-                /campagne\\s*classique/i,
-                /publishing[\\s-]*digitale[\\s-]*video/i
-            ]) || null,
-            notes: extractNotes(pdfText)
+                /message[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([A-Za-z\\s,.'!-]+)/i,
+                /communiquer[\\s]*:?\\s*([A-Za-z\\s,.'!-]+)/i
+            ]),
+            sports_focus: extractSportsFocus(text),
+            notes: extractNotes(text)
         },
         constraints: {
-            min_budget_create_eur: 10000,
-            budget_confirmed_eur_range: extractBudgetRange(pdfText),
-            proposal_deadline: extractDate(pdfText, 'deadline'),
-            lead_time_business_days_after_valid_brief: 10,
-            do_not: extractDoNots(pdfText),
-            prefer: extractPreferences(pdfText)
-        },
-        creative: {
-            sports_focus: extractSportsFocus(pdfText),
-            audience_activity_min_sessions_per_week: extractActivityFrequency(pdfText)
+            budget_confirmed: extractBudget(text),
+            proposal_deadline: extractDate(text),
+            min_budget_required: CONFIG.CREATE_RULES.MIN_BUDGET,
+            min_lead_time_days: CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS
         }
     };
-    
-    console.log('📊 Extraction completed');
-    return data;
 }
 
-// Enhanced pattern extraction
-function extractField(text, patterns) {
+// Pattern extraction helpers
+function extractPattern(text, patterns) {
     for (const pattern of patterns) {
         const match = text.match(pattern);
         if (match) {
             const result = match[1] || match[0];
-            return result.trim().replace(/\\s+/g, ' ');
+            return cleanExtractedText(result);
         }
     }
     return null;
 }
 
-// Specific extraction functions
-function extractLanguages(text) {
-    const languages = [];
-    if (/anglais/i.test(text)) languages.push('Anglais');
-    if (/français/i.test(text)) languages.push('Français');
-    if (/néerlandais/i.test(text)) languages.push('Néerlandais');
-    return languages.length > 0 ? languages : null;
+function cleanExtractedText(text) {
+    return text.trim()
+        .replace(/\\s+/g, ' ')
+        .replace(/^[:\\-]\\s*/, '')
+        .substring(0, 200); // Limit length
 }
 
-function extractObjectives(text) {
-    const objectives = [];
-    if (/awareness/i.test(text)) objectives.push('awareness');
-    if (/consideration/i.test(text)) objectives.push('consideration');
-    if (/activation|conversion/i.test(text)) objectives.push('activation_conversion');
-    return objectives.length > 0 ? objectives : null;
-}
-
-function extractUrgency(text) {
-    if (/urgence.*élevé|urgent.*high/i.test(text)) return 'eleve';
-    if (/urgence.*moyen|medium/i.test(text)) return 'moyen';
-    if (/urgence.*faible|low/i.test(text)) return 'faible';
-    return null;
-}
-
-function extractMediaPreferences(text) {
-    const mediaList = ['LE SOIR', 'SUDINFO', 'RTL TVI', 'NOSTALGIE', 'KOTPLANET', 'EFLUENZ'];
-    const found = mediaList.filter(media => 
-        new RegExp(media.replace(/\\s+/g, '\\\\s*'), 'i').test(text)
-    );
-    return found.length > 0 ? found : null;
-}
-
-function extractBudgetRange(text) {
+function extractBudget(text) {
+    // Look for budget patterns like "20-25K", "20000-25000", etc.
     const patterns = [
         /(\\d{1,3})[-–](\\d{1,3})\\s*k/i,
-        /(\\d{1,3})[.,](\\d{3})\\s*[-–]\\s*(\\d{1,3})[.,](\\d{3})/i
+        /(\\d{1,3})[.,](\\d{3})\\s*[-–]\\s*(\\d{1,3})[.,](\\d{3})/i,
+        /budget[\\s\\w]*:?\\s*(\\d{1,3})[-–](\\d{1,3})k/i
     ];
     
     for (const pattern of patterns) {
         const match = text.match(pattern);
         if (match) {
-            if (match.length === 3) { // Format: 20-25K
-                const low = parseInt(match[1]) * 1000;
-                const high = parseInt(match[2]) * 1000;
-                return `${low}-${high}`;
+            if (match[1] && match[2]) {
+                const low = parseInt(match[1]) * (match[0].toLowerCase().includes('k') ? 1000 : 1);
+                const high = parseInt(match[2]) * (match[0].toLowerCase().includes('k') ? 1000 : 1);
+                return {
+                    range: `${low}-${high}`,
+                    min_amount: low,
+                    max_amount: high
+                };
             }
         }
     }
     return null;
 }
 
-function extractDate(text, type) {
-    const patterns = [
+function extractDate(text) {
+    // Look for date patterns
+    const datePatterns = [
         /(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/g,
-        /(\\d{1,2})-(\\d{1,2})-(\\d{4})/g,
-        /(\\d{4})-(\\d{1,2})-(\\d{1,2})/g
+        /(\\d{1,2})[-](\\d{1,2})[-](\\d{4})/g
     ];
     
-    for (const pattern of patterns) {
+    for (const pattern of datePatterns) {
         const matches = [...text.matchAll(pattern)];
         if (matches.length > 0) {
-            const match = matches[type === 'deadline' ? 0 : matches.length - 1];
+            // Take the first date found (usually deadline)
+            const match = matches[0];
             const [, day, month, year] = match;
-            
-            if (year && year.length === 4) {
-                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            try {
+                return new Date(year, month - 1, day).toISOString().split('T')[0];
+            } catch (e) {
+                continue;
             }
         }
     }
@@ -430,365 +373,345 @@ function extractDate(text, type) {
 }
 
 function extractSportsFocus(text) {
-    const sports = ['padel', 'hockey', 'basket', 'running', 'football', 'tennis'];
-    const found = sports.filter(sport => new RegExp(sport, 'i').test(text));
+    const sports = ['padel', 'hockey', 'basket', 'running', 'football', 'tennis', 'cyclisme'];
+    const found = sports.filter(sport => 
+        new RegExp(sport, 'i').test(text)
+    );
     return found.length > 0 ? found : null;
 }
 
-function extractDoNots(text) {
-    const doNots = [];
-    if (/pas\\s*de\\s*native|no\\s*native/i.test(text)) doNots.push('native');
-    if (/pas\\s*d[''']?influenceurs|no\\s*influencers/i.test(text)) doNots.push('influenceurs');
-    return doNots.length > 0 ? doNots : null;
-}
-
-function extractPreferences(text) {
-    const prefs = [];
-    if (/plutôt.*digital|prefer.*digital/i.test(text)) prefs.push('digital');
-    if (/programmatic/i.test(text)) prefs.push('programmatic');
-    return prefs.length > 0 ? prefs : null;
-}
-
-function extractActivityFrequency(text) {
-    const patterns = [
-        /(\\d+)\\s*fois.*semaine/i,
-        /(\\d+)\\s*x.*semaine/i,
-        /minimum\\s*(\\d+)\\s*fois/i
-    ];
-    
-    for (const pattern of patterns) {
-        const match = text.match(pattern);
-        if (match) return parseInt(match[1]);
-    }
-    return null;
-}
-
 function extractNotes(text) {
-    const patterns = [
-        /intéressé\\s*par\\s*([^\\n.]{50,300})/i,
-        /complément[\\s\\w]*:?\\s*([^\\n.]{50,300})/i,
-        /notes?[\\s\\w]*:?\\s*([^\\n.]{50,300})/i
+    // Look for notes section or additional information
+    const notePatterns = [
+        /intéressé\\s*par\\s*([^\\n.]{50,400})/i,
+        /complément[\\s\\w]*:?\\s*([^\\n.]{50,400})/i,
+        /notes?[\\s\\w]*:?\\s*([^\\n.]{50,400})/i,
+        /divers[\\s\\w]*:?\\s*([^\\n.]{50,400})/i
     ];
     
-    for (const pattern of patterns) {
+    for (const pattern of notePatterns) {
         const match = text.match(pattern);
-        if (match) return match[1].trim();
+        if (match && match[1]) {
+            return cleanExtractedText(match[1]);
+        }
     }
     return null;
 }
 
-// UI State Management with smooth animations
-async function showProcessingState() {
-    const { uploadSection, processingState } = app.elements;
+// CREATE Criteria Evaluation - THE CORE LOGIC
+function evaluateCreateCriteria(data) {
+    const evaluation = {
+        overall_decision: 'PENDING',
+        score: 0,
+        max_score: 100,
+        criteria: {
+            budget: { status: 'FAIL', score: 0, message: '', required: true },
+            timeline: { status: 'FAIL', score: 0, message: '', required: true },
+            required_fields: { status: 'FAIL', score: 0, message: '', required: true }
+        },
+        issues: [],
+        recommendations: []
+    };
     
-    // Fade out upload section
-    uploadSection.style.transition = 'opacity 0.3s ease';
-    uploadSection.style.opacity = '0';
-    
-    await delay(300);
-    
-    uploadSection.style.display = 'none';
-    processingState.style.display = 'block';
-    processingState.style.opacity = '0';
-    processingState.style.transform = 'translateY(20px)';
-    
-    // Animate in processing state
-    requestAnimationFrame(() => {
-        processingState.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-        processingState.style.opacity = '1';
-        processingState.style.transform = 'translateY(0)';
-    });
-    
-    // Reset all steps
-    document.querySelectorAll('.step').forEach(step => {
-        step.classList.remove('active');
-    });
-}
-
-async function updateProcessingStep(stepNumber) {
-    console.log(`📍 Processing step ${stepNumber}`);
-    
-    // Remove active from all steps
-    document.querySelectorAll('.step').forEach(step => {
-        step.classList.remove('active');
-    });
-    
-    // Activate current step with animation
-    const currentStep = document.getElementById(`step${stepNumber}`);
-    if (currentStep) {
-        await delay(200);
-        currentStep.classList.add('active');
+    // 1. BUDGET EVALUATION (40 points)
+    if (data.constraints.budget_confirmed) {
+        const minBudget = data.constraints.budget_confirmed.min_amount;
+        const requiredBudget = CONFIG.CREATE_RULES.MIN_BUDGET;
         
-        // Animate step activation
-        currentStep.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-            currentStep.style.transform = '';
-        }, 300);
-    }
-    
-    // Simulate processing time
-    await delay(CONFIG.PROCESSING_STEPS[stepNumber - 1]?.duration || 800);
-}
-
-async function showDashboard(data) {
-    const { processingState, dashboard } = app.elements;
-    
-    console.log('📊 Displaying dashboard...');
-    
-    // Fade out processing
-    processingState.style.opacity = '0';
-    await delay(300);
-    
-    processingState.style.display = 'none';
-    dashboard.style.display = 'block';
-    dashboard.style.opacity = '0';
-    
-    // Animate in dashboard
-    requestAnimationFrame(() => {
-        dashboard.style.transition = 'opacity 0.6s ease';
-        dashboard.style.opacity = '1';
-        dashboard.classList.add('fade-in');
-    });
-    
-    // Evaluate and display decision
-    const decision = evaluateGoNoGo(data);
-    await delay(200);
-    displayDecision(decision);
-    
-    // Populate fields with stagger animation
-    await delay(300);
-    populateFields(data);
-}
-
-function showUploadSection() {
-    const { uploadSection, processingState, dashboard } = app.elements;
-    
-    console.log('📁 Returning to upload section');
-    
-    uploadSection.style.display = 'block';
-    uploadSection.style.opacity = '1';
-    uploadSection.style.transition = '';
-    
-    if (processingState) processingState.style.display = 'none';
-    if (dashboard) dashboard.style.display = 'none';
-    
-    // Reset file input
-    app.elements.fileInput.value = '';
-}
-
-// Go/No-Go Decision Logic
-function evaluateGoNoGo(data) {
-    const issues = [];
-    
-    // Budget validation
-    if (data.constraints.budget_confirmed_eur_range) {
-        const [low] = data.constraints.budget_confirmed_eur_range.split('-');
-        const minBudget = parseInt(low);
-        
-        if (minBudget < data.constraints.min_budget_create_eur) {
-            issues.push(`Budget insuffisant: €${minBudget.toLocaleString()} < €${data.constraints.min_budget_create_eur.toLocaleString()}`);
+        if (minBudget >= requiredBudget) {
+            evaluation.criteria.budget = {
+                status: 'PASS',
+                score: 40,
+                message: `Budget confirmed: €${minBudget.toLocaleString()} ≥ €${requiredBudget.toLocaleString()}`
+            };
+        } else {
+            evaluation.criteria.budget = {
+                status: 'FAIL',
+                score: 0,
+                message: `Budget insufficient: €${minBudget.toLocaleString()} < €${requiredBudget.toLocaleString()} required`
+            };
+            evaluation.issues.push('Budget below CREATE minimum requirement');
         }
     } else {
-        issues.push('Budget non confirmé');
+        evaluation.criteria.budget = {
+            status: 'FAIL',
+            score: 0,
+            message: 'Budget not confirmed or found in briefing'
+        };
+        evaluation.issues.push('No confirmed budget found');
     }
     
-    // Deadline validation
+    // 2. TIMELINE EVALUATION (30 points)
     if (data.constraints.proposal_deadline) {
         const deadline = new Date(data.constraints.proposal_deadline);
         const today = new Date();
-        const requiredDate = new Date();
-        requiredDate.setDate(today.getDate() + data.constraints.lead_time_business_days_after_valid_brief);
+        const daysAvailable = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+        const requiredDays = CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS;
         
-        if (deadline < requiredDate) {
-            issues.push(`Délai insuffisant: ${data.constraints.lead_time_business_days_after_valid_brief} jours requis`);
+        if (daysAvailable >= requiredDays) {
+            evaluation.criteria.timeline = {
+                status: 'PASS',
+                score: 30,
+                message: `Timeline adequate: ${daysAvailable} days ≥ ${requiredDays} days required`
+            };
+        } else {
+            evaluation.criteria.timeline = {
+                status: 'FAIL',
+                score: 0,
+                message: `Timeline insufficient: ${daysAvailable} days < ${requiredDays} days required`
+            };
+            evaluation.issues.push('Insufficient lead time for CREATE deliverables');
         }
     } else {
-        issues.push('Date limite non spécifiée');
+        evaluation.criteria.timeline = {
+            status: 'FAIL',
+            score: 0,
+            message: 'No proposal deadline specified'
+        };
+        evaluation.issues.push('Missing proposal deadline');
     }
     
-    // Required fields
-    const requiredFields = [
-        { field: data.contact.responsable_commercial, name: 'Responsable commercial' },
-        { field: data.advertiser.group_or_annonceur, name: 'Groupe annonceur' },
-        { field: data.brief.target_persona, name: 'Persona cible' }
-    ];
+    // 3. REQUIRED FIELDS EVALUATION (30 points)
+    const requiredFields = CONFIG.CREATE_RULES.REQUIRED_FIELDS;
+    const missingFields = [];
     
-    requiredFields.forEach(({ field, name }) => {
-        if (!field) issues.push(`${name} manquant`);
+    requiredFields.forEach(field => {
+        const value = getNestedValue(data, field);
+        if (!value) {
+            missingFields.push(field.replace('_', ' '));
+        }
     });
     
-    return {
-        status: issues.length === 0 ? 'GO' : 'NO-GO',
-        issues: issues,
-        score: Math.max(0, 100 - (issues.length * 25))
-    };
+    if (missingFields.length === 0) {
+        evaluation.criteria.required_fields = {
+            status: 'PASS',
+            score: 30,
+            message: 'All required fields present'
+        };
+    } else {
+        evaluation.criteria.required_fields = {
+            status: 'FAIL',
+            score: Math.max(0, 30 - (missingFields.length * 10)),
+            message: `Missing fields: ${missingFields.join(', ')}`
+        };
+        evaluation.issues.push(`Missing required information: ${missingFields.join(', ')}`);
+    }
+    
+    // Calculate overall score and decision
+    evaluation.score = Object.values(evaluation.criteria)
+        .reduce((total, criterion) => total + criterion.score, 0);
+    
+    // GO/NO-GO Decision Logic
+    const allCriticalPassed = evaluation.criteria.budget.status === 'PASS' && 
+                             evaluation.criteria.timeline.status === 'PASS';
+    
+    if (allCriticalPassed && evaluation.score >= 80) {
+        evaluation.overall_decision = 'GO';
+    } else if (allCriticalPassed && evaluation.score >= 60) {
+        evaluation.overall_decision = 'CONDITIONAL';
+        evaluation.recommendations.push('Review missing information before proceeding');
+    } else {
+        evaluation.overall_decision = 'NO-GO';
+    }
+    
+    return evaluation;
 }
 
-function displayDecision(decision) {
-    const { decisionHeader } = app.elements;
+// Helper function to get nested object values
+function getNestedValue(obj, path) {
+    return path.split('.').reduce((current, key) => {
+        if (current && current[key] !== undefined && current[key] !== null) {
+            return current[key];
+        }
+        // Check for underscore-separated paths
+        const underscorePath = key.split('_');
+        if (underscorePath.length > 1) {
+            let value = current;
+            for (const part of underscorePath) {
+                if (value && value[part] !== undefined && value[part] !== null) {
+                    value = value[part];
+                } else {
+                    return null;
+                }
+            }
+            return value;
+        }
+        return null;
+    }, obj);
+}
+
+// UI State Management
+function showProcessingState() {
+    App.elements.uploadSection.style.display = 'none';
+    App.elements.processingSection.style.display = 'block';
+    App.elements.resultsSection.style.display = 'none';
+}
+
+function updateProcessingStatus(message) {
+    App.elements.processingStatus.textContent = message;
+    console.log('📍', message);
+}
+
+function showResults(briefingData, evaluation) {
+    App.elements.uploadSection.style.display = 'none';
+    App.elements.processingSection.style.display = 'none';
+    App.elements.resultsSection.style.display = 'block';
+    
+    // Display decision banner
+    displayDecisionBanner(evaluation);
+    
+    // Display evaluation details
+    displayEvaluationDetails(evaluation);
+    
+    // Display extracted data
+    displayExtractedData(briefingData);
+}
+
+function displayDecisionBanner(evaluation) {
+    const banner = App.elements.decisionBanner;
     const icon = document.getElementById('decisionIcon');
     const title = document.getElementById('decisionTitle');
     const message = document.getElementById('decisionMessage');
+    const score = document.getElementById('decisionScore');
     
-    if (!decisionHeader || !icon || !title || !message) return;
+    // Set banner class
+    banner.className = 'decision-banner';
     
-    // Reset and set classes
-    decisionHeader.className = 'decision-header';
-    decisionHeader.classList.add(decision.status === 'GO' ? 'go' : 'nogo');
-    
-    if (decision.status === 'GO') {
+    if (evaluation.overall_decision === 'GO') {
+        banner.classList.add('go');
         icon.innerHTML = '<i class="fas fa-check"></i>';
-        title.textContent = 'GO - Brief Accepté';
-        message.textContent = `Excellent! Tous les critères CREATE sont remplis. Score: ${decision.score}%`;
+        title.textContent = 'GO - Brief Approved';
+        message.textContent = 'All CREATE criteria met. This briefing is approved for processing.';
+    } else if (evaluation.overall_decision === 'CONDITIONAL') {
+        banner.classList.add('nogo'); // Use warning styling
+        icon.innerHTML = '<i class="fas fa-exclamation"></i>';
+        title.textContent = 'CONDITIONAL - Review Required';
+        message.textContent = 'Core criteria met but additional information needed.';
     } else {
+        banner.classList.add('nogo');
         icon.innerHTML = '<i class="fas fa-times"></i>';
-        title.textContent = 'NO-GO - Brief Refusé';
-        message.textContent = `${decision.issues.length} problème(s) identifié(s). Score: ${decision.score}%`;
-        
-        // Add details if space allows
-        if (decision.issues.length <= 2) {
-            message.textContent += ` • ${decision.issues.join(' • ')}`;
-        }
+        title.textContent = 'NO-GO - Brief Rejected';
+        message.textContent = 'CREATE criteria not met. See evaluation details below.';
     }
     
-    // Animate decision appearance
-    decisionHeader.style.transform = 'scale(0.95)';
-    decisionHeader.style.opacity = '0';
-    
-    setTimeout(() => {
-        decisionHeader.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-        decisionHeader.style.transform = 'scale(1)';
-        decisionHeader.style.opacity = '1';
-    }, 100);
+    score.textContent = `Score: ${evaluation.score}/${evaluation.max_score}`;
 }
 
-// Field population with enhanced formatting
-function populateFields(data) {
-    console.log('📝 Populating dashboard fields...');
+function displayEvaluationDetails(evaluation) {
+    // Budget status
+    const budgetStatus = document.getElementById('budgetStatus');
+    const confirmedBudget = document.getElementById('confirmedBudget');
     
-    const fieldMappings = {
-        // Contact
-        'responsable_commercial': data.contact.responsable_commercial,
-        'agence_media': data.contact.agence_media,
-        
-        // Advertiser
-        'group_or_annonceur': data.advertiser.group_or_annonceur,
-        'brand_or_product': data.advertiser.brand_or_product,
-        
-        // Brief details
-        'brief_type': data.brief.type,
-        'urgency': data.brief.urgency,
-        'typologie_annonceur': data.brief.typologie_annonceur,
-        'presentation_languages': data.brief.presentation_languages?.join(', '),
-        'target_persona': data.brief.target_persona,
-        'objectives': data.brief.objectives?.join(', '),
-        'key_messages': data.brief.key_messages,
-        'media_specific_preferences': data.brief.media_specific_preferences?.join(', '),
-        'notes': data.brief.notes,
-        
-        // Constraints
-        'budget_confirmed_eur_range': data.constraints.budget_confirmed_eur_range ? 
-            `€${data.constraints.budget_confirmed_eur_range.replace('-', ' - €')}` : null,
-        'proposal_deadline': data.constraints.proposal_deadline ? 
-            formatDate(data.constraints.proposal_deadline) : null,
-        
-        // Creative
-        'sports_focus': data.creative.sports_focus?.join(', '),
-        'audience_activity_min_sessions_per_week': data.creative.audience_activity_min_sessions_per_week ? 
-            `${data.creative.audience_activity_min_sessions_per_week} sessions/week` : null,
-        'do_not': data.constraints.do_not?.join(', '),
-        'prefer': data.constraints.prefer?.join(', ')
-    };
-    
-    // Populate with stagger animation
-    Object.entries(fieldMappings).forEach(([fieldId, value], index) => {
-        setTimeout(() => {
-            setFieldValue(fieldId, value);
-        }, index * 50);
-    });
-}
-
-function setFieldValue(fieldId, value) {
-    const element = document.getElementById(fieldId);
-    if (!element) return;
-    
-    const displayValue = value || '-';
-    element.textContent = displayValue;
-    
-    // Add visual indicators
-    element.classList.remove('success', 'warning', 'highlight', 'text-muted');
-    
-    if (value) {
-        // Special styling for specific fields
-        if (fieldId === 'do_not' && value !== '-') {
-            element.classList.add('warning');
-        } else if (fieldId === 'prefer' && value !== '-') {
-            element.classList.add('success');
-        } else if (['min_budget_create_eur', 'lead_time_business_days_after_valid_brief'].includes(fieldId)) {
-            element.classList.add('highlight');
-        }
+    if (evaluation.criteria.budget.status === 'PASS') {
+        budgetStatus.className = 'status valid';
+        budgetStatus.textContent = '✓ Valid';
     } else {
-        element.classList.add('text-muted');
+        budgetStatus.className = 'status invalid';
+        budgetStatus.textContent = '✗ Invalid';
     }
     
-    // Animate field update
-    element.style.transform = 'translateY(10px)';
-    element.style.opacity = '0.7';
+    if (App.currentData.briefing.constraints.budget_confirmed) {
+        const budget = App.currentData.briefing.constraints.budget_confirmed;
+        confirmedBudget.textContent = `€${budget.min_amount.toLocaleString()} - €${budget.max_amount.toLocaleString()}`;
+    } else {
+        confirmedBudget.textContent = 'Not specified';
+        confirmedBudget.classList.add('text-muted');
+    }
     
-    setTimeout(() => {
-        element.style.transition = 'all 0.3s ease';
-        element.style.transform = 'translateY(0)';
-        element.style.opacity = '1';
-    }, 50);
+    // Timeline status
+    const timelineStatus = document.getElementById('timelineStatus');
+    const proposalDeadline = document.getElementById('proposalDeadline');
+    
+    if (evaluation.criteria.timeline.status === 'PASS') {
+        timelineStatus.className = 'status valid';
+        timelineStatus.textContent = '✓ Adequate';
+    } else {
+        timelineStatus.className = 'status invalid';
+        timelineStatus.textContent = '✗ Insufficient';
+    }
+    
+    if (App.currentData.briefing.constraints.proposal_deadline) {
+        const deadline = new Date(App.currentData.briefing.constraints.proposal_deadline);
+        proposalDeadline.textContent = deadline.toLocaleDateString('fr-FR');
+    } else {
+        proposalDeadline.textContent = 'Not specified';
+        proposalDeadline.classList.add('text-muted');
+    }
+    
+    // Required fields status
+    const contactStatus = document.getElementById('contactStatus');
+    const advertiserStatus = document.getElementById('advertiserStatus');
+    const personaStatus = document.getElementById('personaStatus');
+    
+    contactStatus.className = App.currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
+    contactStatus.textContent = App.currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
+    
+    advertiserStatus.className = App.currentData.briefing.advertiser.group_annonceur ? 'status valid' : 'status missing';
+    advertiserStatus.textContent = App.currentData.briefing.advertiser.group_annonceur ? '✓ Found' : '⚠ Missing';
+    
+    personaStatus.className = App.currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
+    personaStatus.textContent = App.currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
+}
+
+function displayExtractedData(data) {
+    // Contact information
+    setFieldValue('responsableCommercial', data.contact.responsable_commercial);
+    setFieldValue('agenceMedia', data.contact.agence_media);
+    
+    // Advertiser
+    setFieldValue('groupAnnonceur', data.advertiser.group_annonceur);
+    setFieldValue('brandProduct', data.advertiser.brand_product);
+    
+    // Brief details
+    setFieldValue('targetPersona', data.brief.target_persona);
+    setFieldValue('keyMessages', data.brief.key_messages);
+    setFieldValue('sportsFocus', data.brief.sports_focus?.join(', '));
+    setFieldValue('additionalNotes', data.brief.notes);
+}
+
+function setFieldValue(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = value || '-';
+        if (!value) {
+            element.classList.add('text-muted');
+        } else {
+            element.classList.remove('text-muted');
+        }
+    }
+}
+
+function resetToUpload() {
+    App.elements.uploadSection.style.display = 'block';
+    App.elements.processingSection.style.display = 'none';
+    App.elements.resultsSection.style.display = 'none';
+    
+    // Reset file input - IMPORTANT for fixing the "second time" issue
+    App.elements.fileInput.value = '';
+    App.elements.uploadArea.classList.remove('dragging');
+    
+    App.currentData = null;
+    App.isProcessing = false;
 }
 
 // Utility functions
-function formatDate(dateString) {
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    } catch (e) {
-        return dateString;
-    }
-}
-
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function showNotification(message, type = 'info') {
-    console.log(`🔔 ${type.toUpperCase()}: ${message}`);
-    
-    // For now, use alerts - could be replaced with toast notifications
-    if (type === 'error') {
-        alert(`❌ ${message}`);
-    } else if (type === 'warning') {
-        alert(`⚠️ ${message}`);
-    } else {
-        alert(`ℹ️ ${message}`);
-    }
+function showError(message) {
+    console.error('❌', message);
+    alert(`Error: ${message}`);
+    resetToUpload();
 }
 
-// Reset functionality
+// Global reset function
 function resetDashboard() {
     console.log('🔄 Resetting dashboard...');
-    
-    app.currentData = null;
-    app.isProcessing = false;
-    
-    if (app.processingTimeout) {
-        clearTimeout(app.processingTimeout);
-        app.processingTimeout = null;
-    }
-    
-    showUploadSection();
+    resetToUpload();
 }
 
-// Global exports
+// Export for global access
 window.resetDashboard = resetDashboard;
 
-console.log('✅ Brand Studio CREATE script loaded successfully');
+console.log('✅ Brand Studio CREATE Dashboard ready!');
