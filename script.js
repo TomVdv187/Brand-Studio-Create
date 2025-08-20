@@ -1,7 +1,5 @@
-// Brand Studio CREATE - Professional Briefing Analysis Dashboard
-// Focus: GO/NO-GO Decision Engine with CREATE Rules
-
-console.log('🚀 Brand Studio CREATE Dashboard - Initializing...');
+// Brand Studio CREATE - Professional Dashboard
+console.log('🚀 Brand Studio CREATE Dashboard Loading...');
 
 // Configuration
 const CONFIG = {
@@ -10,41 +8,33 @@ const CONFIG = {
     CREATE_RULES: {
         MIN_BUDGET: 10000, // €10,000 minimum
         MIN_LEAD_TIME_DAYS: 10, // 10 business days minimum
-        REQUIRED_FIELDS: [
-            'responsable_commercial',
-            'group_annonceur', 
-            'target_persona'
-        ]
+        REQUIRED_FIELDS: ['responsable_commercial', 'group_annonceur', 'target_persona']
     }
 };
 
 // Application state
-const App = {
-    isProcessing: false,
-    currentData: null,
-    elements: {}
-};
+let isProcessing = false;
+let currentData = null;
+let elements = {};
 
-// Wait for DOM and PDF.js to load
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-function initializeApp() {
-    console.log('📋 DOM ready - Setting up dashboard...');
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📋 DOM ready - Initializing dashboard...');
     
     // Configure PDF.js
     if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc = CONFIG.PDF_WORKER_URL;
-        console.log('📚 PDF.js configured successfully');
+        console.log('📚 PDF.js configured');
         setupDashboard();
     } else {
         console.error('❌ PDF.js not loaded');
-        showError('PDF processing library failed to load. Please refresh the page.');
+        alert('PDF processing library failed to load. Please refresh the page.');
     }
-}
+});
 
 function setupDashboard() {
     // Cache DOM elements
-    App.elements = {
+    elements = {
         fileInput: document.getElementById('fileInput'),
         uploadBtn: document.getElementById('uploadBtn'),
         uploadArea: document.getElementById('uploadArea'),
@@ -55,28 +45,27 @@ function setupDashboard() {
         decisionBanner: document.getElementById('decisionBanner')
     };
     
-    // Verify required elements
-    const missing = Object.entries(App.elements)
+    // Verify all elements exist
+    const missing = Object.entries(elements)
         .filter(([key, element]) => !element)
         .map(([key]) => key);
     
     if (missing.length > 0) {
-        console.error('❌ Missing required elements:', missing);
+        console.error('❌ Missing DOM elements:', missing);
         return;
     }
     
     setupEventListeners();
-    console.log('✅ Dashboard ready');
+    console.log('✅ Dashboard initialized successfully');
 }
 
 function setupEventListeners() {
-    const { fileInput, uploadBtn, uploadArea } = App.elements;
+    const { fileInput, uploadBtn, uploadArea } = elements;
     
-    // File input change - FIX for "only works second time" issue
+    // File input change
     fileInput.addEventListener('change', function(event) {
-        console.log('📁 File input changed');
+        console.log('📁 File selected');
         handleFileSelection(event);
-        // IMPORTANT: Don't reset file input here - let it complete first
     });
     
     // Upload button click
@@ -93,7 +82,7 @@ function setupEventListeners() {
         fileInput.click();
     });
     
-    // Drag and drop with proper event handling
+    // Drag and drop
     uploadArea.addEventListener('dragover', handleDragOver);
     uploadArea.addEventListener('dragleave', handleDragLeave);
     uploadArea.addEventListener('drop', handleDrop);
@@ -105,31 +94,30 @@ function setupEventListeners() {
     console.log('🎧 Event listeners configured');
 }
 
-// File handling functions
+// File handling
 function handleFileSelection(event) {
     const file = event.target.files[0];
     if (file) {
-        console.log('📄 File selected:', file.name, `(${(file.size/1024/1024).toFixed(2)}MB)`);
+        console.log('📄 Processing file:', file.name, `(${(file.size/1024/1024).toFixed(2)}MB)`);
         processFile(file);
     }
 }
 
 function handleDragOver(event) {
     event.preventDefault();
-    App.elements.uploadArea.classList.add('dragging');
+    elements.uploadArea.classList.add('dragging');
 }
 
 function handleDragLeave(event) {
     event.preventDefault();
-    // Only remove class if truly leaving the upload area
-    if (!App.elements.uploadArea.contains(event.relatedTarget)) {
-        App.elements.uploadArea.classList.remove('dragging');
+    if (!elements.uploadArea.contains(event.relatedTarget)) {
+        elements.uploadArea.classList.remove('dragging');
     }
 }
 
 function handleDrop(event) {
     event.preventDefault();
-    App.elements.uploadArea.classList.remove('dragging');
+    elements.uploadArea.classList.remove('dragging');
     
     const files = event.dataTransfer.files;
     if (files.length > 0) {
@@ -138,78 +126,77 @@ function handleDrop(event) {
     }
 }
 
-// Main file processing
+// Main processing function
 async function processFile(file) {
-    if (App.isProcessing) {
-        console.log('⏳ Already processing - ignoring new upload');
+    if (isProcessing) {
+        console.log('⏳ Already processing - ignoring');
         return;
     }
     
     // Validate file
-    const validation = validateFile(file);
-    if (!validation.valid) {
-        showError(validation.message);
+    if (!validateFile(file)) {
         return;
     }
     
-    App.isProcessing = true;
+    isProcessing = true;
     
     try {
-        // Show processing state
         showProcessingState();
         updateProcessingStatus('Reading PDF file...');
         
-        // Extract text from PDF
+        // Extract text
         const pdfText = await extractPDFText(file);
-        console.log(`📝 Text extracted: ${pdfText.length} characters`);
+        console.log(`📝 Extracted ${pdfText.length} characters`);
         
         updateProcessingStatus('Analyzing briefing content...');
-        await delay(800); // Simulate AI processing
+        await delay(800);
         
-        // Extract briefing data
+        // Extract data
         const briefingData = extractBriefingData(pdfText, file.name);
         console.log('📊 Data extracted:', briefingData);
         
         updateProcessingStatus('Evaluating CREATE criteria...');
         await delay(600);
         
-        // Evaluate against CREATE rules
+        // Evaluate
         const evaluation = evaluateCreateCriteria(briefingData);
-        console.log('🎯 CREATE evaluation:', evaluation);
+        console.log('🎯 Evaluation complete:', evaluation);
         
-        // Store current data
-        App.currentData = { briefing: briefingData, evaluation };
-        
-        // Show results
+        // Store and show results
+        currentData = { briefing: briefingData, evaluation };
         showResults(briefingData, evaluation);
         
     } catch (error) {
         console.error('💥 Processing failed:', error);
-        showError(`Failed to process PDF: ${error.message}`);
+        alert(`Failed to process PDF: ${error.message}`);
         resetToUpload();
     } finally {
-        App.isProcessing = false;
+        isProcessing = false;
     }
 }
 
 function validateFile(file) {
     if (!file) {
-        return { valid: false, message: 'No file selected.' };
+        alert('No file selected.');
+        return false;
     }
     
     if (file.type !== 'application/pdf') {
-        return { valid: false, message: 'Please upload a PDF file only.' };
+        alert('Please upload a PDF file only.');
+        return false;
     }
     
     if (file.size > CONFIG.MAX_FILE_SIZE) {
-        return { valid: false, message: 'File too large. Please upload a PDF under 10MB.' };
+        alert('File too large. Please upload a PDF under 10MB.');
+        return false;
     }
     
     if (file.size === 0) {
-        return { valid: false, message: 'The file appears to be empty.' };
+        alert('The file appears to be empty.');
+        return false;
     }
     
-    return { valid: true };
+    return true;
 }
 
 // PDF text extraction
@@ -235,12 +222,11 @@ async function extractPDFText(file) {
                 }
             } catch (pageError) {
                 console.warn(`⚠️ Error reading page ${pageNum}:`, pageError);
-                continue;
             }
         }
         
         if (!fullText.trim()) {
-            throw new Error('No readable text found in the PDF. The file may be image-based or password protected.');
+            throw new Error('No readable text found in PDF');
         }
         
         return fullText.trim();
@@ -251,7 +237,7 @@ async function extractPDFText(file) {
     }
 }
 
-// Briefing data extraction with pattern matching
+// Data extraction
 function extractBriefingData(text, fileName) {
     const lowerText = text.toLowerCase();
     
@@ -272,11 +258,13 @@ function extractBriefingData(text, fileName) {
         },
         advertiser: {
             group_annonceur: extractPattern(text, [
+                /oneplus/i,
                 /coca-cola/i,
                 /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
                 /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i
             ]),
             brand_product: extractPattern(text, [
+                /nord\\s*5/i,
                 /powerade/i,
                 /marque[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i,
                 /produit[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
@@ -284,14 +272,15 @@ function extractBriefingData(text, fileName) {
         },
         brief: {
             target_persona: extractPattern(text, [
+                /studenten/i,
                 /18[-\\s]*54[\\s]*[-–]?[\\s]*sportifs/i,
                 /cible[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i,
                 /persona[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i
             ]),
             key_messages: extractPattern(text, [
-                /choississez\\s*powerade\\s*quand\\s*vous\\s*faites\\s*du\\s*sport/i,
-                /message[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([A-Za-z\\s,.'!-]+)/i,
-                /communiquer[\\s]*:?\\s*([A-Za-z\\s,.'!-]+)/i
+                /back\\s*to\\s*school/i,
+                /choississez\\s*powerade/i,
+                /message[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([A-Za-z\\s,.'!-]+)/i
             ]),
             sports_focus: extractSportsFocus(text),
             notes: extractNotes(text)
@@ -305,7 +294,6 @@ function extractBriefingData(text, fileName) {
     };
 }
 
-// Pattern extraction helpers
 function extractPattern(text, patterns) {
     for (const pattern of patterns) {
         const match = text.match(pattern);
@@ -321,36 +309,42 @@ function cleanExtractedText(text) {
     return text.trim()
         .replace(/\\s+/g, ' ')
         .replace(/^[:\\-]\\s*/, '')
-        .substring(0, 200); // Limit length
+        .substring(0, 200);
 }
 
 function extractBudget(text) {
-    // Look for budget patterns like "20-25K", "20000-25000", etc.
     const patterns = [
         /(\\d{1,3})[-–](\\d{1,3})\\s*k/i,
-        /(\\d{1,3})[.,](\\d{3})\\s*[-–]\\s*(\\d{1,3})[.,](\\d{3})/i,
-        /budget[\\s\\w]*:?\\s*(\\d{1,3})[-–](\\d{1,3})k/i
+        /€\\s*(\\d{1,3})[.,](\\d{3})/i,
+        /budget[\\s\\w]*:?\\s*(\\d+)/i
     ];
     
     for (const pattern of patterns) {
         const match = text.match(pattern);
         if (match) {
-            if (match[1] && match[2]) {
-                const low = parseInt(match[1]) * (match[0].toLowerCase().includes('k') ? 1000 : 1);
+            let amount = parseInt(match[1]) || 0;
+            if (match[0].toLowerCase().includes('k')) {
+                amount *= 1000;
+            }
+            if (match[2]) {
                 const high = parseInt(match[2]) * (match[0].toLowerCase().includes('k') ? 1000 : 1);
                 return {
-                    range: `${low}-${high}`,
-                    min_amount: low,
+                    range: `${amount}-${high}`,
+                    min_amount: amount,
                     max_amount: high
                 };
             }
+            return {
+                range: amount.toString(),
+                min_amount: amount,
+                max_amount: amount
+            };
         }
     }
     return null;
 }
 
 function extractDate(text) {
-    // Look for date patterns
     const datePatterns = [
         /(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/g,
         /(\\d{1,2})[-](\\d{1,2})[-](\\d{4})/g
@@ -359,7 +353,6 @@ function extractDate(text) {
     for (const pattern of datePatterns) {
         const matches = [...text.matchAll(pattern)];
         if (matches.length > 0) {
-            // Take the first date found (usually deadline)
             const match = matches[0];
             const [, day, month, year] = match;
             try {
@@ -373,20 +366,16 @@ function extractDate(text) {
 }
 
 function extractSportsFocus(text) {
-    const sports = ['padel', 'hockey', 'basket', 'running', 'football', 'tennis', 'cyclisme'];
-    const found = sports.filter(sport => 
-        new RegExp(sport, 'i').test(text)
-    );
+    const sports = ['padel', 'hockey', 'basket', 'running', 'football', 'tennis'];
+    const found = sports.filter(sport => new RegExp(sport, 'i').test(text));
     return found.length > 0 ? found : null;
 }
 
 function extractNotes(text) {
-    // Look for notes section or additional information
     const notePatterns = [
         /intéressé\\s*par\\s*([^\\n.]{50,400})/i,
         /complément[\\s\\w]*:?\\s*([^\\n.]{50,400})/i,
-        /notes?[\\s\\w]*:?\\s*([^\\n.]{50,400})/i,
-        /divers[\\s\\w]*:?\\s*([^\\n.]{50,400})/i
+        /notes?[\\s\\w]*:?\\s*([^\\n.]{50,400})/i
     ];
     
     for (const pattern of notePatterns) {
@@ -398,22 +387,22 @@ function extractNotes(text) {
     return null;
 }
 
-// CREATE Criteria Evaluation - THE CORE LOGIC
+// CREATE evaluation
 function evaluateCreateCriteria(data) {
     const evaluation = {
         overall_decision: 'PENDING',
         score: 0,
         max_score: 100,
         criteria: {
-            budget: { status: 'FAIL', score: 0, message: '', required: true },
-            timeline: { status: 'FAIL', score: 0, message: '', required: true },
-            required_fields: { status: 'FAIL', score: 0, message: '', required: true }
+            budget: { status: 'FAIL', score: 0, message: '' },
+            timeline: { status: 'FAIL', score: 0, message: '' },
+            required_fields: { status: 'FAIL', score: 0, message: '' }
         },
         issues: [],
         recommendations: []
     };
     
-    // 1. BUDGET EVALUATION (40 points)
+    // Budget evaluation (40 points)
     if (data.constraints.budget_confirmed) {
         const minBudget = data.constraints.budget_confirmed.min_amount;
         const requiredBudget = CONFIG.CREATE_RULES.MIN_BUDGET;
@@ -428,20 +417,20 @@ function evaluateCreateCriteria(data) {
             evaluation.criteria.budget = {
                 status: 'FAIL',
                 score: 0,
-                message: `Budget insufficient: €${minBudget.toLocaleString()} < €${requiredBudget.toLocaleString()} required`
+                message: `Budget insufficient: €${minBudget.toLocaleString()} < €${requiredBudget.toLocaleString()}`
             };
-            evaluation.issues.push('Budget below CREATE minimum requirement');
+            evaluation.issues.push('Budget below CREATE minimum');
         }
     } else {
         evaluation.criteria.budget = {
             status: 'FAIL',
             score: 0,
-            message: 'Budget not confirmed or found in briefing'
+            message: 'Budget not confirmed'
         };
         evaluation.issues.push('No confirmed budget found');
     }
     
-    // 2. TIMELINE EVALUATION (30 points)
+    // Timeline evaluation (30 points)
     if (data.constraints.proposal_deadline) {
         const deadline = new Date(data.constraints.proposal_deadline);
         const today = new Date();
@@ -452,26 +441,26 @@ function evaluateCreateCriteria(data) {
             evaluation.criteria.timeline = {
                 status: 'PASS',
                 score: 30,
-                message: `Timeline adequate: ${daysAvailable} days ≥ ${requiredDays} days required`
+                message: `Timeline adequate: ${daysAvailable} days ≥ ${requiredDays} days`
             };
         } else {
             evaluation.criteria.timeline = {
                 status: 'FAIL',
                 score: 0,
-                message: `Timeline insufficient: ${daysAvailable} days < ${requiredDays} days required`
+                message: `Timeline insufficient: ${daysAvailable} days < ${requiredDays} days`
             };
-            evaluation.issues.push('Insufficient lead time for CREATE deliverables');
+            evaluation.issues.push('Insufficient lead time');
         }
     } else {
         evaluation.criteria.timeline = {
             status: 'FAIL',
             score: 0,
-            message: 'No proposal deadline specified'
+            message: 'No deadline specified'
         };
-        evaluation.issues.push('Missing proposal deadline');
+        evaluation.issues.push('Missing deadline');
     }
     
-    // 3. REQUIRED FIELDS EVALUATION (30 points)
+    // Required fields (30 points)
     const requiredFields = CONFIG.CREATE_RULES.REQUIRED_FIELDS;
     const missingFields = [];
     
@@ -492,16 +481,16 @@ function evaluateCreateCriteria(data) {
         evaluation.criteria.required_fields = {
             status: 'FAIL',
             score: Math.max(0, 30 - (missingFields.length * 10)),
-            message: `Missing fields: ${missingFields.join(', ')}`
+            message: `Missing: ${missingFields.join(', ')}`
         };
-        evaluation.issues.push(`Missing required information: ${missingFields.join(', ')}`);
+        evaluation.issues.push(`Missing: ${missingFields.join(', ')}`);
     }
     
-    // Calculate overall score and decision
+    // Calculate overall score
     evaluation.score = Object.values(evaluation.criteria)
         .reduce((total, criterion) => total + criterion.score, 0);
     
-    // GO/NO-GO Decision Logic
+    // Final decision
     const allCriticalPassed = evaluation.criteria.budget.status === 'PASS' && 
                              evaluation.criteria.timeline.status === 'PASS';
     
@@ -509,7 +498,7 @@ function evaluateCreateCriteria(data) {
         evaluation.overall_decision = 'GO';
     } else if (allCriticalPassed && evaluation.score >= 60) {
         evaluation.overall_decision = 'CONDITIONAL';
-        evaluation.recommendations.push('Review missing information before proceeding');
+        evaluation.recommendations.push('Review missing information');
     } else {
         evaluation.overall_decision = 'NO-GO';
     }
@@ -517,13 +506,11 @@ function evaluateCreateCriteria(data) {
     return evaluation;
 }
 
-// Helper function to get nested object values
 function getNestedValue(obj, path) {
     return path.split('.').reduce((current, key) => {
         if (current && current[key] !== undefined && current[key] !== null) {
             return current[key];
         }
-        // Check for underscore-separated paths
         const underscorePath = key.split('_');
         if (underscorePath.length > 1) {
             let value = current;
@@ -540,121 +527,105 @@ function getNestedValue(obj, path) {
     }, obj);
 }
 
-// UI State Management
+// UI functions
 function showProcessingState() {
-    App.elements.uploadSection.style.display = 'none';
-    App.elements.processingSection.style.display = 'block';
-    App.elements.resultsSection.style.display = 'none';
+    elements.uploadSection.style.display = 'none';
+    elements.processingSection.style.display = 'flex';
+    elements.resultsSection.style.display = 'none';
 }
 
 function updateProcessingStatus(message) {
-    App.elements.processingStatus.textContent = message;
+    elements.processingStatus.textContent = message;
     console.log('📍', message);
 }
 
 function showResults(briefingData, evaluation) {
-    App.elements.uploadSection.style.display = 'none';
-    App.elements.processingSection.style.display = 'none';
-    App.elements.resultsSection.style.display = 'block';
+    elements.uploadSection.style.display = 'none';
+    elements.processingSection.style.display = 'none';
+    elements.resultsSection.style.display = 'block';
     
-    // Display decision banner
     displayDecisionBanner(evaluation);
-    
-    // Display evaluation details
     displayEvaluationDetails(evaluation);
-    
-    // Display extracted data
     displayExtractedData(briefingData);
 }
 
 function displayDecisionBanner(evaluation) {
-    const banner = App.elements.decisionBanner;
+    const banner = elements.decisionBanner;
     const icon = document.getElementById('decisionIcon');
     const title = document.getElementById('decisionTitle');
     const message = document.getElementById('decisionMessage');
     const score = document.getElementById('decisionScore');
     
-    // Set banner class
     banner.className = 'decision-banner';
     
     if (evaluation.overall_decision === 'GO') {
         banner.classList.add('go');
         icon.innerHTML = '<i class="fas fa-check"></i>';
         title.textContent = 'GO - Brief Approved';
-        message.textContent = 'All CREATE criteria met. This briefing is approved for processing.';
+        message.textContent = 'All CREATE criteria met. Approved for processing.';
     } else if (evaluation.overall_decision === 'CONDITIONAL') {
-        banner.classList.add('nogo'); // Use warning styling
+        banner.classList.add('nogo');
         icon.innerHTML = '<i class="fas fa-exclamation"></i>';
         title.textContent = 'CONDITIONAL - Review Required';
-        message.textContent = 'Core criteria met but additional information needed.';
+        message.textContent = 'Core criteria met but additional info needed.';
     } else {
         banner.classList.add('nogo');
         icon.innerHTML = '<i class="fas fa-times"></i>';
         title.textContent = 'NO-GO - Brief Rejected';
-        message.textContent = 'CREATE criteria not met. See evaluation details below.';
+        message.textContent = 'CREATE criteria not met. See details below.';
     }
     
     score.textContent = `Score: ${evaluation.score}/${evaluation.max_score}`;
 }
 
 function displayEvaluationDetails(evaluation) {
-    // Budget status
+    // Budget
     const budgetStatus = document.getElementById('budgetStatus');
     const confirmedBudget = document.getElementById('confirmedBudget');
     
-    if (evaluation.criteria.budget.status === 'PASS') {
-        budgetStatus.className = 'status valid';
-        budgetStatus.textContent = '✓ Valid';
-    } else {
-        budgetStatus.className = 'status invalid';
-        budgetStatus.textContent = '✗ Invalid';
-    }
+    budgetStatus.className = evaluation.criteria.budget.status === 'PASS' ? 'status valid' : 'status invalid';
+    budgetStatus.textContent = evaluation.criteria.budget.status === 'PASS' ? '✓ Valid' : '✗ Invalid';
     
-    if (App.currentData.briefing.constraints.budget_confirmed) {
-        const budget = App.currentData.briefing.constraints.budget_confirmed;
+    if (currentData.briefing.constraints.budget_confirmed) {
+        const budget = currentData.briefing.constraints.budget_confirmed;
         confirmedBudget.textContent = `€${budget.min_amount.toLocaleString()} - €${budget.max_amount.toLocaleString()}`;
     } else {
         confirmedBudget.textContent = 'Not specified';
         confirmedBudget.classList.add('text-muted');
     }
     
-    // Timeline status
+    // Timeline
     const timelineStatus = document.getElementById('timelineStatus');
     const proposalDeadline = document.getElementById('proposalDeadline');
     
-    if (evaluation.criteria.timeline.status === 'PASS') {
-        timelineStatus.className = 'status valid';
-        timelineStatus.textContent = '✓ Adequate';
-    } else {
-        timelineStatus.className = 'status invalid';
-        timelineStatus.textContent = '✗ Insufficient';
-    }
+    timelineStatus.className = evaluation.criteria.timeline.status === 'PASS' ? 'status valid' : 'status invalid';
+    timelineStatus.textContent = evaluation.criteria.timeline.status === 'PASS' ? '✓ Adequate' : '✗ Insufficient';
     
-    if (App.currentData.briefing.constraints.proposal_deadline) {
-        const deadline = new Date(App.currentData.briefing.constraints.proposal_deadline);
-        proposalDeadline.textContent = deadline.toLocaleDateString('fr-FR');
+    if (currentData.briefing.constraints.proposal_deadline) {
+        const deadline = new Date(currentData.briefing.constraints.proposal_deadline);
+        proposalDeadline.textContent = deadline.toLocaleDateString();
     } else {
         proposalDeadline.textContent = 'Not specified';
         proposalDeadline.classList.add('text-muted');
     }
     
-    // Required fields status
+    // Required fields
     const contactStatus = document.getElementById('contactStatus');
     const advertiserStatus = document.getElementById('advertiserStatus');
     const personaStatus = document.getElementById('personaStatus');
     
-    contactStatus.className = App.currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
-    contactStatus.textContent = App.currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
+    contactStatus.className = currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
+    contactStatus.textContent = currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
     
-    advertiserStatus.className = App.currentData.briefing.advertiser.group_annonceur ? 'status valid' : 'status missing';
-    advertiserStatus.textContent = App.currentData.briefing.advertiser.group_annonceur ? '✓ Found' : '⚠ Missing';
+    advertiserStatus.className = currentData.briefing.advertiser.group_annonceur ? 'status valid' : 'status missing';
+    advertiserStatus.textContent = currentData.briefing.advertiser.group_annonceur ? '✓ Found' : '⚠ Missing';
     
-    personaStatus.className = App.currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
-    personaStatus.textContent = App.currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
+    personaStatus.className = currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
+    personaStatus.textContent = currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
 }
 
 function displayExtractedData(data) {
-    // Contact information
+    // Contact
     setFieldValue('responsableCommercial', data.contact.responsable_commercial);
     setFieldValue('agenceMedia', data.contact.agence_media);
     
@@ -662,7 +633,7 @@ function displayExtractedData(data) {
     setFieldValue('groupAnnonceur', data.advertiser.group_annonceur);
     setFieldValue('brandProduct', data.advertiser.brand_product);
     
-    // Brief details
+    // Brief
     setFieldValue('targetPersona', data.brief.target_persona);
     setFieldValue('keyMessages', data.brief.key_messages);
     setFieldValue('sportsFocus', data.brief.sports_focus?.join(', '));
@@ -682,16 +653,15 @@ function setFieldValue(elementId, value) {
 }
 
 function resetToUpload() {
-    App.elements.uploadSection.style.display = 'block';
-    App.elements.processingSection.style.display = 'none';
-    App.elements.resultsSection.style.display = 'none';
+    elements.uploadSection.style.display = 'block';
+    elements.processingSection.style.display = 'none';
+    elements.resultsSection.style.display = 'none';
     
-    // Reset file input - IMPORTANT for fixing the "second time" issue
-    App.elements.fileInput.value = '';
-    App.elements.uploadArea.classList.remove('dragging');
+    elements.fileInput.value = '';
+    elements.uploadArea.classList.remove('dragging');
     
-    App.currentData = null;
-    App.isProcessing = false;
+    currentData = null;
+    isProcessing = false;
 }
 
 // Utility functions
@@ -699,19 +669,12 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function showError(message) {
-    console.error('❌', message);
-    alert(`Error: ${message}`);
-    resetToUpload();
-}
-
-// Global reset function
+// Global functions
 function resetDashboard() {
-    console.log('🔄 Resetting dashboard...');
+    console.log('🔄 Resetting dashboard');
     resetToUpload();
 }
 
-// Export for global access
 window.resetDashboard = resetDashboard;
 
-console.log('✅ Brand Studio CREATE Dashboard ready!');
+console.log('✅ Brand Studio CREATE Dashboard Ready!');

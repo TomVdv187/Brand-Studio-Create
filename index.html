@@ -3,27 +3,532 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand Studio CREATE - Briefing Analysis Dashboard</title>
+    <title>Brand Studio CREATE - Professional Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+            --shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-icon {
+            font-size: 3rem;
+            color: #fbbf24;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .brand h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 4rem 0;
+        }
+
+        /* Upload Section */
+        .upload-card {
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .upload-area {
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px dashed var(--gray-200);
+            border-radius: 1.5rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragging {
+            border-color: var(--primary);
+            background: #eff6ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .upload-content h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+        }
+
+        .upload-content p {
+            color: var(--gray-600);
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+        }
+
+        .upload-info {
+            margin-top: 2rem;
+            color: var(--gray-600);
+        }
+
+        /* Processing Section */
+        .processing-section {
+            display: none;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .processing-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 4rem 3rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid var(--gray-200);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .processing-card h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+        }
+
+        .processing-status {
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Decision Banner */
+        .decision-banner {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow);
+            border-left: 8px solid;
+        }
+
+        .decision-banner.go {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, #d1fae5 0%, white 100%);
+        }
+
+        .decision-banner.nogo {
+            border-left-color: var(--error);
+            background: linear-gradient(135deg, #fee2e2 0%, white 100%);
+        }
+
+        .decision-content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .decision-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2);
+        }
+
+        .decision-banner.go .decision-icon {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+        }
+
+        .decision-banner.nogo .decision-icon {
+            background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
+        }
+
+        .decision-info {
+            flex: 1;
+        }
+
+        .decision-info h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .decision-info p {
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+        }
+
+        .decision-score {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-200);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        /* Evaluation Cards */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .eval-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .eval-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .eval-header {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .eval-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .eval-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .eval-content {
+            padding: 1.5rem;
+        }
+
+        .eval-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .eval-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .eval-item label {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .eval-item .value {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .eval-item .value.highlight {
+            color: var(--primary);
+        }
+
+        .status {
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .status.valid {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .status.invalid {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        .status.missing {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        /* Data Grid */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .data-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+        }
+
+        .data-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .data-header {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .data-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .data-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .data-content {
+            padding: 1.5rem;
+        }
+
+        .data-content.grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .data-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .data-field:last-child {
+            margin-bottom: 0;
+        }
+
+        .data-field label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-field span {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-900);
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-200);
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .notes-content {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--gray-200);
+            min-height: 5rem;
+            line-height: 1.6;
+            color: var(--gray-700);
+        }
+
+        .text-muted {
+            color: var(--gray-600) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .brand {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .brand h1 {
+                font-size: 2rem;
+            }
+            
+            .decision-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .evaluation-grid,
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-content.grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="app">
-        <!-- Header -->
         <header class="header">
             <div class="container">
-                <div class="header-content">
-                    <div class="brand">
-                        <i class="fas fa-bolt brand-icon"></i>
-                        <h1>Brand Studio CREATE</h1>
-                    </div>
-                    <p class="tagline">Automated Briefing Analysis & GO/NO-GO Decision Engine</p>
+                <div class="brand">
+                    <i class="fas fa-bolt brand-icon"></i>
+                    <h1>Brand Studio CREATE</h1>
                 </div>
+                <p class="tagline">Professional Briefing Analysis & GO/NO-GO Decision Engine</p>
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main">
             <div class="container">
                 <!-- Upload Section -->
@@ -50,11 +555,9 @@
                 </section>
 
                 <!-- Processing Section -->
-                <section class="processing-section" id="processingSection" style="display: none;">
+                <section class="processing-section" id="processingSection">
                     <div class="processing-card">
-                        <div class="processing-animation">
-                            <div class="spinner"></div>
-                        </div>
+                        <div class="spinner"></div>
                         <h2>Analyzing Briefing</h2>
                         <p>Extracting data and evaluating against CREATE criteria...</p>
                         <div class="processing-status" id="processingStatus">Initializing...</div>
@@ -62,8 +565,7 @@
                 </section>
 
                 <!-- Results Section -->
-                <section class="results-section" id="resultsSection" style="display: none;">
-                    <!-- Decision Banner -->
+                <section class="results-section" id="resultsSection">
                     <div class="decision-banner" id="decisionBanner">
                         <div class="decision-content">
                             <div class="decision-icon" id="decisionIcon"></div>
@@ -196,7 +698,7 @@
                                     <span id="keyMessages">-</span>
                                 </div>
                                 <div class="data-field">
-                                    <label>Sports Focus</label>
+                                    <label>Campaign Focus</label>
                                     <span id="sportsFocus">-</span>
                                 </div>
                             </div>
@@ -217,7 +719,6 @@
         </main>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="script.js"></script>
 </body>
