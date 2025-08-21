@@ -750,7 +750,7 @@
                                         <button type="button" onclick="debugUpload()" style="background: #dc2626; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
                                             🔍 Debug Upload
                                         </button>
-                                        <button type="button" onclick="document.getElementById('fileInput').click()" style="background: #059669; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
+                                        <button type="button" onclick="directUploadHandler()" style="background: #059669; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
                                             📁 Direct Upload
                                         </button>
                                     </div>
@@ -967,6 +967,60 @@
             document.head.appendChild(script);
         }
         
+        // Simple direct upload handler - works immediately without initialization
+        window.directUploadHandler = function() {
+            console.log('🚀 Direct upload handler triggered');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput) {
+                console.error('❌ File input not found');
+                return;
+            }
+            
+            // Add event listener directly to file input
+            fileInput.addEventListener('change', function(event) {
+                console.log('📁 File selected via direct handler!');
+                const file = event.target.files[0];
+                
+                if (!file) {
+                    console.log('❌ No file selected');
+                    return;
+                }
+                
+                console.log('✅ File details:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+                
+                // Basic validation
+                if (file.type !== 'application/pdf') {
+                    alert('Please select a PDF file. Selected: ' + file.type);
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File too large. Max 10MB. Your file: ' + Math.round(file.size/1024/1024) + 'MB');
+                    return;
+                }
+                
+                // Show processing immediately
+                alert('PDF uploaded: ' + file.name + '. Processing would start here...');
+                
+                // Try to call processFile if it exists
+                if (typeof window.processFile === 'function') {
+                    console.log('🔄 Calling processFile...');
+                    window.processFile(file);
+                } else {
+                    console.log('❌ processFile function not available');
+                    alert('Upload successful but processing function not available. Check console for details.');
+                }
+            }, { once: true }); // Use once: true to prevent multiple handlers
+            
+            // Trigger file dialog
+            fileInput.click();
+        };
+
         // Debug function to test upload immediately
         window.debugUpload = function() {
             console.log('🔍 DEBUG: Testing upload system...');
@@ -1258,7 +1312,7 @@
                     console.log('✅ File found:', file.name, file.type, file.size + ' bytes');
                     event.preventDefault();
                     event.stopPropagation();
-                    processFile(file);
+                    window.processFile(file);
                 } else {
                     console.log('❌ No file in event.target.files');
                 }
@@ -1332,7 +1386,7 @@
                 if (files.length > 0) {
                     const file = files[0];
                     console.log('✅ Processing dropped file:', file.name, file.type);
-                    processFile(file);
+                    window.processFile(file);
                 } else {
                     console.log('❌ No files in drop event');
                 }
@@ -1354,8 +1408,8 @@
             console.log('✅ All event listeners configured successfully');
         }
 
-        // File processing
-        async function processFile(file) {
+        // File processing - make it globally accessible
+        window.processFile = async function processFile(file) {
             const processStartTime = performance.now();
             console.log('🚀 processFile() called with:', file ? file.name : 'null file');
             
@@ -2221,7 +2275,7 @@
             hideError();
             if (window.lastFile) {
                 console.log('🔄 Retrying with last file:', window.lastFile.name);
-                processFile(window.lastFile);
+                window.processFile(window.lastFile);
             } else {
                 resetToUpload();
             }
