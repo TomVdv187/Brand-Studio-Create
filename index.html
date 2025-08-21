@@ -993,7 +993,7 @@
             
             // Test all DOM elements
             console.log('📋 Element Check:');
-            Object.entries(elements).forEach(([key, element]) => {
+            Object.entries(window.elements || {}).forEach(([key, element]) => {
                 console.log(`- ${key}:`, !!element ? '✅' : '❌');
             });
             
@@ -1089,7 +1089,7 @@
                             }
                         };
                         
-                        currentData = { briefing: mockData.briefing, evaluation: mockEvaluation };
+                        window.currentData = { briefing: mockData.briefing, evaluation: mockEvaluation };
                         showResults(mockData.briefing, mockEvaluation);
                     }, 500);
                 }
@@ -1111,12 +1111,12 @@
             }
         };
 
-        // State
-        let isProcessing = false;
-        let currentData = null;
-        let elements = {};
-        let lastFile = null;
-        let progressInterval = null;
+        // Global state - accessible to all functions
+        window.isProcessing = false;
+        window.currentData = null;
+        window.elements = {};
+        window.lastFile = null;
+        window.progressInterval = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1147,7 +1147,7 @@
 
         function initDashboard() {
             // Get elements
-            elements = {
+            window.elements = {
                 fileInput: document.getElementById('fileInput'),
                 uploadBtn: document.getElementById('uploadBtn'),
                 uploadArea: document.getElementById('uploadArea'),
@@ -1163,7 +1163,7 @@
             };
 
             // Check elements
-            for (const [key, element] of Object.entries(elements)) {
+            for (const [key, element] of Object.entries(window.elements)) {
                 if (!element) {
                     console.error(`❌ Missing element: ${key}`);
                     return;
@@ -1175,7 +1175,7 @@
         }
 
         function setupEventListeners() {
-            const { fileInput, uploadBtn, uploadArea } = elements;
+            const { fileInput, uploadBtn, uploadArea } = window.elements;
 
             console.log('🎧 Setting up event listeners...');
             console.log('Elements found:', {
@@ -1231,7 +1231,7 @@
                 event.stopPropagation();
                 console.log('📦 Upload area clicked - opening file dialog');
                 
-                if (!isProcessing) {
+                if (!window.isProcessing) {
                     fileInput.value = '';
                     fileInput.click();
                 }
@@ -1296,7 +1296,7 @@
             const processStartTime = performance.now();
             console.log('🚀 processFile() called with:', file ? file.name : 'null file');
             
-            if (isProcessing) {
+            if (window.isProcessing) {
                 console.log('⏳ Already processing a file - ignoring new request');
                 return;
             }
@@ -1337,17 +1337,17 @@
             }
 
             console.log('✅ File validation passed - starting processing...');
-            isProcessing = true;
+            window.isProcessing = true;
             
             // Add visual feedback immediately
-            elements.uploadArea.classList.add('form-loading');
-            elements.uploadBtn.disabled = true;
-            elements.uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            window.elements.uploadArea.classList.add('form-loading');
+            window.elements.uploadBtn.disabled = true;
+            window.elements.uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             try {
                 // Show processing
                 showProcessing();
-                lastFile = file;
+                window.lastFile = file;
                 
                 // Start progress tracking
                 startProgressAnimation();
@@ -1381,7 +1381,7 @@
                 setProgress(100);
 
                 // Store and display
-                currentData = { briefing: briefingData, evaluation };
+                window.currentData = { briefing: briefingData, evaluation };
                 stopProgressAnimation();
                 showResults(briefingData, evaluation);
 
@@ -1397,7 +1397,7 @@
                 showError(error);
                 hideProcessing();
             } finally {
-                isProcessing = false;
+                window.isProcessing = false;
             }
         }
 
@@ -1471,16 +1471,16 @@
                 },
                 contact: {
                     responsable_commercial: extractPattern(text, [
-                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i,
-                        /contact[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i,
-                        /commercial[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i,
+                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s.]+)/i,
+                        /contact[\\s]*:?\\s*([A-Za-z\\s.]+)/i,
+                        /commercial[\\s]*:?\\s*([A-Za-z\\s.]+)/i,
                         // Specific known contacts
                         /karolien\\s+van\\s+gaever/i,
                         /tom\\s+vandevenne/i
                     ]),
                     agence_media: extractPattern(text, [
-                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-z\\s&\\-\\.]+)/i,
-                        /media[\\s]*agenc[ey][\\s]*:?\\s*([A-Za-z\\s&\\-\\.]+)/i,
+                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-z\\s&.-]+)/i,
+                        /media[\\s]*agenc[ey][\\s]*:?\\s*([A-Za-z\\s&.-]+)/i,
                         // Common agencies - more flexible matching
                         /group\\s*m[\\s\\-]*essence\\s*mediacom/i,
                         /essence\\s*mediacom/i,
@@ -1496,10 +1496,10 @@
                 },
                 advertiser: {
                     group_or_annonceur: extractPattern(text, [
-                        /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
-                        /annonceur[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
-                        /client[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
-                        /advertiser[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i,
+                        /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s&.-]+)/i,
+                        /annonceur[\\s]*:?\\s*([A-Za-z\\s&.-]+)/i,
+                        /client[\\s]*:?\\s*([A-Za-z\\s&.-]+)/i,
+                        /advertiser[\\s]*:?\\s*([A-Za-z\\s&.-]+)/i,
                         // Common advertisers with more flexible patterns
                         /coca[\\s\\-]*cola[\\s\\w]*/i,
                         /oneplus[\\s\\w]*/i,
@@ -1512,11 +1512,11 @@
                         /ing\\s*bank/i
                     ]),
                     brand_or_product: extractPattern(text, [
-                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
-                        /produit[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
-                        /gamme[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
-                        /brand[\\s]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
-                        /product[\\s]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i,
+                        /marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9&.-]+)/i,
+                        /produit[\\s\\w]*:?\\s*([A-Za-z\\s0-9&.-]+)/i,
+                        /gamme[\\s\\w]*:?\\s*([A-Za-z\\s0-9&.-]+)/i,
+                        /brand[\\s]*:?\\s*([A-Za-z\\s0-9&.-]+)/i,
+                        /product[\\s]*:?\\s*([A-Za-z\\s0-9&.-]+)/i,
                         // Specific product patterns
                         /powerade/i,
                         /nord[\\s]*\\d+/i,
@@ -1539,13 +1539,13 @@
                     presentation_languages: extractLanguages(text),
                     attachments_present: extractAttachments(text),
                     target_persona: extractPattern(text, [
-                        /cible[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
-                        /persona[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
-                        /target[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
-                        /doelgroep[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
-                        /audience[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i,
+                        /cible[\\s]*:?\\s*([A-Za-z0-9\\s,+.-]+)/i,
+                        /persona[\\s]*:?\\s*([A-Za-z0-9\\s,+.-]+)/i,
+                        /target[\\s]*:?\\s*([A-Za-z0-9\\s,+.-]+)/i,
+                        /doelgroep[\\s]*:?\\s*([A-Za-z0-9\\s,+.-]+)/i,
+                        /audience[\\s]*:?\\s*([A-Za-z0-9\\s,+.-]+)/i,
                         // Age range patterns - more flexible
-                        /\\d{1,2}[\\s]*[-–][\\s]*\\d{1,2}[\\s]*[A-Za-z\\s,\\-\\+\\.]+/i,
+                        /\\d{1,2}[\\s]*[-–][\\s]*\\d{1,2}[\\s]*[A-Za-z\\s,+.-]+/i,
                         // Specific target patterns
                         /studenten/i,
                         /sportifs/i,
@@ -1937,19 +1937,19 @@
 
         // UI functions
         function showProcessing() {
-            elements.uploadSection.style.display = 'none';
-            elements.processingSection.style.display = 'flex';
-            elements.resultsSection.style.display = 'none';
+            window.elements.uploadSection.style.display = 'none';
+            window.elements.processingSection.style.display = 'flex';
+            window.elements.resultsSection.style.display = 'none';
         }
 
         function updateStatus(message) {
-            elements.processingStatus.textContent = message;
+            window.elements.processingStatus.textContent = message;
         }
 
         function showResults(briefingData, evaluation) {
-            elements.uploadSection.style.display = 'none';
-            elements.processingSection.style.display = 'none';
-            elements.resultsSection.style.display = 'block';
+            window.elements.uploadSection.style.display = 'none';
+            window.elements.processingSection.style.display = 'none';
+            window.elements.resultsSection.style.display = 'block';
 
             displayDecisionBanner(evaluation);
             displayEvaluationDetails(evaluation);
@@ -1957,7 +1957,7 @@
         }
 
         function displayDecisionBanner(evaluation) {
-            const banner = elements.decisionBanner;
+            const banner = window.elements.decisionBanner;
             const icon = document.getElementById('decisionIcon');
             const title = document.getElementById('decisionTitle');
             const message = document.getElementById('decisionMessage');
@@ -1993,8 +1993,8 @@
             budgetStatus.className = evaluation.criteria.budget.status === 'PASS' ? 'status valid' : 'status invalid';
             budgetStatus.textContent = evaluation.criteria.budget.status === 'PASS' ? '✓ Valid' : '✗ Invalid';
 
-            if (currentData.briefing.constraints.budget_confirmed_eur_range) {
-                const budget = currentData.briefing.constraints.budget_confirmed_eur_range;
+            if (window.currentData.briefing.constraints.budget_confirmed_eur_range) {
+                const budget = window.currentData.briefing.constraints.budget_confirmed_eur_range;
                 if (budget.includes('-')) {
                     const [low, high] = budget.split('-');
                     confirmedBudget.textContent = `€${parseInt(low).toLocaleString()}-€${parseInt(high).toLocaleString()}`;
@@ -2013,8 +2013,8 @@
             timelineStatus.className = evaluation.criteria.timeline.status === 'PASS' ? 'status valid' : 'status invalid';
             timelineStatus.textContent = evaluation.criteria.timeline.status === 'PASS' ? '✓ Adequate' : '✗ Insufficient';
 
-            if (currentData.briefing.constraints.proposal_deadline) {
-                const deadline = new Date(currentData.briefing.constraints.proposal_deadline);
+            if (window.currentData.briefing.constraints.proposal_deadline) {
+                const deadline = new Date(window.currentData.briefing.constraints.proposal_deadline);
                 proposalDeadline.textContent = deadline.toLocaleDateString();
             } else {
                 proposalDeadline.textContent = 'Not specified';
@@ -2026,14 +2026,14 @@
             const advertiserStatus = document.getElementById('advertiserStatus');
             const personaStatus = document.getElementById('personaStatus');
 
-            contactStatus.className = currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
-            contactStatus.textContent = currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
+            contactStatus.className = window.currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
+            contactStatus.textContent = window.currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
 
-            advertiserStatus.className = currentData.briefing.advertiser.group_or_annonceur ? 'status valid' : 'status missing';
-            advertiserStatus.textContent = currentData.briefing.advertiser.group_or_annonceur ? '✓ Found' : '⚠ Missing';
+            advertiserStatus.className = window.currentData.briefing.advertiser.group_or_annonceur ? 'status valid' : 'status missing';
+            advertiserStatus.textContent = window.currentData.briefing.advertiser.group_or_annonceur ? '✓ Found' : '⚠ Missing';
 
-            personaStatus.className = currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
-            personaStatus.textContent = currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
+            personaStatus.className = window.currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
+            personaStatus.textContent = window.currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
         }
 
         function displayExtractedData(data) {
@@ -2065,17 +2065,17 @@
         }
 
         function resetToUpload() {
-            elements.uploadSection.style.display = 'block';
-            elements.processingSection.style.display = 'none';
-            elements.resultsSection.style.display = 'none';
+            window.elements.uploadSection.style.display = 'block';
+            window.elements.processingSection.style.display = 'none';
+            window.elements.resultsSection.style.display = 'none';
 
-            elements.fileInput.value = '';
-            elements.uploadArea.classList.remove('dragging', 'form-loading');
-            elements.uploadBtn.disabled = false;
-            elements.uploadBtn.innerHTML = '<i class="fas fa-plus"></i> Choose PDF File';
+            window.elements.fileInput.value = '';
+            window.elements.uploadArea.classList.remove('dragging', 'form-loading');
+            window.elements.uploadBtn.disabled = false;
+            window.elements.uploadBtn.innerHTML = '<i class="fas fa-plus"></i> Choose PDF File';
 
-            currentData = null;
-            isProcessing = false;
+            window.currentData = null;
+            window.isProcessing = false;
         }
 
         function delay(ms) {
@@ -2084,34 +2084,34 @@
 
         // Progress and error handling functions
         function startProgressAnimation() {
-            if (progressInterval) clearInterval(progressInterval);
+            if (window.progressInterval) clearInterval(window.progressInterval);
             let progress = 0;
-            progressInterval = setInterval(() => {
+            window.progressInterval = setInterval(() => {
                 progress = Math.min(progress + Math.random() * 2, 95);
-                if (elements.progressFill) {
-                    elements.progressFill.style.width = progress + '%';
+                if (window.elements.progressFill) {
+                    window.elements.progressFill.style.width = progress + '%';
                 }
             }, 100);
         }
 
         function stopProgressAnimation() {
-            if (progressInterval) {
-                clearInterval(progressInterval);
-                progressInterval = null;
+            if (window.progressInterval) {
+                clearInterval(window.progressInterval);
+                window.progressInterval = null;
             }
         }
 
         function setProgress(percentage) {
-            if (elements.progressFill) {
-                elements.progressFill.style.width = percentage + '%';
+            if (window.elements.progressFill) {
+                window.elements.progressFill.style.width = percentage + '%';
             }
         }
 
         function showError(error) {
-            if (elements.errorBanner) {
-                elements.errorTitle.textContent = getErrorTitle(error);
-                elements.errorMessage.textContent = getErrorMessage(error);
-                elements.errorBanner.classList.add('show');
+            if (window.elements.errorBanner) {
+                window.elements.errorTitle.textContent = getErrorTitle(error);
+                window.elements.errorMessage.textContent = getErrorMessage(error);
+                window.elements.errorBanner.classList.add('show');
                 
                 // Auto-hide after 10 seconds
                 setTimeout(() => {
@@ -2121,13 +2121,13 @@
         }
 
         function hideError() {
-            if (elements.errorBanner) {
-                elements.errorBanner.classList.remove('show');
+            if (window.elements.errorBanner) {
+                window.elements.errorBanner.classList.remove('show');
             }
         }
 
         function hideProcessing() {
-            elements.processingSection.style.display = 'none';
+            window.elements.processingSection.style.display = 'none';
         }
 
         function getErrorTitle(error) {
@@ -2156,9 +2156,9 @@
 
         function handleRetry() {
             hideError();
-            if (lastFile) {
-                console.log('🔄 Retrying with last file:', lastFile.name);
-                processFile(lastFile);
+            if (window.lastFile) {
+                console.log('🔄 Retrying with last file:', window.lastFile.name);
+                processFile(window.lastFile);
             } else {
                 resetToUpload();
             }
@@ -2167,7 +2167,7 @@
         function resetDashboard() {
             console.log('🔄 Reset');
             hideError();
-            lastFile = null;
+            window.lastFile = null;
             resetToUpload();
         }
 
@@ -2175,19 +2175,19 @@
 
         // Export functionality
         function exportData() {
-            if (!currentData || !currentData.briefing) {
+            if (!window.currentData || !window.currentData.briefing) {
                 alert('No data to export. Please process a PDF first.');
                 return;
             }
 
             // Transform data to match CLAUDE.md schema exactly
-            const exportData = transformToClaudeSchema(currentData.briefing);
+            const exportData = transformToClaudeSchema(window.currentData.briefing);
             
             // Create download
             const dataStr = JSON.stringify(exportData, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
             
-            const exportFileDefaultName = `briefing-${currentData.briefing.meta.source_file.replace('.pdf', '')}-${currentData.briefing.meta.extraction_ts}.json`;
+            const exportFileDefaultName = `briefing-${window.currentData.briefing.meta.source_file.replace('.pdf', '')}-${window.currentData.briefing.meta.extraction_ts}.json`;
             
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
