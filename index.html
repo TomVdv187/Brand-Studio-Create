@@ -733,16 +733,12 @@
                                 </div>
                                 <h2>Upload Your Briefing</h2>
                                 <p>Drag and drop your PDF briefing here, or click to browse</p>
-                                <button type="button" class="btn-primary" id="uploadBtn">
-                                    <i class="fas fa-plus"></i>
+                                <button type="button" class="btn-primary" onclick="document.getElementById('fileInput').click(); console.log('Upload button clicked');">
+                                    <i class="fas fa-upload"></i>
                                     Choose PDF File
                                 </button>
                                 <div class="upload-info">
                                     <small><i class="fas fa-info-circle"></i> Supports PDF files up to 10MB</small>
-                                    <br><br>
-                                    <button type="button" onclick="document.getElementById('fileInput').click(); console.log('Manual file input trigger');" style="background: #059669; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer; margin-top: 1rem;">
-                                        📁 Upload PDF
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1112,14 +1108,14 @@
             `;
             
             const testData = {
-                contact: extractPattern(testText, [/responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-z\\s\\.]+)/i]),
-                agency: extractPattern(testText, [/agence[\\s\\w]*média[\\s]*:?\\s*([A-Za-z\\s&\\-\\.]+)/i]),
-                advertiser: extractPattern(testText, [/annonceur[\\s]*:?\\s*([A-Za-z\\s\\-&\\.]+)/i]),
-                brand: extractPattern(testText, [/marque[\\s\\w]*:?\\s*([A-Za-z\\s0-9\\-&\\.]+)/i]),
-                target: extractPattern(testText, [/cible[\\s]*:?\\s*([A-Za-z0-9\\s,\\-\\+\\.]+)/i]),
-                budget: extractBudget(testText),
-                date: extractDate(testText),
-                sports: extractSportsFocus(testText)
+                contact: 'Test extraction disabled - upload a real PDF to see results',
+                agency: null,
+                advertiser: null,
+                brand: null,
+                target: null,
+                budget: null,
+                date: null,
+                sports: null
             };
             
             console.log('🎯 Test Extraction Results:', testData);
@@ -2311,15 +2307,28 @@
             if (fileInput) {
                 fileInput.addEventListener('change', function(event) {
                     const file = event.target.files[0];
+                    console.log('File change event triggered:', file);
                     if (file && file.type === 'application/pdf') {
-                        console.log('PDF selected:', file.name);
+                        console.log('✅ PDF selected:', file.name, file.size, 'bytes');
+                        console.log('🔍 Checking processFile function:', typeof window.processFile);
+                        
                         if (typeof window.processFile === 'function') {
-                            window.processFile(file);
+                            console.log('🚀 Starting processFile...');
+                            try {
+                                window.processFile(file);
+                            } catch (error) {
+                                console.error('❌ Error in processFile:', error);
+                                alert('Error processing file: ' + error.message);
+                            }
                         } else {
-                            alert('File selected: ' + file.name + ' - Processing function loading...');
+                            console.error('❌ processFile function not available');
+                            alert('File selected: ' + file.name + ' - Processing function not available. Check console.');
                         }
                     } else if (file) {
+                        console.log('❌ Invalid file type:', file.type);
                         alert('Please select a PDF file. You selected: ' + file.type);
+                    } else {
+                        console.log('❌ No file selected');
                     }
                 });
             }
