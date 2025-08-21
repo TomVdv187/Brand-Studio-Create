@@ -747,6 +747,12 @@
                                         <button type="button" onclick="simulateProcessing()" style="background: #0ea5e9; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
                                             🎭 Demo Flow
                                         </button>
+                                        <button type="button" onclick="debugUpload()" style="background: #dc2626; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
+                                            🔍 Debug Upload
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('fileInput').click()" style="background: #059669; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">
+                                            📁 Direct Upload
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -961,6 +967,57 @@
             document.head.appendChild(script);
         }
         
+        // Debug function to test upload immediately
+        window.debugUpload = function() {
+            console.log('🔍 DEBUG: Testing upload system...');
+            
+            // Direct element access
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadArea = document.getElementById('uploadArea');
+            
+            console.log('- Direct FileInput:', !!fileInput);
+            console.log('- Direct UploadBtn:', !!uploadBtn);
+            console.log('- Direct UploadArea:', !!uploadArea);
+            console.log('- Window Elements:', window.elements);
+            console.log('- PDF.js available:', typeof pdfjsLib !== 'undefined');
+            
+            if (!fileInput) {
+                console.error('❌ FileInput not found in DOM!');
+                return;
+            }
+            
+            console.log('- FileInput accept:', fileInput.accept);
+            console.log('- FileInput disabled:', fileInput.disabled);
+            console.log('- FileInput style.display:', fileInput.style.display);
+            
+            // Add a temporary change handler to test
+            const testHandler = function(event) {
+                console.log('🎯 TEST HANDLER: File selected!', event.target.files);
+                if (event.target.files.length > 0) {
+                    const file = event.target.files[0];
+                    console.log('File details:', {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size
+                    });
+                    alert('File selected: ' + file.name + ' (' + file.type + ')');
+                }
+            };
+            
+            // Remove existing listeners and add test one
+            fileInput.removeEventListener('change', testHandler);
+            fileInput.addEventListener('change', testHandler);
+            
+            // Test direct click
+            try {
+                fileInput.click();
+                console.log('✅ File dialog clicked - should open now');
+            } catch (error) {
+                console.error('❌ Error clicking file input:', error);
+            }
+        };
+
         // Define functions early so they're available for buttons and error handlers
         window.showPDFError = function(message) {
             const uploadArea = document.getElementById('uploadArea');
@@ -1183,6 +1240,12 @@
                 uploadBtn: !!uploadBtn, 
                 uploadArea: !!uploadArea
             });
+
+            // Check if elements exist before adding listeners
+            if (!fileInput || !uploadBtn || !uploadArea) {
+                console.error('❌ Critical elements missing:', { fileInput: !!fileInput, uploadBtn: !!uploadBtn, uploadArea: !!uploadArea });
+                return;
+            }
 
             // CRITICAL: File input change handler
             fileInput.addEventListener('change', function(event) {
