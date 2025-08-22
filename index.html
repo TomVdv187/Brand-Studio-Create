@@ -370,11 +370,7 @@
                                     <i class="fas fa-cloud-upload-alt"></i>
                                 </div>
                                 <h2>Upload Your Briefing</h2>
-                                <p>Drag and drop your PDF briefing here, or click to browse</p>
-                                <button type="button" id="uploadBtn" class="btn-primary">
-                                    <i class="fas fa-upload"></i>
-                                    Choose PDF File
-                                </button>
+                                <p>Drag and drop your PDF briefing here</p>
                                 <div style="margin-top: 1.5rem; color: var(--gray-600); font-size: 0.875rem;">
                                     <small><i class="fas fa-info-circle"></i> Supports PDF files up to 10MB</small>
                                 </div>
@@ -455,14 +451,7 @@
         };
         
         // Event listeners
-        elements.uploadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('🔘 Upload button clicked');
-            elements.fileInput.click();
-        });
-        
         elements.uploadArea.addEventListener('click', (e) => {
-            if (e.target === elements.uploadBtn) return;
             e.preventDefault();
             console.log('📦 Upload area clicked');
             elements.fileInput.click();
@@ -613,16 +602,21 @@
                 },
                 advertiser: {
                     group_or_annonceur: extractPattern(text, [
-                        /groupe[\s\w]*annonceur[\s]*:?\s*([A-Za-z\s-]+)/i,
-                        /annonceur[\s]*:?\s*([A-Za-z\s-]+)/i,
-                        /coca-cola/i,
-                        /oneplus/i
+                        /groupe[\s\w]*annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                        /annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                        /coca[\s\-]*cola/i,
+                        /oneplus/i,
+                        // Broader patterns for any brand mention
+                        /(coca[\s\-]*cola|oneplus|unilever|nestl[eé]|pepsi|microsoft|apple|samsung)/i
                     ]),
                     brand_or_product: extractPattern(text, [
-                        /marque[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                        /marque[\s\w\/]*produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                         /produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                        /marque[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                         /powerade/i,
-                        /nord\s*5/i
+                        /nord[\s]*5/i,
+                        // Broader patterns for any product mention
+                        /(powerade|nord[\s]*5|sprite|fanta|iphone|galaxy)/i
                     ])
                 },
                 brief: {
@@ -675,6 +669,17 @@
                 creative: {
                     sports_focus: extractSportsFocus(text),
                     audience_activity_min_sessions_per_week: extractActivityFrequency(text)
+                },
+                internal: {
+                    briefing_acceptance_status: 'needs_more_info', // Will be determined by evaluation
+                    acceptance_reason: null,
+                    action_recommend_publishers: false,
+                    internal_publisher_recommendation: null,
+                    internal_notes: null
+                },
+                supplemental: {
+                    other_fields: null,
+                    source_field_map: null
                 }
             };
         }
@@ -989,6 +994,13 @@
             }
             
             evaluation.internal_notes = generateInternalNotes(data, evaluation);
+            
+            // Update the data object's internal section according to CLAUDE.md v4
+            data.internal.briefing_acceptance_status = evaluation.overall_decision;
+            data.internal.acceptance_reason = evaluation.acceptance_reason;
+            data.internal.action_recommend_publishers = evaluation.action_recommend_publishers;
+            data.internal.internal_publisher_recommendation = evaluation.internal_publisher_recommendation;
+            data.internal.internal_notes = evaluation.internal_notes;
             
             return evaluation;
         }
