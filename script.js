@@ -168,10 +168,12 @@ async function processFile(file) {
         
     } catch (error) {
         console.error('💥 Processing failed:', error);
-        alert(`Failed to process PDF: ${error.message}`);
-        resetToUpload();
-    } finally {
+        showError('Processing Error', `Failed to process PDF: ${error.message}`);
         isProcessing = false;
+    } finally {
+        if (isProcessing) {
+            isProcessing = false;
+        }
     }
 }
 
@@ -218,7 +220,7 @@ async function extractPDFText(file) {
                     .join(' ');
                 
                 if (pageText.trim()) {
-                    fullText += pageText + '\\n\\n';
+                    fullText += pageText + '\n\n';
                 }
             } catch (pageError) {
                 console.warn(`⚠️ Error reading page ${pageNum}:`, pageError);
@@ -248,48 +250,49 @@ function extractBriefingData(text, fileName) {
         },
         contact: {
             responsable_commercial: extractPattern(text, [
-                /karolien\\s+van\\s+gaever/i,
-                /responsable[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
+                /karolien\s+van\s+gaever/i,
+                /responsable[\s\w]*:?\s*([A-Za-z\s]+)/i
             ]),
             agence_media: extractPattern(text, [
-                /group\\s*m\\s*[-–]?\\s*essence\\s*mediacom/i,
-                /agence[\\s\\w]*:?\\s*([A-Za-z\\s&-]+)/i
+                /group\s*m\s*[-–]?\s*essence\s*mediacom/i,
+                /agence[\s\w]*:?\s*([A-Za-z\s&-]+)/i
             ])
         },
         advertiser: {
             group_annonceur: extractPattern(text, [
                 /oneplus/i,
                 /coca-cola/i,
-                /groupe[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i,
-                /annonceur[\\s]*:?\\s*([A-Za-z\\s-]+)/i
+                /groupe[\s\w]*annonceur[\s]*:?\s*([A-Za-z\s-]+)/i,
+                /annonceur[\s]*:?\s*([A-Za-z\s-]+)/i
             ]),
             brand_product: extractPattern(text, [
-                /nord\\s*5/i,
+                /nord\s*5/i,
                 /powerade/i,
-                /marque[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i,
-                /produit[\\s\\w]*:?\\s*([A-Za-z\\s]+)/i
+                /marque[\s\w]*:?\s*([A-Za-z\s]+)/i,
+                /produit[\s\w]*:?\s*([A-Za-z\s]+)/i
             ])
         },
         brief: {
             target_persona: extractPattern(text, [
                 /studenten/i,
-                /18[-\\s]*54[\\s]*[-–]?[\\s]*sportifs/i,
-                /cible[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i,
-                /persona[\\s\\w]*:?\\s*([A-Za-z0-9\\s-]+)/i
+                /18[-\s]*54[\s]*[-–]?[\s]*sportifs/i,
+                /cible[\s\w]*:?\s*([A-Za-z0-9\s-]+)/i,
+                /persona[\s\w]*:?\s*([A-Za-z0-9\s-]+)/i
             ]),
             key_messages: extractPattern(text, [
-                /back\\s*to\\s*school/i,
-                /choississez\\s*powerade/i,
-                /message[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([A-Za-z\\s,.'!-]+)/i
+                /back\s*to\s*school/i,
+                /choississez\s*powerade/i,
+                /message[\s\w]*cl[eé]s?[\s]*:?\s*([A-Za-z\s,.'!-]+)/i
             ]),
             sports_focus: extractSportsFocus(text),
             notes: extractNotes(text)
         },
         constraints: {
             budget_confirmed: extractBudget(text),
+            budget_confirmed_eur_range: extractBudgetRange(text),
             proposal_deadline: extractDate(text),
-            min_budget_required: CONFIG.CREATE_RULES.MIN_BUDGET,
-            min_lead_time_days: CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS
+            min_budget_create_eur: CONFIG.CREATE_RULES.MIN_BUDGET,
+            lead_time_business_days_after_valid_brief: CONFIG.CREATE_RULES.MIN_LEAD_TIME_DAYS
         }
     };
 }
@@ -307,16 +310,16 @@ function extractPattern(text, patterns) {
 
 function cleanExtractedText(text) {
     return text.trim()
-        .replace(/\\s+/g, ' ')
-        .replace(/^[:\\-]\\s*/, '')
+        .replace(/\s+/g, ' ')
+        .replace(/^[:\-]\s*/, '')
         .substring(0, 200);
 }
 
 function extractBudget(text) {
     const patterns = [
-        /(\\d{1,3})[-–](\\d{1,3})\\s*k/i,
-        /€\\s*(\\d{1,3})[.,](\\d{3})/i,
-        /budget[\\s\\w]*:?\\s*(\\d+)/i
+        /(\d{1,3})[-–](\d{1,3})\s*k/i,
+        /€\s*(\d{1,3})[.,](\d{3})/i,
+        /budget[\s\w]*:?\s*(\d+)/i
     ];
     
     for (const pattern of patterns) {
@@ -344,10 +347,15 @@ function extractBudget(text) {
     return null;
 }
 
+function extractBudgetRange(text) {
+    const budget = extractBudget(text);
+    return budget ? budget.range : null;
+}
+
 function extractDate(text) {
     const datePatterns = [
-        /(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/g,
-        /(\\d{1,2})[-](\\d{1,2})[-](\\d{4})/g
+        /(\d{1,2})\/(\d{1,2})\/(\d{4})/g,
+        /(\d{1,2})[-](\d{1,2})[-](\d{4})/g
     ];
     
     for (const pattern of datePatterns) {
@@ -373,9 +381,9 @@ function extractSportsFocus(text) {
 
 function extractNotes(text) {
     const notePatterns = [
-        /intéressé\\s*par\\s*([^\\n.]{50,400})/i,
-        /complément[\\s\\w]*:?\\s*([^\\n.]{50,400})/i,
-        /notes?[\\s\\w]*:?\\s*([^\\n.]{50,400})/i
+        /intéressé\s*par\s*([^\n.]{50,400})/i,
+        /complément[\s\w]*:?\s*([^\n.]{50,400})/i,
+        /notes?[\s\w]*:?\s*([^\n.]{50,400})/i
     ];
     
     for (const pattern of notePatterns) {
@@ -586,9 +594,14 @@ function displayEvaluationDetails(evaluation) {
     budgetStatus.className = evaluation.criteria.budget.status === 'PASS' ? 'status valid' : 'status invalid';
     budgetStatus.textContent = evaluation.criteria.budget.status === 'PASS' ? '✓ Valid' : '✗ Invalid';
     
-    if (currentData.briefing.constraints.budget_confirmed) {
-        const budget = currentData.briefing.constraints.budget_confirmed;
-        confirmedBudget.textContent = `€${budget.min_amount.toLocaleString()} - €${budget.max_amount.toLocaleString()}`;
+    if (currentData.briefing.constraints.budget_confirmed_eur_range) {
+        const budget = currentData.briefing.constraints.budget_confirmed_eur_range;
+        if (budget.includes('-')) {
+            const [low, high] = budget.split('-');
+            confirmedBudget.textContent = `€${parseInt(low).toLocaleString()}-€${parseInt(high).toLocaleString()}`;
+        } else {
+            confirmedBudget.textContent = `€${parseInt(budget).toLocaleString()}`;
+        }
     } else {
         confirmedBudget.textContent = 'Not specified';
         confirmedBudget.classList.add('text-muted');
@@ -617,8 +630,8 @@ function displayEvaluationDetails(evaluation) {
     contactStatus.className = currentData.briefing.contact.responsable_commercial ? 'status valid' : 'status missing';
     contactStatus.textContent = currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
     
-    advertiserStatus.className = currentData.briefing.advertiser.group_annonceur ? 'status valid' : 'status missing';
-    advertiserStatus.textContent = currentData.briefing.advertiser.group_annonceur ? '✓ Found' : '⚠ Missing';
+    advertiserStatus.className = currentData.briefing.advertiser.group_or_annonceur ? 'status valid' : 'status missing';
+    advertiserStatus.textContent = currentData.briefing.advertiser.group_or_annonceur ? '✓ Found' : '⚠ Missing';
     
     personaStatus.className = currentData.briefing.brief.target_persona ? 'status valid' : 'status missing';
     personaStatus.textContent = currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
@@ -629,14 +642,14 @@ function displayExtractedData(data) {
     setFieldValue('responsableCommercial', data.contact.responsable_commercial);
     setFieldValue('agenceMedia', data.contact.agence_media);
     
-    // Advertiser
-    setFieldValue('groupAnnonceur', data.advertiser.group_annonceur);
-    setFieldValue('brandProduct', data.advertiser.brand_product);
+    // Advertiser - fixed field names to match the data structure
+    setFieldValue('groupAnnonceur', data.advertiser.group_or_annonceur);
+    setFieldValue('brandProduct', data.advertiser.brand_or_product);
     
     // Brief
     setFieldValue('targetPersona', data.brief.target_persona);
     setFieldValue('keyMessages', data.brief.key_messages);
-    setFieldValue('sportsFocus', data.brief.sports_focus?.join(', '));
+    setFieldValue('sportsFocus', data.creative?.sports_focus?.join(', '));
     setFieldValue('additionalNotes', data.brief.notes);
 }
 
@@ -669,12 +682,116 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Global functions
-function resetDashboard() {
-    console.log('🔄 Resetting dashboard');
+// Export and utility functions
+function exportData() {
+    if (!currentData) {
+        alert('No data to export. Please upload and process a PDF first.');
+        return;
+    }
+    
+    try {
+        // Create export object matching CLAUDE.md schema
+        const exportObject = {
+            meta: {
+                source_file: currentData.briefing.meta.source_file,
+                extraction_ts: currentData.briefing.meta.extraction_date
+            },
+            contact: {
+                responsable_commercial: currentData.briefing.contact.responsable_commercial,
+                agence_media: currentData.briefing.contact.agence_media
+            },
+            advertiser: {
+                group_or_annonceur: currentData.briefing.advertiser.group_annonceur,
+                brand_or_product: currentData.briefing.advertiser.brand_product
+            },
+            brief: {
+                type: null,
+                urgency: null,
+                typologie_annonceur: null,
+                presentation_languages: null,
+                attachments_present: null,
+                target_persona: currentData.briefing.brief.target_persona,
+                objectives: null,
+                start_momentum_reason: null,
+                end_date: null,
+                key_messages: currentData.briefing.brief.key_messages,
+                media_specific_preferences: null,
+                history_with_rossel: null,
+                other_campaigns_with_rossel: null,
+                notes: currentData.briefing.brief.notes
+            },
+            constraints: {
+                min_budget_create_eur: currentData.briefing.constraints.min_budget_create_eur,
+                budget_confirmed_eur_range: currentData.briefing.constraints.budget_confirmed_eur_range,
+                proposal_deadline: currentData.briefing.constraints.proposal_deadline,
+                lead_time_business_days_after_valid_brief: currentData.briefing.constraints.lead_time_business_days_after_valid_brief,
+                do_not: null,
+                prefer: null
+            },
+            creative: {
+                sports_focus: currentData.briefing.brief.sports_focus,
+                audience_activity_min_sessions_per_week: null
+            }
+        };
+        
+        // Download as JSON
+        const jsonString = JSON.stringify(exportObject, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `briefing-extract-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('📥 Data exported successfully');
+    } catch (error) {
+        console.error('❌ Export failed:', error);
+        alert('Failed to export data. Please try again.');
+    }
+}
+
+function handleRetry() {
+    console.log('🔄 Retrying upload');
+    hideError();
     resetToUpload();
 }
 
+function showError(title, message) {
+    const errorBanner = document.getElementById('errorBanner');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    if (errorBanner && errorTitle && errorMessage) {
+        errorTitle.textContent = title;
+        errorMessage.textContent = message;
+        errorBanner.classList.add('show');
+        
+        elements.uploadSection.style.display = 'block';
+        elements.processingSection.style.display = 'none';
+        elements.resultsSection.style.display = 'none';
+    }
+}
+
+function hideError() {
+    const errorBanner = document.getElementById('errorBanner');
+    if (errorBanner) {
+        errorBanner.classList.remove('show');
+    }
+}
+
+// Global functions
+function resetDashboard() {
+    console.log('🔄 Resetting dashboard');
+    hideError();
+    resetToUpload();
+}
+
+// Make functions globally available
 window.resetDashboard = resetDashboard;
+window.exportData = exportData;
+window.handleRetry = handleRetry;
 
 console.log('✅ Brand Studio CREATE Dashboard Ready!');
