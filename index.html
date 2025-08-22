@@ -602,22 +602,39 @@
                 },
                 advertiser: {
                     group_or_annonceur: extractPattern(text, [
+                        // Try to find formal field labels first
                         /groupe[\s\w]*annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
                         /annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
-                        /coca[\s\-]*cola/i,
-                        /oneplus/i,
-                        // Broader patterns for any brand mention
-                        /(coca[\s\-]*cola|oneplus|unilever|nestl[eé]|pepsi|microsoft|apple|samsung)/i
-                    ]),
+                        // Look for specific known brands anywhere in text
+                        /(coca[\s\-]*cola)/i,
+                        /(coca)/i,  // Just "Coca" as fallback
+                        /(oneplus)/i,
+                        /(unilever)/i,
+                        /(nestl[eé])/i,
+                        /(pepsi)/i,
+                        /(microsoft)/i,
+                        /(apple)/i,
+                        /(samsung)/i,
+                        // Very broad search for any company name patterns
+                        /\b([A-Z][a-z]+[\s\-][A-Z][a-z]+)\b/,
+                        /\b([A-Z][a-z]{3,})\b/
+                    ], 'group_or_annonceur'),
                     brand_or_product: extractPattern(text, [
+                        // Try to find formal field labels first
                         /marque[\s\w\/]*produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                         /produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                         /marque[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
-                        /powerade/i,
-                        /nord[\s]*5/i,
-                        // Broader patterns for any product mention
-                        /(powerade|nord[\s]*5|sprite|fanta|iphone|galaxy)/i
-                    ])
+                        // Look for specific known products anywhere in text
+                        /(powerade)/i,
+                        /(nord[\s]*5)/i,
+                        /(sprite)/i,
+                        /(fanta)/i,
+                        /(iphone)/i,
+                        /(galaxy)/i,
+                        // Very broad search for any product name patterns
+                        /\b([A-Z][a-z]+[\s]*[0-9]+)\b/,
+                        /\b([A-Z][a-z]{4,})\b/
+                    ], 'brand_or_product')
                 },
                 brief: {
                     type: extractPattern(text, [
@@ -684,13 +701,20 @@
             };
         }
         
-        function extractPattern(text, patterns) {
+        function extractPattern(text, patterns, fieldName) {
             for (const pattern of patterns) {
                 const match = text.match(pattern);
                 if (match) {
                     const result = match[1] || match[0];
-                    return cleanExtractedText(result);
+                    const cleaned = cleanExtractedText(result);
+                    if (fieldName === 'group_or_annonceur' || fieldName === 'brand_or_product') {
+                        console.log(`🔍 ${fieldName} found:`, pattern, '→', cleaned);
+                    }
+                    return cleaned;
                 }
+            }
+            if (fieldName === 'group_or_annonceur' || fieldName === 'brand_or_product') {
+                console.log(`❌ ${fieldName} not found in text preview:`, text.substring(0, 200));
             }
             return null;
         }
