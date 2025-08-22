@@ -1171,11 +1171,9 @@
             
             // Upload area click
             elements.uploadArea.addEventListener('click', (e) => {
-                if (e.target !== elements.uploadBtn) {
-                    e.preventDefault();
-                    console.log('📦 Upload area clicked');
-                    elements.fileInput.click();
-                }
+                e.preventDefault();
+                console.log('📦 Upload area clicked');
+                elements.fileInput.click();
             });
             
             // File input change
@@ -1332,8 +1330,9 @@
         
         function extractBriefingData(text, fileName) {
             console.log('🔍 Starting briefing data extraction...');
+            console.log('📄 Text length:', text.length, 'characters');
             
-            return {
+            const extractedData = {
                 meta: {
                     source_file: fileName,
                     extraction_ts: new Date().toISOString().split('T')[0]
@@ -1416,6 +1415,9 @@
                     audience_activity_min_sessions_per_week: extractActivityFrequency(text)
                 }
             };
+            
+            console.log('📊 Extracted data:', extractedData);
+            return extractedData;
         }
         
         function extractPattern(text, patterns) {
@@ -1931,6 +1933,8 @@
         }
         
         function displayExtractedData(data) {
+            console.log('🎨 Populating all extracted data fields...');
+            
             // Contact & Advertiser
             setFieldValue('responsableCommercial', data.contact.responsable_commercial);
             setFieldValue('agenceMedia', data.contact.agence_media);
@@ -1954,6 +1958,16 @@
             setFieldValue('historyWithRossel', data.brief.history_with_rossel);
             setFieldValue('otherCampaigns', data.brief.other_campaigns_with_rossel);
             setFieldValue('additionalNotes', data.brief.notes);
+            
+            // Additional fields that might be missing
+            setFieldValue('briefType', data.brief.type);
+            setFieldValue('urgencyLevel', data.brief.urgency);
+            setFieldValue('typologieAnnonceur', data.brief.typologie_annonceur);
+            setFieldValue('attachmentsPresent', data.brief.attachments_present ? 'Yes' : (data.brief.attachments_present === false ? 'No' : null));
+            setFieldValue('startMomentumReason', data.brief.start_momentum_reason);
+            setFieldValue('activityFrequency', data.creative.audience_activity_min_sessions_per_week ? `${data.creative.audience_activity_min_sessions_per_week}x/week` : null);
+            
+            console.log('✅ All data fields populated');
         }
         
         function setFieldValue(elementId, value) {
@@ -1965,6 +1979,9 @@
                 } else {
                     element.classList.remove('text-muted');
                 }
+                console.log(`📝 Set ${elementId}:`, value || 'null');
+            } else {
+                console.warn(`⚠️ Element not found: ${elementId}`);
             }
         }
         
