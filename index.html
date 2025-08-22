@@ -572,7 +572,7 @@
                         .join(' ');
                     
                     if (pageText.trim()) {
-                        fullText += pageText + '\\n\\n';
+                        fullText += pageText + '\n\n';
                     }
                     
                     console.log(`📄 Page ${pageNum} processed:`, pageText.length, 'characters');
@@ -728,9 +728,9 @@
         
         function extractDate(text, contextPattern) {
             const datePatterns = [
-                /(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})/g,
-                /(\\d{1,2})[-](\\d{1,2})[-](\\d{4})/g,
-                /(\\d{4})-(\\d{1,2})-(\\d{1,2})/g
+                /(\d{1,2})\/(\d{1,2})\/(\d{4})/g,
+                /(\d{1,2})[-](\d{1,2})[-](\d{4})/g,
+                /(\d{4})-(\d{1,2})-(\d{1,2})/g
             ];
             
             for (const pattern of datePatterns) {
