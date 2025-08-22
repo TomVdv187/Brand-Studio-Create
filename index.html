@@ -1340,66 +1340,66 @@
                 },
                 contact: {
                     responsable_commercial: extractPattern(text, [
-                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s]+)/i,
-                        /contact[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s]+)/i,
-                        /karolien\\s+van\\s+gaever/i
+                        /responsable[\s\w]*commercial[\s]*:?\s*([A-Za-zÀ-ÿ\s]+)/i,
+                        /contact[\s]*:?\s*([A-Za-zÀ-ÿ\s]+)/i,
+                        /karolien\s+van\s+gaever/i
                     ]),
                     agence_media: extractPattern(text, [
-                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s&\\-]+)/i,
-                        /group\\s*m\\s*[-–]?\\s*essence\\s*mediacom/i,
-                        /agence[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s&\\-]+)/i
+                        /agence[\s\w]*m[eé]dia[\s]*:?\s*([A-Za-zÀ-ÿ\s&\-]+)/i,
+                        /group\s*m\s*[-–]?\s*essence\s*mediacom/i,
+                        /agence[\s]*:?\s*([A-Za-zÀ-ÿ\s&\-]+)/i
                     ])
                 },
                 advertiser: {
                     group_or_annonceur: extractPattern(text, [
-                        /groupe?[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
-                        /annonceur[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
-                        /coca[\\s-]?cola/i,
+                        /groupe?[\s\w]*annonceur[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i,
+                        /annonceur[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i,
+                        /coca[\s-]?cola/i,
                         /oneplus/i
                     ]),
                     brand_or_product: extractPattern(text, [
-                        /marque[\\s\\w]*produit[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
-                        /produit[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
-                        /marque[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
+                        /marque[\s\w]*produit[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i,
+                        /produit[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i,
+                        /marque[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i,
                         /powerade/i,
-                        /nord\\s*5/i
+                        /nord\s*5/i
                     ])
                 },
                 brief: {
                     type: extractPattern(text, [
-                        /type[\\s\\w]*brief[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i
+                        /type[\s\w]*brief[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i
                     ]),
                     urgency: extractUrgency(text),
                     typologie_annonceur: extractPattern(text, [
-                        /typologie[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i
+                        /typologie[\s\w]*annonceur[\s]*:?\s*([A-Za-zÀ-ÿ\s\-]+)/i
                     ]),
                     presentation_languages: extractLanguages(text),
                     attachments_present: extractBoolean(text, /attach.*pr[eé]sent/i),
                     target_persona: extractPattern(text, [
-                        /cible[\\s]*:?\\s*([A-Za-zÀ-ÿ0-9\\s\\-–]+)/i,
-                        /persona[\\s]*:?\\s*([A-Za-zÀ-ÿ0-9\\s\\-–]+)/i,
-                        /target[\\s]*:?\\s*([A-Za-zÀ-ÿ0-9\\s\\-–]+)/i,
-                        /18[\\s]*[-–][\\s]*54[\\s]*[-–]?[\\s]*sportifs/i,
+                        /cible[\s]*:?\s*([A-Za-zÀ-ÿ0-9\s\-–]+)/i,
+                        /persona[\s]*:?\s*([A-Za-zÀ-ÿ0-9\s\-–]+)/i,
+                        /target[\s]*:?\s*([A-Za-zÀ-ÿ0-9\s\-–]+)/i,
+                        /18[\s]*[-–][\s]*54[\s]*[-–]?[\s]*sportifs/i,
                         /studenten/i
                     ]),
                     objectives: extractObjectives(text),
                     start_momentum_reason: extractPattern(text, [
-                        /start[\\s\\w]*momentum[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.]+)/i,
-                        /raison[\\s\\w]*d[ée]marrage[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.]+)/i
+                        /start[\s\w]*momentum[\s]*:?\s*([A-Za-zÀ-ÿ\s\-\.]+)/i,
+                        /raison[\s\w]*d[ée]marrage[\s]*:?\s*([A-Za-zÀ-ÿ\s\-\.]+)/i
                     ]),
                     end_date: extractDate(text),
                     key_messages: extractPattern(text, [
-                        /messages?[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s,.'!\\-–]+)/i,
-                        /choississez\\s*powerade[\\s\\w]*sport/i,
-                        /back\\s*to\\s*school/i
+                        /messages?[\s\w]*cl[eé]s?[\s]*:?\s*([A-Za-zÀ-ÿ\s,.'!\-–]+)/i,
+                        /choississez\s*powerade[\s\w]*sport/i,
+                        /back\s*to\s*school/i
                     ]),
                     media_specific_preferences: extractMediaPreferences(text),
                     history_with_rossel: extractPattern(text, [
-                        /historique[\\s\\w]*rossel[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.,!?]+)/i
+                        /historique[\s\w]*rossel[\s]*:?\s*([A-Za-zÀ-ÿ\s\-\.,!?]+)/i
                     ]),
                     other_campaigns_with_rossel: extractPattern(text, [
-                        /campagnes?[\\s\\w]*cours[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.,!?]+)/i,
-                        /autres?[\\s\\w]*campagnes?[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.,!?]+)/i
+                        /campagnes?[\s\w]*cours[\s]*:?\s*([A-Za-zÀ-ÿ\s\-\.,!?]+)/i,
+                        /autres?[\s\w]*campagnes?[\s]*:?\s*([A-Za-zÀ-ÿ\s\-\.,!?]+)/i
                     ]),
                     notes: extractNotes(text)
                 },
@@ -1432,16 +1432,16 @@
         function cleanExtractedText(text) {
             if (!text) return null;
             return text.trim()
-                .replace(/\\s+/g, ' ')
-                .replace(/^[:\\-–]\\s*/, '')
+                .replace(/\s+/g, ' ')
+                .replace(/^[:\-–]\s*/, '')
                 .substring(0, 500);
         }
         
         function extractBudgetRange(text) {
             const patterns = [
-                /(\\d{1,3})[-–](\\d{1,3})\\s*k(?:€|eur)?/i,
-                /€\\s*(\\d{1,3})[.,]?(\\d{3})[-–]€?\\s*(\\d{1,3})[.,]?(\\d{3})/i,
-                /budget[\\s\\w]*:?\\s*(\\d{1,3})[-–](\\d{1,3})\\s*k/i
+                /(\d{1,3})[-–](\d{1,3})\s*k(?:€|eur)?/i,
+                /€\s*(\d{1,3})[.,]?(\d{3})[-–]€?\s*(\d{1,3})[.,]?(\d{3})/i,
+                /budget[\s\w]*:?\s*(\d{1,3})[-–](\d{1,3})\s*k/i
             ];
             
             for (const pattern of patterns) {
@@ -1465,8 +1465,8 @@
         
         function extractDate(text) {
             const datePatterns = [
-                /(\\d{1,2})[\\/.](\\d{1,2})[\\/.](\\d{4})/g,
-                /(\\d{4})[-](\\d{1,2})[-](\\d{1,2})/g
+                /(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/g,
+                /(\d{4})[-](\d{1,2})[-](\d{1,2})/g
             ];
             
             for (const pattern of datePatterns) {
@@ -1494,8 +1494,8 @@
         
         function extractProposalDeadline(text) {
             const deadlinePatterns = [
-                /date[\\s\\w]*limite[\\s\\w]*remise[\\s]*:?\\s*(\\d{1,2}[\\/.](\\d{1,2})[\\/.](\\d{4}))/i,
-                /deadline[\\s]*:?\\s*(\\d{1,2}[\\/.](\\d{1,2})[\\/.](\\d{4}))/i
+                /date[\s\w]*limite[\s\w]*remise[\s]*:?\s*(\d{1,2}[\/.](\d{1,2})[\/.](\d{4}))/i,
+                /deadline[\s]*:?\s*(\d{1,2}[\/.](\d{1,2})[\/.](\d{4}))/i
             ];
             
             for (const pattern of deadlinePatterns) {
@@ -1587,12 +1587,12 @@
         }
         
         function extractActivityFrequency(text) {
-            const match = text.match(/(\\d+)\\s*x?\\/\\s*semaine/i);
+            const match = text.match(/(\d+)\s*x?\/\s*semaine/i);
             if (match) {
                 return parseInt(match[1]);
             }
             
-            const match2 = text.match(/min[\\s]*([0-9]+)[\\s]*.*semaine/i);
+            const match2 = text.match(/min[\s]*([0-9]+)[\s]*.*semaine/i);
             if (match2) {
                 return parseInt(match2[1]);
             }
@@ -1601,7 +1601,7 @@
         }
         
         function extractUrgency(text) {
-            if (/urgent|\\bélevé\\b|high/i.test(text)) return 'eleve';
+            if (/urgent|\bélevé\b|high/i.test(text)) return 'eleve';
             if (/moyen|medium/i.test(text)) return 'moyen';
             if (/faible|low/i.test(text)) return 'faible';
             return null;
@@ -1620,9 +1620,9 @@
         function extractDoNotList(text) {
             const doNotList = [];
             const patterns = [
-                /pas\\s*de\\s*(\\w+)/gi,
-                /not\\s*(\\w+)/gi,
-                /no\\s*(\\w+)/gi
+                /pas\s*de\s*(\w+)/gi,
+                /not\s*(\w+)/gi,
+                /no\s*(\w+)/gi
             ];
             
             patterns.forEach(pattern => {
@@ -1633,8 +1633,8 @@
             });
             
             // Common exclusions
-            if (/pas\\s*de\\s*native/i.test(text)) doNotList.push('native');
-            if (/pas\\s*d'influenceurs?/i.test(text)) doNotList.push('influenceurs');
+            if (/pas\s*de\s*native/i.test(text)) doNotList.push('native');
+            if (/pas\s*d'influenceurs?/i.test(text)) doNotList.push('influenceurs');
             
             return doNotList.length > 0 ? [...new Set(doNotList)] : null;
         }
@@ -1642,9 +1642,9 @@
         function extractPreferList(text) {
             const preferList = [];
             const patterns = [
-                /plut[oô]t\\s*(\\w+)/gi,
-                /prefer\\w*\\s*(\\w+)/gi,
-                /favour\\w*\\s*(\\w+)/gi
+                /plut[oô]t\s*(\w+)/gi,
+                /prefer\w*\s*(\w+)/gi,
+                /favour\w*\s*(\w+)/gi
             ];
             
             patterns.forEach(pattern => {
@@ -1655,18 +1655,18 @@
             });
             
             // Common preferences
-            if (/plut[oô]t\\s*digital/i.test(text)) preferList.push('digital');
-            if (/prefer\\w*\\s*online/i.test(text)) preferList.push('online');
+            if (/plut[oô]t\s*digital/i.test(text)) preferList.push('digital');
+            if (/prefer\w*\s*online/i.test(text)) preferList.push('online');
             
             return preferList.length > 0 ? [...new Set(preferList)] : null;
         }
         
         function extractNotes(text) {
             const notePatterns = [
-                /compl[eé]ments?[\\s]*:?\\s*([^\\n.]{50,800})/i,
-                /notes?[\\s]*:?\\s*([^\\n.]{50,800})/i,
-                /remarques?[\\s]*:?\\s*([^\\n.]{50,800})/i,
-                /int[eé]r[eê]t\\s*pour\\s*([^\\n.]{30,800})/i
+                /compl[eé]ments?[\s]*:?\s*([^\n.]{50,800})/i,
+                /notes?[\s]*:?\s*([^\n.]{50,800})/i,
+                /remarques?[\s]*:?\s*([^\n.]{50,800})/i,
+                /int[eé]r[eê]t\s*pour\s*([^\n.]{30,800})/i
             ];
             
             for (const pattern of notePatterns) {
