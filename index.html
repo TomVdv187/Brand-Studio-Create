@@ -597,11 +597,7 @@
                         /karolien\s+van\s+gaever/i,
                         /contact[\s\w]*:?\s*([A-Za-z\s]+)/i
                     ]),
-                    agence_media: extractPattern(text, [
-                        /agence\s+media[\s\w]*:?\s*([A-Za-z\s&-]+)/i,
-                        /group\s*m\s*[-–]?\s*essence\s*mediacom/i,
-                        /essence\s+mediacom/i
-                    ])
+                    agence_media: extractMediaAgencyAggressive(text)
                 },
                 advertiser: {
                     group_or_annonceur: extractAdvertiserAggressive(text),
@@ -618,12 +614,7 @@
                     ]),
                     presentation_languages: extractLanguages(text),
                     attachments_present: detectAttachments(text),
-                    target_persona: extractPattern(text, [
-                        /cible[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
-                        /persona[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
-                        /18[-\s]*54[\s]*[-–]?[\s]*sportifs/i,
-                        /studenten/i
-                    ]),
+                    target_persona: extractTargetPersonaIntelligent(text, extractAdvertiserAggressive(text), extractProductAggressive(text)),
                     objectives: extractObjectives(text),
                     start_momentum_reason: extractPattern(text, [
                         /momentum[\s\w]*:?\s*([A-Za-z0-9\s,.'!-–]+)/i,
@@ -786,6 +777,170 @@
             }
             
             console.log('❌ PRODUCT NOT FOUND - No patterns matched');
+            return null;
+        }
+        
+        function extractMediaAgencyAggressive(text) {
+            console.log('🏢 EXTRACTING MEDIA AGENCY - Starting aggressive search...');
+            
+            // Method 1: Try specific known agencies first
+            const knownAgencies = [
+                'group m', 'groupm', 'essence mediacom', 'mediacom', 
+                'havas', 'publicis', 'wpp', 'omnicom', 'dentsu',
+                'mindshare', 'zenith', 'starcom', 'carat', 'phd',
+                'initiative', 'bcom', 'kinetic'
+            ];
+            
+            for (const agency of knownAgencies) {
+                const regex = new RegExp(agency, 'gi');
+                const matches = text.match(regex);
+                if (matches && matches.length > 0) {
+                    const result = matches[0];
+                    console.log(`🎯 MEDIA AGENCY FOUND (known agency):`, result);
+                    return result.toUpperCase();
+                }
+            }
+            
+            // Method 2: Look for formal field patterns
+            const fieldPatterns = [
+                /agence[\s\w]*media[\s\w]*:?\s*([A-Za-z\s&-]+)/i,
+                /media[\s\w]*agency[\s\w]*:?\s*([A-Za-z\s&-]+)/i,
+                /agency[\s\w]*:?\s*([A-Za-z\s&-]+)/i,
+                /agence[\s\w]*:?\s*([A-Za-z\s&-]+)/i
+            ];
+            
+            for (const pattern of fieldPatterns) {
+                const match = text.match(pattern);
+                if (match && match[1] && match[1].trim().length > 3) {
+                    const result = match[1].trim();
+                    console.log(`🎯 MEDIA AGENCY FOUND (field pattern):`, result);
+                    return result;
+                }
+            }
+            
+            // Method 3: Look for agency-like patterns (Company & Company, Company Media, etc.)
+            const agencyPatterns = [
+                /\b([A-Z][a-z]+[\s&-][A-Z][a-z]+)\b/g,  // Like "Group M" or "Essence Mediacom"
+                /\b([A-Z][a-z]+[\s][Mm]edia[a-z]*)\b/g   // Anything + Media/Mediacom
+            ];
+            
+            for (const pattern of agencyPatterns) {
+                const matches = text.match(pattern);
+                if (matches && matches.length > 0) {
+                    const result = matches[0];
+                    console.log(`🎯 MEDIA AGENCY FOUND (pattern match):`, result);
+                    return result;
+                }
+            }
+            
+            console.log('❌ MEDIA AGENCY NOT FOUND - No patterns matched');
+            return null;
+        }
+        
+        function extractTargetPersonaIntelligent(text, advertiser, product) {
+            console.log('👥 EXTRACTING TARGET PERSONA - Starting intelligent search...');
+            console.log('🔍 Using context - Advertiser:', advertiser, 'Product:', product);
+            
+            // Method 1: Try to find explicit persona in text first
+            const personaPatterns = [
+                /cible[\s\w]*persona[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
+                /persona[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
+                /cible[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
+                /target[\s\w]*audience[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
+                /audience[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
+                /18[-\s]*54[\s]*[-–]?[\s]*sportifs/i,
+                /25[-\s]*45[\s]*[-–]?[\s]*actifs/i,
+                /studenten/i,
+                /étudiants/i
+            ];
+            
+            for (const pattern of personaPatterns) {
+                const match = text.match(pattern);
+                if (match && match[1] && match[1].trim().length > 5) {
+                    const result = match[1].trim();
+                    console.log(`🎯 PERSONA FOUND (explicit):`, result);
+                    return result;
+                } else if (match && match[0]) {
+                    const result = match[0];
+                    console.log(`🎯 PERSONA FOUND (pattern match):`, result);
+                    return result;
+                }
+            }
+            
+            // Method 2: Create intelligent persona based on advertiser + product
+            if (advertiser && product) {
+                const persona = generatePersonaRecommendation(advertiser.toLowerCase(), product.toLowerCase());
+                if (persona) {
+                    console.log(`🎯 PERSONA GENERATED (intelligent):`, persona);
+                    return persona;
+                }
+            }
+            
+            // Method 3: Product-based persona fallback
+            if (product) {
+                const persona = generateProductBasedPersona(product.toLowerCase());
+                if (persona) {
+                    console.log(`🎯 PERSONA GENERATED (product-based):`, persona);
+                    return persona;
+                }
+            }
+            
+            console.log('❌ PERSONA NOT FOUND - No patterns matched and no context for generation');
+            return null;
+        }
+        
+        function generatePersonaRecommendation(advertiser, product) {
+            // Coca-Cola + Powerade = Sports audience
+            if (advertiser.includes('coca') && product.includes('powerade')) {
+                return '18-35 sportifs actifs, pratiquant sport minimum 2x/semaine';
+            }
+            
+            // Sports drinks general
+            if (product.includes('powerade') || product.includes('gatorade') || product.includes('aquarius')) {
+                return '18-40 sportifs et fitness enthusiasts';
+            }
+            
+            // Coca-Cola products general
+            if (advertiser.includes('coca')) {
+                if (product.includes('zero') || product.includes('light')) {
+                    return '25-45 adultes soucieux de leur santé';
+                }
+                return '16-35 jeunes adultes et familles';
+            }
+            
+            // Tech products
+            if (product.includes('iphone') || product.includes('samsung') || product.includes('oneplus')) {
+                return '18-45 early adopters et tech enthusiasts';
+            }
+            
+            if (product.includes('nord')) {
+                return '20-35 jeunes professionnels tech-savvy';
+            }
+            
+            // Generic fallbacks
+            if (advertiser.includes('nike') || advertiser.includes('adidas')) {
+                return '16-40 sportifs et lifestyle actif';
+            }
+            
+            return null;
+        }
+        
+        function generateProductBasedPersona(product) {
+            const productPersonas = {
+                'powerade': '18-35 sportifs actifs',
+                'sprite': '16-30 jeunes rafraîchissement',
+                'fanta': '12-25 familles et jeunes',
+                'iphone': '25-50 premium tech users',
+                'galaxy': '20-45 tech enthusiasts',
+                'oneplus': '20-35 tech early adopters'
+            };
+            
+            for (const [key, persona] of Object.entries(productPersonas)) {
+                if (product.includes(key)) {
+                    return persona;
+                }
+            }
+            
             return null;
         }
         
