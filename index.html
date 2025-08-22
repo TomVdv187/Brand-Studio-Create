@@ -585,6 +585,13 @@
             
             const today = new Date().toISOString().split('T')[0];
             
+            // Extract core data first to use for intelligent recommendations
+            const advertiser = extractAdvertiserAggressive(text);
+            const product = extractProductAggressive(text);
+            const mediaAgency = extractMediaAgencyAggressive(text);
+            
+            console.log('🔧 EXTRACTED CORE DATA:', { advertiser, product, mediaAgency });
+            
             // Enhanced extraction following CLAUDE.md v4 specifications
             return {
                 meta: {
@@ -597,11 +604,11 @@
                         /karolien\s+van\s+gaever/i,
                         /contact[\s\w]*:?\s*([A-Za-z\s]+)/i
                     ]),
-                    agence_media: extractMediaAgencyAggressive(text)
+                    agence_media: mediaAgency
                 },
                 advertiser: {
-                    group_or_annonceur: extractAdvertiserAggressive(text),
-                    brand_or_product: extractProductAggressive(text)
+                    group_or_annonceur: advertiser,
+                    brand_or_product: product
                 },
                 brief: {
                     type: extractPattern(text, [
@@ -614,7 +621,7 @@
                     ]),
                     presentation_languages: extractLanguages(text),
                     attachments_present: detectAttachments(text),
-                    target_persona: extractTargetPersonaIntelligent(text, extractAdvertiserAggressive(text), extractProductAggressive(text)),
+                    target_persona: extractTargetPersonaIntelligent(text, advertiser, product),
                     objectives: extractObjectives(text),
                     start_momentum_reason: extractPattern(text, [
                         /momentum[\s\w]*:?\s*([A-Za-z0-9\s,.'!-–]+)/i,
@@ -885,43 +892,64 @@
                 }
             }
             
-            console.log('❌ PERSONA NOT FOUND - No patterns matched and no context for generation');
-            return null;
+            // Method 4: Final fallback - always provide a persona
+            console.log('🔄 PERSONA FALLBACK - Generating default persona');
+            return '18-45 adultes actifs, consommateurs digitaux';
         }
         
         function generatePersonaRecommendation(advertiser, product) {
+            console.log('🧠 GENERATING PERSONA RECOMMENDATION for:', advertiser, '+', product);
+            
+            // Make sure we have strings to work with
+            const adv = advertiser ? advertiser.toLowerCase() : '';
+            const prod = product ? product.toLowerCase() : '';
+            
             // Coca-Cola + Powerade = Sports audience
-            if (advertiser.includes('coca') && product.includes('powerade')) {
+            if (adv.includes('coca') && prod.includes('powerade')) {
+                console.log('✅ MATCHED: Coca-Cola + Powerade → Sports persona');
                 return '18-35 sportifs actifs, pratiquant sport minimum 2x/semaine';
             }
             
-            // Sports drinks general
-            if (product.includes('powerade') || product.includes('gatorade') || product.includes('aquarius')) {
+            // Sports drinks general (even without advertiser)
+            if (prod.includes('powerade') || prod.includes('gatorade') || prod.includes('aquarius')) {
+                console.log('✅ MATCHED: Sports drink → Sports persona');
                 return '18-40 sportifs et fitness enthusiasts';
             }
             
             // Coca-Cola products general
-            if (advertiser.includes('coca')) {
-                if (product.includes('zero') || product.includes('light')) {
+            if (adv.includes('coca')) {
+                if (prod.includes('zero') || prod.includes('light')) {
+                    console.log('✅ MATCHED: Coca-Cola diet → Health-conscious persona');
                     return '25-45 adultes soucieux de leur santé';
                 }
+                console.log('✅ MATCHED: Coca-Cola → General youth persona');
                 return '16-35 jeunes adultes et familles';
             }
             
             // Tech products
-            if (product.includes('iphone') || product.includes('samsung') || product.includes('oneplus')) {
+            if (prod.includes('iphone') || prod.includes('samsung') || prod.includes('oneplus')) {
+                console.log('✅ MATCHED: Tech product → Tech enthusiast persona');
                 return '18-45 early adopters et tech enthusiasts';
             }
             
-            if (product.includes('nord')) {
+            if (prod.includes('nord')) {
+                console.log('✅ MATCHED: Nord → Young professional persona');
                 return '20-35 jeunes professionnels tech-savvy';
             }
             
-            // Generic fallbacks
-            if (advertiser.includes('nike') || advertiser.includes('adidas')) {
+            // Generic fallbacks based on advertiser
+            if (adv.includes('nike') || adv.includes('adidas')) {
+                console.log('✅ MATCHED: Sports brand → Active lifestyle persona');
                 return '16-40 sportifs et lifestyle actif';
             }
             
+            // If we have any product, try to make a general recommendation
+            if (prod && prod.length > 2) {
+                console.log('✅ MATCHED: Generic product → Active consumer persona');
+                return '18-45 consommateurs actifs et engagés';
+            }
+            
+            console.log('❌ NO SPECIFIC MATCH - Will use fallback');
             return null;
         }
         
