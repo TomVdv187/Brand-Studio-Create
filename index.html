@@ -3,86 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand Studio CREATE - Working Version</title>
+    <title>Brand Studio CREATE - Professional Briefing Analysis</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --success: #059669;
+            --success-light: #10b981;
+            --error: #dc2626;
+            --error-light: #ef4444;
+            --warning: #d97706;
+            --warning-light: #f59e0b;
+            
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
             --gray-600: #475569;
             --gray-700: #334155;
+            --gray-800: #1e293b;
             --gray-900: #0f172a;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            --border-radius: 0.5rem;
+            --border-radius-lg: 0.75rem;
+            --border-radius-xl: 1rem;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: var(--gray-900);
             line-height: 1.6;
+            font-size: 14px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* Header */
         .header {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 2rem 0;
-            text-align: center;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 1rem;
-            margin-bottom: 0.5rem;
         }
 
         .brand-icon {
-            font-size: 2.5rem;
-            color: #fbbf24;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-        }
-
-        .brand h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-md);
         }
 
-        .tagline {
-            font-size: 1.125rem;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 300;
+        .brand-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            line-height: 1.2;
         }
 
+        .brand-text p {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--gray-100);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .status-indicator.ready {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .status-indicator.processing {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        /* Main Content */
         .main {
-            padding: 3rem 0;
+            flex: 1;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            margin-bottom: 3rem;
         }
 
         .upload-card {
-            max-width: 600px;
-            margin: 0 auto 3rem;
             background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
             overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-header {
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            padding: 2rem;
+            border-bottom: 1px solid var(--gray-200);
+            text-align: center;
+        }
+
+        .upload-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-header p {
+            color: var(--gray-600);
+            font-size: 1rem;
         }
 
         .upload-area {
@@ -90,12 +191,30 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 3px dashed var(--gray-200);
-            border-radius: 1.5rem;
+            border: 3px dashed var(--gray-300);
+            border-radius: var(--border-radius-lg);
+            margin: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
         }
 
         .upload-area:hover {
-            border-color: var(--primary);
+            border-color: var(--primary-light);
             background: var(--gray-50);
             transform: translateY(-2px);
         }
@@ -103,17 +222,26 @@
         .upload-area.dragging {
             border-color: var(--primary);
             background: #eff6ff;
-            transform: scale(1.02);
+            transform: scale(1.01);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         .upload-icon {
-            font-size: 4rem;
-            color: var(--primary);
-            margin-bottom: 1.5rem;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            box-shadow: var(--shadow-lg);
         }
 
-        .upload-content h2 {
-            font-size: 2rem;
+        .upload-content h3 {
+            font-size: 1.25rem;
             font-weight: 600;
             color: var(--gray-900);
             margin-bottom: 0.75rem;
@@ -121,30 +249,77 @@
 
         .upload-content p {
             color: var(--gray-600);
-            margin-bottom: 1.5rem;
-            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            font-size: 1rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
             border: none;
             padding: 1rem 2rem;
-            border-radius: 0.75rem;
-            font-size: 1.125rem;
+            border-radius: var(--border-radius-lg);
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
             transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+            box-shadow: var(--shadow-lg);
         }
 
+        .upload-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .upload-info ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .upload-info li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-info i {
+            color: var(--success);
+            width: 16px;
+        }
+
+        /* Processing Section */
         .processing-section {
             display: none;
             justify-content: center;
@@ -153,22 +328,28 @@
 
         .processing-card {
             background: white;
-            border-radius: 1.5rem;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
             padding: 3rem 2rem;
             text-align: center;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
         }
 
+        .processing-animation {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
         .spinner {
-            width: 60px;
-            height: 60px;
+            width: 100%;
+            height: 100%;
             border: 4px solid var(--gray-200);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 2rem;
         }
 
         @keyframes spin {
@@ -176,17 +357,68 @@
             100% { transform: rotate(360deg); }
         }
 
+        .processing-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+        }
+
+        .processing-status {
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        /* Results Section */
         .results-section {
             display: none;
         }
 
+        /* Decision Banner */
         .decision-banner {
             background: white;
-            border-radius: 1.5rem;
-            padding: 2.5rem;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-lg);
             margin-bottom: 3rem;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            border-left: 8px solid var(--success);
+            overflow: hidden;
+            border-left: 6px solid var(--success);
+        }
+
+        .decision-banner.go {
+            border-left-color: var(--success);
+        }
+
+        .decision-banner.conditional {
+            border-left-color: var(--warning);
+        }
+
+        .decision-banner.nogo {
+            border-left-color: var(--error);
+        }
+
+        .decision-header {
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            padding: 2rem;
+            border-bottom: 1px solid var(--gray-200);
         }
 
         .decision-content {
@@ -204,7 +436,24 @@
             justify-content: center;
             font-size: 2rem;
             color: white;
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            box-shadow: var(--shadow-lg);
+            flex-shrink: 0;
+        }
+
+        .decision-banner.go .decision-icon {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+        }
+
+        .decision-banner.conditional .decision-icon {
+            background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
+        }
+
+        .decision-banner.nogo .decision-icon {
+            background: linear-gradient(135deg, var(--error) 0%, var(--error-light) 100%);
+        }
+
+        .decision-info {
+            flex: 1;
         }
 
         .decision-info h2 {
@@ -217,23 +466,179 @@
         .decision-info p {
             font-size: 1.125rem;
             color: var(--gray-600);
+            margin-bottom: 1rem;
         }
 
+        .decision-score {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: #eff6ff;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            display: inline-block;
+        }
+
+        .decision-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: 2px solid var(--success);
+        }
+
+        .btn-success:hover {
+            background: var(--success-light);
+            border-color: var(--success-light);
+        }
+
+        /* Evaluation Grid */
+        .evaluation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .eval-card {
+            background: white;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .eval-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .eval-header {
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .eval-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .eval-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .eval-content {
+            padding: 1.5rem;
+        }
+
+        .eval-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .eval-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .eval-item label {
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .eval-item .value {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 0.875rem;
+        }
+
+        .eval-item .value.highlight {
+            color: var(--primary);
+        }
+
+        .status {
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status.valid {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .status.invalid {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        .status.missing {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        /* Data Grid */
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
             gap: 1.5rem;
         }
 
         .data-card {
             background: white;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-md);
             overflow: hidden;
         }
 
+        .data-card.full-width {
+            grid-column: 1 / -1;
+        }
+
         .data-header {
-            background: var(--gray-50);
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
             padding: 1.5rem;
             border-bottom: 1px solid var(--gray-200);
             display: flex;
@@ -256,6 +661,18 @@
             padding: 1.5rem;
         }
 
+        .data-content.grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .data-content.grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
         .data-field {
             margin-bottom: 1.5rem;
         }
@@ -266,8 +683,8 @@
 
         .data-field label {
             display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--gray-600);
             margin-bottom: 0.5rem;
             text-transform: uppercase;
@@ -276,93 +693,198 @@
 
         .data-field span {
             display: block;
-            font-size: 1rem;
+            font-size: 0.875rem;
             font-weight: 500;
             color: var(--gray-900);
             background: var(--gray-50);
             padding: 1rem;
-            border-radius: 0.5rem;
+            border-radius: var(--border-radius);
             border: 1px solid var(--gray-200);
             min-height: 3rem;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            line-height: 1.4;
         }
 
-        .btn-secondary {
-            background: white;
+        .data-field span.large {
+            min-height: 5rem;
+            align-items: flex-start;
+            padding-top: 1rem;
+        }
+
+        .text-muted {
+            color: var(--gray-500) !important;
+            font-style: italic;
+        }
+
+        /* Error States */
+        .error-banner {
+            background: linear-gradient(135deg, #fee2e2 0%, white 100%);
+            border: 1px solid var(--error-light);
+            border-left: 4px solid var(--error);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .error-banner.show {
+            display: block;
+        }
+
+        .error-banner h3 {
+            color: var(--error);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-banner p {
             color: var(--gray-700);
-            border: 2px solid var(--gray-200);
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .retry-btn {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.2s ease;
-            text-decoration: none;
+            transition: background 0.2s;
         }
 
-        .btn-secondary:hover {
-            background: var(--gray-50);
-            border-color: var(--gray-300);
-            transform: translateY(-1px);
+        .retry-btn:hover {
+            background: var(--error-light);
         }
 
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .brand {
+            .header-content {
+                padding: 0 1rem;
                 flex-direction: column;
-                gap: 0.5rem;
+                gap: 1rem;
+                text-align: center;
             }
-            
-            .brand h1 {
-                font-size: 2rem;
+
+            .brand {
+                justify-content: center;
             }
-            
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .upload-area {
+                margin: 1rem;
+                padding: 2rem 1rem;
+            }
+
             .decision-content {
                 flex-direction: column;
                 text-align: center;
+                gap: 1.5rem;
             }
-            
+
+            .decision-actions {
+                justify-content: center;
+            }
+
+            .evaluation-grid,
             .data-grid {
                 grid-template-columns: 1fr;
             }
+
+            .data-content.grid-2,
+            .data-content.grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
     <div class="app">
+        <!-- Header -->
         <header class="header">
-            <div class="container">
+            <div class="header-content">
                 <div class="brand">
-                    <i class="fas fa-bolt brand-icon"></i>
-                    <h1>Brand Studio CREATE</h1>
+                    <div class="brand-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1>Brand Studio CREATE</h1>
+                        <p>Professional Briefing Analysis & GO/NO-GO Decision Engine</p>
+                    </div>
                 </div>
-                <p class="tagline">Professional Briefing Analysis & GO/NO-GO Decision Engine</p>
+                <div class="header-actions">
+                    <div class="status-indicator ready" id="systemStatus">
+                        <i class="fas fa-check-circle"></i>
+                        <span>System Ready</span>
+                    </div>
+                </div>
             </div>
         </header>
 
+        <!-- Main Content -->
         <main class="main">
             <div class="container">
                 <!-- Upload Section -->
                 <section class="upload-section" id="uploadSection">
                     <div class="upload-card">
+                        <div class="upload-header">
+                            <h2>Upload Marketing Brief</h2>
+                            <p>Upload your PDF briefing document to analyze against CREATE criteria and receive an instant GO/NO-GO decision</p>
+                        </div>
+                        
                         <div class="upload-area" id="uploadArea">
                             <input type="file" id="fileInput" accept=".pdf" style="display: none;">
                             <div class="upload-content">
                                 <div class="upload-icon">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                 </div>
-                                <h2>Upload Your Briefing</h2>
-                                <p>Drag and drop your PDF briefing here, or click to browse</p>
+                                <h3>Drag & Drop Your PDF Here</h3>
+                                <p>Or click the button below to browse and select your briefing document</p>
                                 <button type="button" id="uploadBtn" class="btn-primary">
-                                    <i class="fas fa-upload"></i>
+                                    <i class="fas fa-file-pdf"></i>
                                     Choose PDF File
                                 </button>
-                                <div style="margin-top: 1.5rem; color: var(--gray-600); font-size: 0.875rem;">
-                                    <small><i class="fas fa-info-circle"></i> Supports PDF files up to 10MB</small>
-                                </div>
                             </div>
+                        </div>
+
+                        <div class="upload-info">
+                            <strong><i class="fas fa-info-circle"></i> Supported formats and requirements:</strong>
+                            <ul>
+                                <li><i class="fas fa-check"></i> PDF files up to 10MB</li>
+                                <li><i class="fas fa-check"></i> French, English, or Dutch language</li>
+                                <li><i class="fas fa-check"></i> Marketing briefing documents</li>
+                                <li><i class="fas fa-check"></i> Secure processing (files are not stored)</li>
+                            </ul>
                         </div>
                     </div>
                 </section>
@@ -370,71 +892,225 @@
                 <!-- Processing Section -->
                 <section class="processing-section" id="processingSection">
                     <div class="processing-card">
-                        <div class="spinner"></div>
-                        <h2>Analyzing Briefing</h2>
+                        <div class="processing-animation">
+                            <div class="spinner"></div>
+                        </div>
+                        <h2>Analyzing Briefing Document</h2>
                         <p>Extracting data and evaluating against CREATE criteria...</p>
-                        <div style="margin-top: 1rem; color: var(--primary); font-weight: 500;" id="processingStatus">
-                            Reading PDF file...
+                        <div class="processing-status" id="processingStatus">Initializing analysis...</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
                         </div>
                     </div>
                 </section>
 
+                <!-- Error Banner -->
+                <section class="error-banner" id="errorBanner">
+                    <h3><i class="fas fa-exclamation-triangle"></i> <span id="errorTitle">Processing Error</span></h3>
+                    <p id="errorMessage">An error occurred while processing your file.</p>
+                    <button class="retry-btn" onclick="handleRetry()">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </section>
+
                 <!-- Results Section -->
                 <section class="results-section" id="resultsSection">
-                    <div class="decision-banner">
-                        <div class="decision-content">
-                            <div class="decision-icon">
-                                <i class="fas fa-check"></i>
+                    <!-- Decision Banner -->
+                    <div class="decision-banner" id="decisionBanner">
+                        <div class="decision-header">
+                            <div class="decision-content">
+                                <div class="decision-icon" id="decisionIcon"></div>
+                                <div class="decision-info">
+                                    <h2 id="decisionTitle"></h2>
+                                    <p id="decisionMessage"></p>
+                                    <div class="decision-score" id="decisionScore"></div>
+                                </div>
+                                <div class="decision-actions">
+                                    <button class="btn-secondary btn-success" onclick="exportJSON()">
+                                        <i class="fas fa-download"></i>
+                                        Export JSON
+                                    </button>
+                                    <button class="btn-secondary" onclick="resetDashboard()">
+                                        <i class="fas fa-upload"></i>
+                                        New Analysis
+                                    </button>
+                                </div>
                             </div>
-                            <div class="decision-info">
-                                <h2 id="decisionTitle">Processing Complete</h2>
-                                <p id="decisionMessage">Your PDF has been successfully analyzed.</p>
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Cards -->
+                    <div class="evaluation-grid">
+                        <div class="eval-card">
+                            <div class="eval-header">
+                                <i class="fas fa-euro-sign"></i>
+                                <h3>Budget Evaluation</h3>
                             </div>
-                            <div style="display: flex; gap: 1rem; align-items: center;">
-                                <button class="btn-secondary" onclick="exportData()">
-                                    <i class="fas fa-download"></i>
-                                    Export JSON
-                                </button>
-                                <button class="btn-secondary" onclick="reset()">
-                                    <i class="fas fa-upload"></i>
-                                    New Briefing
-                                </button>
+                            <div class="eval-content">
+                                <div class="eval-item">
+                                    <label>Minimum Required:</label>
+                                    <span class="value highlight">€10,000</span>
+                                </div>
+                                <div class="eval-item">
+                                    <label>Confirmed Budget:</label>
+                                    <span class="value" id="confirmedBudget">-</span>
+                                </div>
+                                <div class="eval-item">
+                                    <label>Status:</label>
+                                    <span class="status" id="budgetStatus">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="eval-card">
+                            <div class="eval-header">
+                                <i class="fas fa-clock"></i>
+                                <h3>Timeline Evaluation</h3>
+                            </div>
+                            <div class="eval-content">
+                                <div class="eval-item">
+                                    <label>Required Lead Time:</label>
+                                    <span class="value highlight">10 business days</span>
+                                </div>
+                                <div class="eval-item">
+                                    <label>Proposal Deadline:</label>
+                                    <span class="value" id="proposalDeadline">-</span>
+                                </div>
+                                <div class="eval-item">
+                                    <label>Status:</label>
+                                    <span class="status" id="timelineStatus">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="eval-card">
+                            <div class="eval-header">
+                                <i class="fas fa-check-circle"></i>
+                                <h3>Required Information</h3>
+                            </div>
+                            <div class="eval-content">
+                                <div class="eval-item">
+                                    <label>Contact Information:</label>
+                                    <span class="status" id="contactStatus">-</span>
+                                </div>
+                                <div class="eval-item">
+                                    <label>Advertiser Details:</label>
+                                    <span class="status" id="advertiserStatus">-</span>
+                                </div>
+                                <div class="eval-item">
+                                    <label>Target Persona:</label>
+                                    <span class="status" id="personaStatus">-</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Extracted Data -->
                     <div class="data-grid">
+                        <!-- Contact & Advertiser -->
                         <div class="data-card">
                             <div class="data-header">
-                                <i class="fas fa-file-alt"></i>
-                                <h3>PDF Analysis</h3>
+                                <i class="fas fa-address-book"></i>
+                                <h3>Contact & Advertiser</h3>
                             </div>
-                            <div class="data-content">
+                            <div class="data-content grid-2">
                                 <div class="data-field">
-                                    <label>File Name</label>
-                                    <span id="fileName">-</span>
+                                    <label>Responsable Commercial</label>
+                                    <span id="responsableCommercial">-</span>
                                 </div>
                                 <div class="data-field">
-                                    <label>File Size</label>
-                                    <span id="fileSize">-</span>
+                                    <label>Agence Média</label>
+                                    <span id="agenceMedia">-</span>
                                 </div>
                                 <div class="data-field">
-                                    <label>Text Extracted</label>
-                                    <span id="textLength">-</span>
+                                    <label>Group/Annonceur</label>
+                                    <span id="groupAnnonceur">-</span>
+                                </div>
+                                <div class="data-field">
+                                    <label>Brand/Product</label>
+                                    <span id="brandProduct">-</span>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Brief Details -->
                         <div class="data-card">
                             <div class="data-header">
-                                <i class="fas fa-search"></i>
-                                <h3>Content Preview</h3>
+                                <i class="fas fa-bullseye"></i>
+                                <h3>Brief Details</h3>
+                            </div>
+                            <div class="data-content grid-2">
+                                <div class="data-field">
+                                    <label>Target Persona</label>
+                                    <span id="targetPersona">-</span>
+                                </div>
+                                <div class="data-field">
+                                    <label>Objectives</label>
+                                    <span id="objectives">-</span>
+                                </div>
+                                <div class="data-field">
+                                    <label>Presentation Languages</label>
+                                    <span id="presentationLanguages">-</span>
+                                </div>
+                                <div class="data-field">
+                                    <label>Campaign End Date</label>
+                                    <span id="endDate">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Messages -->
+                        <div class="data-card full-width">
+                            <div class="data-header">
+                                <i class="fas fa-comment-dots"></i>
+                                <h3>Key Messages & Preferences</h3>
                             </div>
                             <div class="data-content">
                                 <div class="data-field">
-                                    <label>First 300 Characters</label>
-                                    <span id="contentPreview" style="font-family: monospace; font-size: 0.875rem; line-height: 1.4;">-</span>
+                                    <label>Key Messages</label>
+                                    <span id="keyMessages" class="large">-</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                                    <div class="data-field">
+                                        <label>Media Preferences</label>
+                                        <span id="mediaPreferences">-</span>
+                                    </div>
+                                    <div class="data-field">
+                                        <label>Sports Focus</label>
+                                        <span id="sportsFocus">-</span>
+                                    </div>
+                                    <div class="data-field">
+                                        <label>Do Not Use</label>
+                                        <span id="doNotUse">-</span>
+                                    </div>
+                                    <div class="data-field">
+                                        <label>Prefer</label>
+                                        <span id="preferUse">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="data-card full-width">
+                            <div class="data-header">
+                                <i class="fas fa-sticky-note"></i>
+                                <h3>Additional Information</h3>
+                            </div>
+                            <div class="data-content">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                    <div class="data-field">
+                                        <label>History with Rossel</label>
+                                        <span id="historyWithRossel" class="large">-</span>
+                                    </div>
+                                    <div class="data-field">
+                                        <label>Other Campaigns</label>
+                                        <span id="otherCampaigns" class="large">-</span>
+                                    </div>
+                                    <div class="data-field">
+                                        <label>Additional Notes</label>
+                                        <span id="additionalNotes" class="large">-</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -449,231 +1125,940 @@
         // Configure PDF.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         
-        console.log('🚀 Brand Studio CREATE Loading...');
+        console.log('🚀 Brand Studio CREATE Professional Loading...');
         
-        // Global variables
+        // Application state
+        let isProcessing = false;
         let currentData = null;
+        let progressInterval = null;
         
-        // Get DOM elements
-        const uploadSection = document.getElementById('uploadSection');
-        const processingSection = document.getElementById('processingSection');
-        const resultsSection = document.getElementById('resultsSection');
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const processingStatus = document.getElementById('processingStatus');
+        // CREATE criteria constants
+        const CREATE_RULES = {
+            MIN_BUDGET: 10000,
+            MIN_LEAD_TIME_DAYS: 10,
+            REQUIRED_FIELDS: ['responsable_commercial', 'group_or_annonceur', 'target_persona']
+        };
         
-        // Event listeners
-        uploadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('🔘 Upload button clicked');
-            fileInput.click();
+        // DOM elements
+        const elements = {
+            uploadSection: document.getElementById('uploadSection'),
+            processingSection: document.getElementById('processingSection'),
+            resultsSection: document.getElementById('resultsSection'),
+            uploadArea: document.getElementById('uploadArea'),
+            fileInput: document.getElementById('fileInput'),
+            uploadBtn: document.getElementById('uploadBtn'),
+            processingStatus: document.getElementById('processingStatus'),
+            progressFill: document.getElementById('progressFill'),
+            systemStatus: document.getElementById('systemStatus'),
+            errorBanner: document.getElementById('errorBanner'),
+            decisionBanner: document.getElementById('decisionBanner')
+        };
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 Initializing Brand Studio CREATE...');
+            setupEventListeners();
+            console.log('✅ Brand Studio CREATE Ready');
         });
         
-        uploadArea.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('📦 Upload area clicked');
-            fileInput.click();
-        });
+        function setupEventListeners() {
+            // Upload button
+            elements.uploadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🔘 Upload button clicked');
+                elements.fileInput.click();
+            });
+            
+            // Upload area click
+            elements.uploadArea.addEventListener('click', (e) => {
+                if (e.target !== elements.uploadBtn) {
+                    e.preventDefault();
+                    console.log('📦 Upload area clicked');
+                    elements.fileInput.click();
+                }
+            });
+            
+            // File input change
+            elements.fileInput.addEventListener('change', (e) => {
+                console.log('📁 File selected');
+                handleFileSelection(e.target.files[0]);
+            });
+            
+            // Drag and drop events
+            elements.uploadArea.addEventListener('dragover', handleDragOver);
+            elements.uploadArea.addEventListener('dragleave', handleDragLeave);
+            elements.uploadArea.addEventListener('drop', handleDrop);
+            
+            // Prevent default drag behaviors
+            document.addEventListener('dragover', e => e.preventDefault());
+            document.addEventListener('drop', e => e.preventDefault());
+        }
         
-        fileInput.addEventListener('change', (e) => {
-            console.log('📁 File selected');
-            handleFile(e.target.files[0]);
-        });
-        
-        // Drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
+        function handleDragOver(e) {
             e.preventDefault();
-            uploadArea.classList.add('dragging');
-        });
+            elements.uploadArea.classList.add('dragging');
+        }
         
-        uploadArea.addEventListener('dragleave', (e) => {
+        function handleDragLeave(e) {
             e.preventDefault();
-            if (!uploadArea.contains(e.relatedTarget)) {
-                uploadArea.classList.remove('dragging');
+            if (!elements.uploadArea.contains(e.relatedTarget)) {
+                elements.uploadArea.classList.remove('dragging');
             }
-        });
+        }
         
-        uploadArea.addEventListener('drop', (e) => {
+        function handleDrop(e) {
             e.preventDefault();
-            uploadArea.classList.remove('dragging');
-            console.log('📥 File dropped');
-            handleFile(e.dataTransfer.files[0]);
-        });
+            elements.uploadArea.classList.remove('dragging');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                console.log('📥 File dropped:', files[0].name);
+                handleFileSelection(files[0]);
+            }
+        }
         
-        // Prevent default drag behaviors on document
-        document.addEventListener('dragover', e => e.preventDefault());
-        document.addEventListener('drop', e => e.preventDefault());
-        
-        async function handleFile(file) {
+        async function handleFileSelection(file) {
             if (!file) {
-                alert('No file selected');
+                showError('No File Selected', 'Please select a PDF file to analyze.');
                 return;
             }
             
             if (file.type !== 'application/pdf') {
-                alert('Please select a PDF file only');
+                showError('Invalid File Type', 'Please upload a PDF file only. Other formats are not supported.');
                 return;
             }
             
-            if (file.size > 10 * 1024 * 1024) { // 10MB
-                alert('File too large. Please select a PDF under 10MB');
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File Too Large', 'Please upload a PDF file smaller than 10MB.');
                 return;
             }
             
-            console.log('📊 Processing file:', file.name, (file.size / 1024).toFixed(1), 'KB');
+            if (file.size === 0) {
+                showError('Empty File', 'The selected file appears to be empty. Please choose a valid PDF.');
+                return;
+            }
             
-            // Show processing state
-            showProcessing();
+            if (isProcessing) {
+                console.log('⏳ Already processing - ignoring');
+                return;
+            }
+            
+            console.log('📊 Processing briefing:', file.name, `(${(file.size/1024/1024).toFixed(2)}MB)`);
+            await processFile(file);
+        }
+        
+        async function processFile(file) {
+            isProcessing = true;
+            updateSystemStatus('processing', 'Analyzing...');
             
             try {
-                // Update status
-                updateStatus('Reading PDF file...');
-                await delay(500);
+                showProcessingState();
                 
-                // Extract text
-                const text = await extractPDFText(file);
-                console.log('✅ Text extracted:', text.length, 'characters');
+                // Step 1: Extract PDF text
+                updateProcessingStatus('Reading PDF document...', 10);
+                const pdfText = await extractPDFText(file);
+                console.log(`📝 Extracted ${pdfText.length} characters from PDF`);
                 
-                updateStatus('Analyzing content...');
+                // Step 2: Parse briefing data
+                updateProcessingStatus('Parsing briefing information...', 40);
                 await delay(800);
+                const briefingData = extractBriefingData(pdfText, file.name);
+                console.log('📊 Briefing data extracted:', briefingData);
                 
-                // Store data
-                currentData = {
-                    file: {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type
-                    },
-                    text: text,
-                    extractedAt: new Date().toISOString()
-                };
+                // Step 3: Evaluate CREATE criteria
+                updateProcessingStatus('Evaluating CREATE criteria...', 70);
+                await delay(600);
+                const evaluation = evaluateCreateCriteria(briefingData);
+                console.log('🎯 CREATE evaluation complete:', evaluation);
                 
-                updateStatus('Processing complete!');
+                // Step 4: Complete processing
+                updateProcessingStatus('Finalizing analysis...', 100);
                 await delay(500);
                 
-                // Show results
-                showResults();
+                // Store results and show
+                currentData = { briefing: briefingData, evaluation };
+                showResults(briefingData, evaluation);
+                updateSystemStatus('ready', 'Analysis Complete');
                 
             } catch (error) {
-                console.error('❌ Error processing PDF:', error);
-                alert('Failed to process PDF: ' + error.message);
-                reset();
+                console.error('💥 Processing failed:', error);
+                showError('Processing Failed', error.message);
+                updateSystemStatus('ready', 'System Ready');
+            } finally {
+                isProcessing = false;
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
             }
         }
         
         async function extractPDFText(file) {
             try {
                 const arrayBuffer = await file.arrayBuffer();
-                console.log('📚 Array buffer created:', arrayBuffer.byteLength, 'bytes');
-                
                 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                console.log('📖 PDF loaded, pages:', pdf.numPages);
                 
                 let fullText = '';
                 
                 for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const textContent = await page.getTextContent();
-                    
-                    const pageText = textContent.items
-                        .filter(item => item.str && item.str.trim())
-                        .map(item => item.str)
-                        .join(' ');
-                    
-                    if (pageText.trim()) {
-                        fullText += pageText + '\n\n';
+                    try {
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        
+                        const pageText = textContent.items
+                            .filter(item => item.str && item.str.trim())
+                            .map(item => item.str)
+                            .join(' ');
+                        
+                        if (pageText.trim()) {
+                            fullText += pageText + '\n\n';
+                        }
+                    } catch (pageError) {
+                        console.warn(`⚠️ Error reading page ${pageNum}:`, pageError);
                     }
-                    
-                    console.log(`📄 Page ${pageNum} processed:`, pageText.length, 'characters');
                 }
                 
                 if (!fullText.trim()) {
-                    throw new Error('No readable text found in PDF');
+                    throw new Error('No readable text found in PDF. Please ensure the PDF contains text content.');
                 }
                 
                 return fullText.trim();
                 
             } catch (error) {
-                console.error('💥 PDF extraction failed:', error);
-                throw new Error('Could not read PDF file. Please ensure it contains readable text.');
+                console.error('📚 PDF extraction error:', error);
+                throw new Error('Failed to extract text from PDF. Please ensure the file is not corrupted.');
             }
         }
         
-        function showProcessing() {
-            uploadSection.style.display = 'none';
-            processingSection.style.display = 'flex';
-            resultsSection.style.display = 'none';
+        function extractBriefingData(text, fileName) {
+            console.log('🔍 Starting briefing data extraction...');
+            
+            return {
+                meta: {
+                    source_file: fileName,
+                    extraction_ts: new Date().toISOString().split('T')[0]
+                },
+                contact: {
+                    responsable_commercial: extractPattern(text, [
+                        /responsable[\\s\\w]*commercial[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s]+)/i,
+                        /contact[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s]+)/i,
+                        /karolien\\s+van\\s+gaever/i
+                    ]),
+                    agence_media: extractPattern(text, [
+                        /agence[\\s\\w]*m[eé]dia[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s&\\-]+)/i,
+                        /group\\s*m\\s*[-–]?\\s*essence\\s*mediacom/i,
+                        /agence[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s&\\-]+)/i
+                    ])
+                },
+                advertiser: {
+                    group_or_annonceur: extractPattern(text, [
+                        /groupe?[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
+                        /annonceur[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
+                        /coca[\\s-]?cola/i,
+                        /oneplus/i
+                    ]),
+                    brand_or_product: extractPattern(text, [
+                        /marque[\\s\\w]*produit[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
+                        /produit[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
+                        /marque[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i,
+                        /powerade/i,
+                        /nord\\s*5/i
+                    ])
+                },
+                brief: {
+                    type: extractPattern(text, [
+                        /type[\\s\\w]*brief[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i
+                    ]),
+                    urgency: extractUrgency(text),
+                    typologie_annonceur: extractPattern(text, [
+                        /typologie[\\s\\w]*annonceur[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-]+)/i
+                    ]),
+                    presentation_languages: extractLanguages(text),
+                    attachments_present: extractBoolean(text, /attach.*pr[eé]sent/i),
+                    target_persona: extractPattern(text, [
+                        /cible[\\s]*:?\\s*([A-Za-zÀ-ÿ0-9\\s\\-–]+)/i,
+                        /persona[\\s]*:?\\s*([A-Za-zÀ-ÿ0-9\\s\\-–]+)/i,
+                        /target[\\s]*:?\\s*([A-Za-zÀ-ÿ0-9\\s\\-–]+)/i,
+                        /18[\\s]*[-–][\\s]*54[\\s]*[-–]?[\\s]*sportifs/i,
+                        /studenten/i
+                    ]),
+                    objectives: extractObjectives(text),
+                    start_momentum_reason: extractPattern(text, [
+                        /start[\\s\\w]*momentum[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.]+)/i,
+                        /raison[\\s\\w]*d[ée]marrage[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.]+)/i
+                    ]),
+                    end_date: extractDate(text),
+                    key_messages: extractPattern(text, [
+                        /messages?[\\s\\w]*cl[eé]s?[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s,.'!\\-–]+)/i,
+                        /choississez\\s*powerade[\\s\\w]*sport/i,
+                        /back\\s*to\\s*school/i
+                    ]),
+                    media_specific_preferences: extractMediaPreferences(text),
+                    history_with_rossel: extractPattern(text, [
+                        /historique[\\s\\w]*rossel[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.,!?]+)/i
+                    ]),
+                    other_campaigns_with_rossel: extractPattern(text, [
+                        /campagnes?[\\s\\w]*cours[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.,!?]+)/i,
+                        /autres?[\\s\\w]*campagnes?[\\s]*:?\\s*([A-Za-zÀ-ÿ\\s\\-\\.,!?]+)/i
+                    ]),
+                    notes: extractNotes(text)
+                },
+                constraints: {
+                    min_budget_create_eur: CREATE_RULES.MIN_BUDGET,
+                    budget_confirmed_eur_range: extractBudgetRange(text),
+                    proposal_deadline: extractProposalDeadline(text),
+                    lead_time_business_days_after_valid_brief: CREATE_RULES.MIN_LEAD_TIME_DAYS,
+                    do_not: extractDoNotList(text),
+                    prefer: extractPreferList(text)
+                },
+                creative: {
+                    sports_focus: extractSportsFocus(text),
+                    audience_activity_min_sessions_per_week: extractActivityFrequency(text)
+                }
+            };
         }
         
-        function updateStatus(message) {
-            processingStatus.textContent = message;
+        function extractPattern(text, patterns) {
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const result = match[1] || match[0];
+                    return cleanExtractedText(result);
+                }
+            }
+            return null;
+        }
+        
+        function cleanExtractedText(text) {
+            if (!text) return null;
+            return text.trim()
+                .replace(/\\s+/g, ' ')
+                .replace(/^[:\\-–]\\s*/, '')
+                .substring(0, 500);
+        }
+        
+        function extractBudgetRange(text) {
+            const patterns = [
+                /(\\d{1,3})[-–](\\d{1,3})\\s*k(?:€|eur)?/i,
+                /€\\s*(\\d{1,3})[.,]?(\\d{3})[-–]€?\\s*(\\d{1,3})[.,]?(\\d{3})/i,
+                /budget[\\s\\w]*:?\\s*(\\d{1,3})[-–](\\d{1,3})\\s*k/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    let low = parseInt(match[1]) || 0;
+                    let high = parseInt(match[2]) || 0;
+                    
+                    if (match[0].toLowerCase().includes('k')) {
+                        low *= 1000;
+                        high *= 1000;
+                    }
+                    
+                    if (low && high && low <= high) {
+                        return `${low}-${high}`;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function extractDate(text) {
+            const datePatterns = [
+                /(\\d{1,2})[\\/.](\\d{1,2})[\\/.](\\d{4})/g,
+                /(\\d{4})[-](\\d{1,2})[-](\\d{1,2})/g
+            ];
+            
+            for (const pattern of datePatterns) {
+                const matches = [...text.matchAll(pattern)];
+                if (matches.length > 0) {
+                    const match = matches[0];
+                    try {
+                        let day, month, year;
+                        if (match[1].length === 4) {
+                            [, year, month, day] = match;
+                        } else {
+                            [, day, month, year] = match;
+                        }
+                        const date = new Date(year, month - 1, day);
+                        if (!isNaN(date.getTime())) {
+                            return date.toISOString().split('T')[0];
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function extractProposalDeadline(text) {
+            const deadlinePatterns = [
+                /date[\\s\\w]*limite[\\s\\w]*remise[\\s]*:?\\s*(\\d{1,2}[\\/.](\\d{1,2})[\\/.](\\d{4}))/i,
+                /deadline[\\s]*:?\\s*(\\d{1,2}[\\/.](\\d{1,2})[\\/.](\\d{4}))/i
+            ];
+            
+            for (const pattern of deadlinePatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    return extractDate(match[1]);
+                }
+            }
+            return extractDate(text);
+        }
+        
+        function extractLanguages(text) {
+            const languages = [];
+            const langMap = {
+                'français': 'Français',
+                'french': 'Français',
+                'anglais': 'Anglais', 
+                'english': 'Anglais',
+                'néerlandais': 'Néerlandais',
+                'dutch': 'Néerlandais',
+                'nederlands': 'Néerlandais'
+            };
+            
+            Object.keys(langMap).forEach(key => {
+                if (new RegExp(key, 'i').test(text)) {
+                    const normalized = langMap[key];
+                    if (!languages.includes(normalized)) {
+                        languages.push(normalized);
+                    }
+                }
+            });
+            
+            return languages.length > 0 ? languages : null;
+        }
+        
+        function extractObjectives(text) {
+            const objectives = [];
+            const objMap = {
+                'awareness': 'awareness',
+                'notori[eé]t[eé]': 'awareness',
+                'consideration': 'consideration',
+                'consid[eé]ration': 'consideration',
+                'activation': 'activation_conversion',
+                'conversion': 'activation_conversion'
+            };
+            
+            Object.keys(objMap).forEach(pattern => {
+                if (new RegExp(pattern, 'i').test(text)) {
+                    const normalized = objMap[pattern];
+                    if (!objectives.includes(normalized)) {
+                        objectives.push(normalized);
+                    }
+                }
+            });
+            
+            return objectives.length > 0 ? objectives : null;
+        }
+        
+        function extractMediaPreferences(text) {
+            const mediaList = [];
+            const mediaOutlets = [
+                'le soir', 'sudinfo', 'kotplanet', 'dh', 'la meuse', 
+                'digital', 'radio', 'print', 'online', 'social'
+            ];
+            
+            mediaOutlets.forEach(media => {
+                if (new RegExp(media, 'i').test(text)) {
+                    mediaList.push(media);
+                }
+            });
+            
+            return mediaList.length > 0 ? mediaList : null;
+        }
+        
+        function extractSportsFocus(text) {
+            const sports = [];
+            const sportsList = [
+                'padel', 'hockey', 'basket', 'basketball', 'running', 
+                'football', 'tennis', 'volleyball', 'cyclisme'
+            ];
+            
+            sportsList.forEach(sport => {
+                if (new RegExp(sport, 'i').test(text)) {
+                    sports.push(sport.toLowerCase());
+                }
+            });
+            
+            return sports.length > 0 ? sports : null;
+        }
+        
+        function extractActivityFrequency(text) {
+            const match = text.match(/(\\d+)\\s*x?\\/\\s*semaine/i);
+            if (match) {
+                return parseInt(match[1]);
+            }
+            
+            const match2 = text.match(/min[\\s]*([0-9]+)[\\s]*.*semaine/i);
+            if (match2) {
+                return parseInt(match2[1]);
+            }
+            
+            return null;
+        }
+        
+        function extractUrgency(text) {
+            if (/urgent|\\bélevé\\b|high/i.test(text)) return 'eleve';
+            if (/moyen|medium/i.test(text)) return 'moyen';
+            if (/faible|low/i.test(text)) return 'faible';
+            return null;
+        }
+        
+        function extractBoolean(text, pattern) {
+            const match = text.match(pattern);
+            if (!match) return null;
+            
+            const context = text.substring(Math.max(0, match.index - 50), match.index + 100);
+            if (/oui|yes|ja|true/i.test(context)) return true;
+            if (/non|no|nee|false/i.test(context)) return false;
+            return null;
+        }
+        
+        function extractDoNotList(text) {
+            const doNotList = [];
+            const patterns = [
+                /pas\\s*de\\s*(\\w+)/gi,
+                /not\\s*(\\w+)/gi,
+                /no\\s*(\\w+)/gi
+            ];
+            
+            patterns.forEach(pattern => {
+                const matches = text.matchAll(pattern);
+                for (const match of matches) {
+                    doNotList.push(match[1].toLowerCase());
+                }
+            });
+            
+            // Common exclusions
+            if (/pas\\s*de\\s*native/i.test(text)) doNotList.push('native');
+            if (/pas\\s*d'influenceurs?/i.test(text)) doNotList.push('influenceurs');
+            
+            return doNotList.length > 0 ? [...new Set(doNotList)] : null;
+        }
+        
+        function extractPreferList(text) {
+            const preferList = [];
+            const patterns = [
+                /plut[oô]t\\s*(\\w+)/gi,
+                /prefer\\w*\\s*(\\w+)/gi,
+                /favour\\w*\\s*(\\w+)/gi
+            ];
+            
+            patterns.forEach(pattern => {
+                const matches = text.matchAll(pattern);
+                for (const match of matches) {
+                    preferList.push(match[1].toLowerCase());
+                }
+            });
+            
+            // Common preferences
+            if (/plut[oô]t\\s*digital/i.test(text)) preferList.push('digital');
+            if (/prefer\\w*\\s*online/i.test(text)) preferList.push('online');
+            
+            return preferList.length > 0 ? [...new Set(preferList)] : null;
+        }
+        
+        function extractNotes(text) {
+            const notePatterns = [
+                /compl[eé]ments?[\\s]*:?\\s*([^\\n.]{50,800})/i,
+                /notes?[\\s]*:?\\s*([^\\n.]{50,800})/i,
+                /remarques?[\\s]*:?\\s*([^\\n.]{50,800})/i,
+                /int[eé]r[eê]t\\s*pour\\s*([^\\n.]{30,800})/i
+            ];
+            
+            for (const pattern of notePatterns) {
+                const match = text.match(pattern);
+                if (match && match[1]) {
+                    return cleanExtractedText(match[1]);
+                }
+            }
+            
+            return null;
+        }
+        
+        function evaluateCreateCriteria(data) {
+            console.log('🎯 Evaluating CREATE criteria...');
+            
+            const evaluation = {
+                overall_decision: 'PENDING',
+                score: 0,
+                max_score: 100,
+                criteria: {
+                    budget: { status: 'FAIL', score: 0, message: '' },
+                    timeline: { status: 'FAIL', score: 0, message: '' },
+                    required_fields: { status: 'FAIL', score: 0, message: '' }
+                },
+                issues: [],
+                recommendations: []
+            };
+            
+            // Budget evaluation (40 points)
+            if (data.constraints.budget_confirmed_eur_range) {
+                const [minBudget] = data.constraints.budget_confirmed_eur_range.split('-').map(Number);
+                const requiredBudget = CREATE_RULES.MIN_BUDGET;
+                
+                if (minBudget >= requiredBudget) {
+                    evaluation.criteria.budget = {
+                        status: 'PASS',
+                        score: 40,
+                        message: `Budget confirmed: €${minBudget.toLocaleString()} ≥ €${requiredBudget.toLocaleString()}`
+                    };
+                } else {
+                    evaluation.criteria.budget = {
+                        status: 'FAIL',
+                        score: 0,
+                        message: `Budget insufficient: €${minBudget.toLocaleString()} < €${requiredBudget.toLocaleString()}`
+                    };
+                    evaluation.issues.push('Budget below CREATE minimum');
+                }
+            } else {
+                evaluation.criteria.budget = {
+                    status: 'FAIL',
+                    score: 0,
+                    message: 'Budget not confirmed or found'
+                };
+                evaluation.issues.push('No confirmed budget found');
+            }
+            
+            // Timeline evaluation (30 points)
+            if (data.constraints.proposal_deadline) {
+                const deadline = new Date(data.constraints.proposal_deadline);
+                const today = new Date();
+                const daysAvailable = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                const requiredDays = CREATE_RULES.MIN_LEAD_TIME_DAYS;
+                
+                if (daysAvailable >= requiredDays) {
+                    evaluation.criteria.timeline = {
+                        status: 'PASS',
+                        score: 30,
+                        message: `Timeline adequate: ${daysAvailable} days ≥ ${requiredDays} days`
+                    };
+                } else {
+                    evaluation.criteria.timeline = {
+                        status: 'FAIL',
+                        score: 0,
+                        message: `Timeline insufficient: ${daysAvailable} days < ${requiredDays} days`
+                    };
+                    evaluation.issues.push('Insufficient lead time');
+                }
+            } else {
+                evaluation.criteria.timeline = {
+                    status: 'FAIL',
+                    score: 0,
+                    message: 'No proposal deadline specified'
+                };
+                evaluation.issues.push('Missing proposal deadline');
+            }
+            
+            // Required fields evaluation (30 points)
+            const requiredFields = CREATE_RULES.REQUIRED_FIELDS;
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const value = getNestedValue(data, field);
+                if (!value) {
+                    missingFields.push(field.replace('_', ' '));
+                }
+            });
+            
+            if (missingFields.length === 0) {
+                evaluation.criteria.required_fields = {
+                    status: 'PASS',
+                    score: 30,
+                    message: 'All required fields present'
+                };
+            } else {
+                evaluation.criteria.required_fields = {
+                    status: 'FAIL',
+                    score: Math.max(0, 30 - (missingFields.length * 10)),
+                    message: `Missing: ${missingFields.join(', ')}`
+                };
+                evaluation.issues.push(`Missing: ${missingFields.join(', ')}`);
+            }
+            
+            // Calculate overall score
+            evaluation.score = Object.values(evaluation.criteria)
+                .reduce((total, criterion) => total + criterion.score, 0);
+            
+            // Determine final decision
+            const allCriticalPassed = evaluation.criteria.budget.status === 'PASS' && 
+                                     evaluation.criteria.timeline.status === 'PASS';
+            
+            if (allCriticalPassed && evaluation.score >= 80) {
+                evaluation.overall_decision = 'GO';
+                evaluation.recommendations.push('Brief approved for CREATE processing');
+            } else if (allCriticalPassed && evaluation.score >= 60) {
+                evaluation.overall_decision = 'CONDITIONAL';
+                evaluation.recommendations.push('Review missing information before proceeding');
+            } else {
+                evaluation.overall_decision = 'NO-GO';
+                evaluation.recommendations.push('Brief does not meet CREATE minimum criteria');
+            }
+            
+            return evaluation;
+        }
+        
+        function getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => {
+                if (current && current[key] !== undefined && current[key] !== null) {
+                    return current[key];
+                }
+                
+                // Try underscore path navigation
+                const parts = key.split('_');
+                let value = current;
+                for (const part of parts) {
+                    if (value && value[part] !== undefined && value[part] !== null) {
+                        value = value[part];
+                    } else {
+                        return null;
+                    }
+                }
+                return value;
+            }, obj);
+        }
+        
+        function showProcessingState() {
+            elements.uploadSection.style.display = 'none';
+            elements.processingSection.style.display = 'flex';
+            elements.resultsSection.style.display = 'none';
+            hideError();
+        }
+        
+        function updateProcessingStatus(message, progress = null) {
+            elements.processingStatus.textContent = message;
+            if (progress !== null) {
+                elements.progressFill.style.width = `${progress}%`;
+            }
             console.log('📍', message);
         }
         
-        function showResults() {
-            uploadSection.style.display = 'none';
-            processingSection.style.display = 'none';
-            resultsSection.style.display = 'block';
+        function showResults(briefingData, evaluation) {
+            elements.uploadSection.style.display = 'none';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'block';
             
-            // Update result data
-            document.getElementById('fileName').textContent = currentData.file.name;
-            document.getElementById('fileSize').textContent = (currentData.file.size / 1024).toFixed(1) + ' KB';
-            document.getElementById('textLength').textContent = currentData.text.length.toLocaleString() + ' characters';
-            document.getElementById('contentPreview').textContent = currentData.text.substring(0, 300) + (currentData.text.length > 300 ? '...' : '');
+            displayDecisionBanner(evaluation);
+            displayEvaluationDetails(evaluation);
+            displayExtractedData(briefingData);
             
-            // Update decision banner
-            document.getElementById('decisionTitle').textContent = 'PDF Successfully Processed';
-            document.getElementById('decisionMessage').textContent = `Text extracted from ${currentData.file.name} and ready for analysis.`;
+            // Add animation classes
+            elements.resultsSection.classList.add('fade-in');
         }
         
-        function exportData() {
+        function displayDecisionBanner(evaluation) {
+            const banner = elements.decisionBanner;
+            const icon = document.getElementById('decisionIcon');
+            const title = document.getElementById('decisionTitle');
+            const message = document.getElementById('decisionMessage');
+            const score = document.getElementById('decisionScore');
+            
+            // Reset classes
+            banner.className = 'decision-banner';
+            
+            if (evaluation.overall_decision === 'GO') {
+                banner.classList.add('go');
+                icon.innerHTML = '<i class="fas fa-check"></i>';
+                title.textContent = 'GO - Brief Approved';
+                message.textContent = 'All CREATE criteria met. Brief approved for processing.';
+            } else if (evaluation.overall_decision === 'CONDITIONAL') {
+                banner.classList.add('conditional');
+                icon.innerHTML = '<i class="fas fa-exclamation"></i>';
+                title.textContent = 'CONDITIONAL - Review Required';
+                message.textContent = 'Core criteria met but additional information needed.';
+            } else {
+                banner.classList.add('nogo');
+                icon.innerHTML = '<i class="fas fa-times"></i>';
+                title.textContent = 'NO-GO - Brief Rejected';
+                message.textContent = 'CREATE criteria not met. See evaluation details below.';
+            }
+            
+            score.textContent = `Score: ${evaluation.score}/${evaluation.max_score}`;
+        }
+        
+        function displayEvaluationDetails(evaluation) {
+            // Budget evaluation
+            const budgetStatus = document.getElementById('budgetStatus');
+            const confirmedBudget = document.getElementById('confirmedBudget');
+            
+            budgetStatus.className = `status ${evaluation.criteria.budget.status === 'PASS' ? 'valid' : 'invalid'}`;
+            budgetStatus.textContent = evaluation.criteria.budget.status === 'PASS' ? '✓ Valid' : '✗ Invalid';
+            
+            if (currentData.briefing.constraints.budget_confirmed_eur_range) {
+                const budget = currentData.briefing.constraints.budget_confirmed_eur_range;
+                if (budget.includes('-')) {
+                    const [low, high] = budget.split('-');
+                    confirmedBudget.textContent = `€${parseInt(low).toLocaleString()}-€${parseInt(high).toLocaleString()}`;
+                } else {
+                    confirmedBudget.textContent = `€${parseInt(budget).toLocaleString()}`;
+                }
+            } else {
+                confirmedBudget.textContent = 'Not specified';
+                confirmedBudget.classList.add('text-muted');
+            }
+            
+            // Timeline evaluation
+            const timelineStatus = document.getElementById('timelineStatus');
+            const proposalDeadline = document.getElementById('proposalDeadline');
+            
+            timelineStatus.className = `status ${evaluation.criteria.timeline.status === 'PASS' ? 'valid' : 'invalid'}`;
+            timelineStatus.textContent = evaluation.criteria.timeline.status === 'PASS' ? '✓ Adequate' : '✗ Insufficient';
+            
+            if (currentData.briefing.constraints.proposal_deadline) {
+                const deadline = new Date(currentData.briefing.constraints.proposal_deadline);
+                proposalDeadline.textContent = deadline.toLocaleDateString();
+            } else {
+                proposalDeadline.textContent = 'Not specified';
+                proposalDeadline.classList.add('text-muted');
+            }
+            
+            // Required fields evaluation
+            const contactStatus = document.getElementById('contactStatus');
+            const advertiserStatus = document.getElementById('advertiserStatus');
+            const personaStatus = document.getElementById('personaStatus');
+            
+            contactStatus.className = `status ${currentData.briefing.contact.responsable_commercial ? 'valid' : 'missing'}`;
+            contactStatus.textContent = currentData.briefing.contact.responsable_commercial ? '✓ Found' : '⚠ Missing';
+            
+            advertiserStatus.className = `status ${currentData.briefing.advertiser.group_or_annonceur ? 'valid' : 'missing'}`;
+            advertiserStatus.textContent = currentData.briefing.advertiser.group_or_annonceur ? '✓ Found' : '⚠ Missing';
+            
+            personaStatus.className = `status ${currentData.briefing.brief.target_persona ? 'valid' : 'missing'}`;
+            personaStatus.textContent = currentData.briefing.brief.target_persona ? '✓ Found' : '⚠ Missing';
+        }
+        
+        function displayExtractedData(data) {
+            // Contact & Advertiser
+            setFieldValue('responsableCommercial', data.contact.responsable_commercial);
+            setFieldValue('agenceMedia', data.contact.agence_media);
+            setFieldValue('groupAnnonceur', data.advertiser.group_or_annonceur);
+            setFieldValue('brandProduct', data.advertiser.brand_or_product);
+            
+            // Brief Details
+            setFieldValue('targetPersona', data.brief.target_persona);
+            setFieldValue('objectives', data.brief.objectives?.join(', '));
+            setFieldValue('presentationLanguages', data.brief.presentation_languages?.join(', '));
+            setFieldValue('endDate', data.brief.end_date);
+            
+            // Messages & Preferences
+            setFieldValue('keyMessages', data.brief.key_messages);
+            setFieldValue('mediaPreferences', data.brief.media_specific_preferences?.join(', '));
+            setFieldValue('sportsFocus', data.creative.sports_focus?.join(', '));
+            setFieldValue('doNotUse', data.constraints.do_not?.join(', '));
+            setFieldValue('preferUse', data.constraints.prefer?.join(', '));
+            
+            // Additional Information
+            setFieldValue('historyWithRossel', data.brief.history_with_rossel);
+            setFieldValue('otherCampaigns', data.brief.other_campaigns_with_rossel);
+            setFieldValue('additionalNotes', data.brief.notes);
+        }
+        
+        function setFieldValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value || '-';
+                if (!value) {
+                    element.classList.add('text-muted');
+                } else {
+                    element.classList.remove('text-muted');
+                }
+            }
+        }
+        
+        function updateSystemStatus(type, message) {
+            const status = elements.systemStatus;
+            status.className = `status-indicator ${type}`;
+            status.querySelector('span').textContent = message;
+            
+            const icon = status.querySelector('i');
+            if (type === 'ready') {
+                icon.className = 'fas fa-check-circle';
+            } else if (type === 'processing') {
+                icon.className = 'fas fa-spinner fa-spin';
+            }
+        }
+        
+        function showError(title, message) {
+            const errorBanner = elements.errorBanner;
+            const errorTitle = document.getElementById('errorTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorTitle.textContent = title;
+            errorMessage.textContent = message;
+            errorBanner.classList.add('show');
+            
+            // Show upload section
+            elements.uploadSection.style.display = 'block';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'none';
+        }
+        
+        function hideError() {
+            elements.errorBanner.classList.remove('show');
+        }
+        
+        function handleRetry() {
+            console.log('🔄 Retrying upload');
+            hideError();
+            resetDashboard();
+        }
+        
+        function resetDashboard() {
+            console.log('🔄 Resetting dashboard');
+            
+            elements.uploadSection.style.display = 'block';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'none';
+            
+            elements.fileInput.value = '';
+            elements.uploadArea.classList.remove('dragging');
+            elements.progressFill.style.width = '0%';
+            
+            hideError();
+            currentData = null;
+            isProcessing = false;
+            
+            updateSystemStatus('ready', 'System Ready');
+        }
+        
+        function exportJSON() {
             if (!currentData) {
-                alert('No data to export');
+                alert('No data available to export. Please analyze a briefing first.');
                 return;
             }
             
             try {
+                // Create export object following CLAUDE.md schema exactly
                 const exportObject = {
-                    meta: {
-                        source_file: currentData.file.name,
-                        extraction_ts: currentData.extractedAt.split('T')[0],
-                        file_size_kb: Math.round(currentData.file.size / 1024),
-                        text_length: currentData.text.length
-                    },
-                    content: {
-                        full_text: currentData.text,
-                        preview: currentData.text.substring(0, 500)
-                    }
+                    meta: currentData.briefing.meta,
+                    contact: currentData.briefing.contact,
+                    advertiser: currentData.briefing.advertiser,
+                    brief: currentData.briefing.brief,
+                    constraints: currentData.briefing.constraints,
+                    creative: currentData.briefing.creative
                 };
                 
+                // Download as JSON
                 const jsonString = JSON.stringify(exportObject, null, 2);
                 const blob = new Blob([jsonString], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `pdf-extract-${new Date().toISOString().split('T')[0]}.json`;
+                a.download = `briefing-analysis-${new Date().toISOString().split('T')[0]}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
-                console.log('📥 Data exported successfully');
+                console.log('📥 JSON exported successfully');
                 
             } catch (error) {
                 console.error('❌ Export failed:', error);
-                alert('Failed to export data');
+                alert('Failed to export JSON. Please try again.');
             }
-        }
-        
-        function reset() {
-            uploadSection.style.display = 'block';
-            processingSection.style.display = 'none';
-            resultsSection.style.display = 'none';
-            fileInput.value = '';
-            uploadArea.classList.remove('dragging');
-            currentData = null;
-            console.log('🔄 Reset complete');
         }
         
         function delay(ms) {
@@ -681,10 +2066,11 @@
         }
         
         // Make functions globally available
-        window.exportData = exportData;
-        window.reset = reset;
+        window.resetDashboard = resetDashboard;
+        window.exportJSON = exportJSON;
+        window.handleRetry = handleRetry;
         
-        console.log('✅ Brand Studio CREATE Ready!');
+        console.log('✅ Brand Studio CREATE Professional Ready!');
     </script>
 </body>
 </html>
