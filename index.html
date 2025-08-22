@@ -580,6 +580,9 @@
         }
         
         function extractBriefingDataV4(text, fileName) {
+            console.log('📄 FULL PDF TEXT (first 1000 chars):', text.substring(0, 1000));
+            console.log('📄 PDF TEXT LENGTH:', text.length);
+            
             const today = new Date().toISOString().split('T')[0];
             
             // Enhanced extraction following CLAUDE.md v4 specifications
@@ -601,40 +604,8 @@
                     ])
                 },
                 advertiser: {
-                    group_or_annonceur: extractPattern(text, [
-                        // Try to find formal field labels first
-                        /groupe[\s\w]*annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
-                        /annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
-                        // Look for specific known brands anywhere in text
-                        /(coca[\s\-]*cola)/i,
-                        /(coca)/i,  // Just "Coca" as fallback
-                        /(oneplus)/i,
-                        /(unilever)/i,
-                        /(nestl[eé])/i,
-                        /(pepsi)/i,
-                        /(microsoft)/i,
-                        /(apple)/i,
-                        /(samsung)/i,
-                        // Very broad search for any company name patterns
-                        /\b([A-Z][a-z]+[\s\-][A-Z][a-z]+)\b/,
-                        /\b([A-Z][a-z]{3,})\b/
-                    ], 'group_or_annonceur'),
-                    brand_or_product: extractPattern(text, [
-                        // Try to find formal field labels first
-                        /marque[\s\w\/]*produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
-                        /produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
-                        /marque[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
-                        // Look for specific known products anywhere in text
-                        /(powerade)/i,
-                        /(nord[\s]*5)/i,
-                        /(sprite)/i,
-                        /(fanta)/i,
-                        /(iphone)/i,
-                        /(galaxy)/i,
-                        // Very broad search for any product name patterns
-                        /\b([A-Z][a-z]+[\s]*[0-9]+)\b/,
-                        /\b([A-Z][a-z]{4,})\b/
-                    ], 'brand_or_product')
+                    group_or_annonceur: extractAdvertiserAggressive(text),
+                    brand_or_product: extractProductAggressive(text)
                 },
                 brief: {
                     type: extractPattern(text, [
@@ -699,6 +670,123 @@
                     source_field_map: null
                 }
             };
+        }
+        
+        function extractAdvertiserAggressive(text) {
+            console.log('🚀 EXTRACTING ADVERTISER - Starting aggressive search...');
+            
+            // Method 1: Try specific brand patterns first
+            const knownBrands = [
+                'coca-cola', 'coca cola', 'cocacola', 'coca',
+                'oneplus', 'one plus',
+                'unilever', 'nestlé', 'nestle', 'pepsi', 'microsoft', 'apple', 'samsung',
+                'nike', 'adidas', 'google', 'amazon', 'facebook', 'meta'
+            ];
+            
+            for (const brand of knownBrands) {
+                const regex = new RegExp(brand, 'gi');
+                const matches = text.match(regex);
+                if (matches && matches.length > 0) {
+                    const result = matches[0];
+                    console.log(`🎯 ADVERTISER FOUND (known brand):`, result);
+                    return result.charAt(0).toUpperCase() + result.slice(1).toLowerCase();
+                }
+            }
+            
+            // Method 2: Look for formal field patterns
+            const fieldPatterns = [
+                /groupe[\s\w]*annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /groupe[\s]*:?\s*([A-Za-z\s-]+)/i,
+                /client[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /advertiser[\s\w]*:?\s*([A-Za-z\s-]+)/i
+            ];
+            
+            for (const pattern of fieldPatterns) {
+                const match = text.match(pattern);
+                if (match && match[1] && match[1].trim().length > 2) {
+                    const result = match[1].trim();
+                    console.log(`🎯 ADVERTISER FOUND (field pattern):`, result);
+                    return result;
+                }
+            }
+            
+            // Method 3: Look for capitalized words that might be company names
+            const capitalizedWords = text.match(/\b[A-Z][a-z]{2,}\b/g);
+            if (capitalizedWords) {
+                // Filter out common words
+                const commonWords = ['The', 'And', 'For', 'With', 'This', 'That', 'Create', 'Brief', 'Campaign', 'Media', 'Digital', 'Marketing', 'Agency', 'Studio', 'Brand'];
+                const candidates = capitalizedWords.filter(word => 
+                    !commonWords.includes(word) && 
+                    word.length > 3 &&
+                    !/^\d/.test(word)
+                );
+                
+                if (candidates.length > 0) {
+                    const result = candidates[0];
+                    console.log(`🎯 ADVERTISER FOUND (capitalized word):`, result, 'from candidates:', candidates.slice(0, 5));
+                    return result;
+                }
+            }
+            
+            console.log('❌ ADVERTISER NOT FOUND - No patterns matched');
+            return null;
+        }
+        
+        function extractProductAggressive(text) {
+            console.log('🚀 EXTRACTING PRODUCT - Starting aggressive search...');
+            
+            // Method 1: Try specific product patterns first
+            const knownProducts = [
+                'powerade', 'sprite', 'fanta', 'coca-cola', 'pepsi',
+                'nord 5', 'iphone', 'galaxy', 'pixel'
+            ];
+            
+            for (const product of knownProducts) {
+                const regex = new RegExp(product, 'gi');
+                const matches = text.match(regex);
+                if (matches && matches.length > 0) {
+                    const result = matches[0];
+                    console.log(`🎯 PRODUCT FOUND (known product):`, result);
+                    return result.charAt(0).toUpperCase() + result.slice(1).toLowerCase();
+                }
+            }
+            
+            // Method 2: Look for formal field patterns
+            const fieldPatterns = [
+                /marque[\s\w\/]*produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                /produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                /marque[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                /product[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                /brand[\s\w]*:?\s*([A-Za-z\s0-9]+)/i
+            ];
+            
+            for (const pattern of fieldPatterns) {
+                const match = text.match(pattern);
+                if (match && match[1] && match[1].trim().length > 2) {
+                    const result = match[1].trim();
+                    console.log(`🎯 PRODUCT FOUND (field pattern):`, result);
+                    return result;
+                }
+            }
+            
+            // Method 3: Look for product-like patterns (capitalized words with numbers or special chars)
+            const productPatterns = [
+                /\b([A-Z][a-z]+\s*\d+)\b/g,  // Like "Nord 5"
+                /\b([A-Z][a-z]{4,})\b/g       // Capitalized words 5+ chars
+            ];
+            
+            for (const pattern of productPatterns) {
+                const matches = text.match(pattern);
+                if (matches && matches.length > 0) {
+                    const result = matches[0];
+                    console.log(`🎯 PRODUCT FOUND (pattern match):`, result);
+                    return result;
+                }
+            }
+            
+            console.log('❌ PRODUCT NOT FOUND - No patterns matched');
+            return null;
         }
         
         function extractPattern(text, patterns, fieldName) {
