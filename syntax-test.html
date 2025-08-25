@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Syntax Test</title>
+</head>
+<body>
+    <h1>Testing JavaScript Syntax</h1>
+    <script>
+        console.log('Starting syntax test...');
+        
+        // Test template literals
+        const test1 = `This is a test ${1 + 1}`;
+        console.log('Test 1:', test1);
+        
+        // Test nested template literals
+        const cards = [{title: 'Test', fields: [{label: 'Label', value: 'Value'}]}];
+        const result = cards.map(card => `
+            <div>
+                <h3>${card.title}</h3>
+                ${card.fields.map(field => `
+                    <span>${field.label}: ${field.value}</span>
+                `).join('')}
+            </div>
+        `).join('');
+        console.log('Test 2:', result);
+        
+        console.log('Syntax test completed successfully!');
+    </script>
+</body>
+</html>

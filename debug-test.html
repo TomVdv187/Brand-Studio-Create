@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test - Upload Functionality</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 50px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            background-color: #f8f9fa;
+        }
+        .upload-area:hover {
+            background-color: #e3f2fd;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .debug-info {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Test - Upload Functionality</h1>
+    
+    <div class="upload-area" id="uploadArea">
+        <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+        <h3>📄 Upload Test</h3>
+        <p>Click here or drag and drop a PDF file</p>
+        <button class="btn" id="uploadBtn">Browse for PDF</button>
+    </div>
+    
+    <div class="debug-info" id="debugInfo">
+        Debug info will appear here...
+    </div>
+
+    <script>
+        console.log('🚀 Debug Test Starting...');
+        
+        // Get elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        function log(message) {
+            console.log(message);
+            debugInfo.innerHTML += message + '<br>';
+        }
+        
+        log('✅ Elements found:');
+        log(`- uploadArea: ${uploadArea ? 'OK' : 'MISSING'}`);
+        log(`- fileInput: ${fileInput ? 'OK' : 'MISSING'}`);
+        log(`- uploadBtn: ${uploadBtn ? 'OK' : 'MISSING'}`);
+        log('');
+        
+        // Upload button click
+        uploadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            log('🔘 Upload button clicked!');
+            if (fileInput) {
+                fileInput.click();
+                log('📁 Triggered file input click');
+            } else {
+                log('❌ File input not found');
+            }
+        });
+        
+        // Upload area click
+        uploadArea.addEventListener('click', function(e) {
+            if (e.target === uploadBtn) return;
+            e.preventDefault();
+            log('📦 Upload area clicked!');
+            if (fileInput) {
+                fileInput.click();
+                log('📁 Triggered file input click');
+            } else {
+                log('❌ File input not found');
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            log('📄 File selected!');
+            const file = e.target.files[0];
+            if (file) {
+                log(`✅ File: ${file.name} (${file.size} bytes, ${file.type})`);
+                // Basic validation
+                if (file.type === 'application/pdf') {
+                    log('✅ PDF file detected - Upload would work!');
+                } else {
+                    log('❌ Not a PDF file');
+                }
+            } else {
+                log('❌ No file selected');
+            }
+        });
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            log('🔄 Drag over detected');
+            uploadArea.style.backgroundColor = '#e3f2fd';
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            log('🔄 Drag leave detected');
+            uploadArea.style.backgroundColor = '#f8f9fa';
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.style.backgroundColor = '#f8f9fa';
+            log('📥 File dropped!');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                log(`✅ Dropped file: ${file.name} (${file.size} bytes, ${file.type})`);
+                if (file.type === 'application/pdf') {
+                    log('✅ PDF file detected - Drag & drop would work!');
+                } else {
+                    log('❌ Not a PDF file');
+                }
+            } else {
+                log('❌ No files in drop');
+            }
+        });
+        
+        // Prevent default drag behaviors
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('drop', e => e.preventDefault());
+        
+        log('🎧 All event listeners attached');
+        log('✅ Debug test ready - try uploading!');
+    </script>
+</body>
+</html>

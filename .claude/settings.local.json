@@ -6,7 +6,9 @@
       "Bash(start working-index.html)",
       "Bash(cp:*)",
       "Bash(git push:*)",
-      "Bash(start index.html)"
+      "Bash(start index.html)",
+      "Bash(start debug-test.html)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

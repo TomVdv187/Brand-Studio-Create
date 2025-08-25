@@ -403,10 +403,6 @@
                                 <p id="decisionMessage">Your PDF has been successfully analyzed.</p>
                             </div>
                             <div style="display: flex; gap: 1rem; align-items: center; margin-left: auto;">
-                                <button class="btn-secondary" onclick="exportData()">
-                                    <i class="fas fa-download"></i>
-                                    Export JSON
-                                </button>
                                 <button class="btn-secondary" onclick="reset()">
                                     <i class="fas fa-upload"></i>
                                     New Briefing
@@ -621,7 +617,7 @@
                     ]),
                     presentation_languages: extractLanguages(text),
                     attachments_present: detectAttachments(text),
-                    target_persona: extractTargetPersonaIntelligent(text, advertiser, product),
+                    target_persona: extractTargetPersonaSimple(text),
                     objectives: extractObjectives(text),
                     start_momentum_reason: extractPattern(text, [
                         /momentum[\s\w]*:?\s*([A-Za-z0-9\s,.'!-–]+)/i,
@@ -844,11 +840,10 @@
             return null;
         }
         
-        function extractTargetPersonaIntelligent(text, advertiser, product) {
-            console.log('👥 EXTRACTING TARGET PERSONA - Starting intelligent search...');
-            console.log('🔍 Using context - Advertiser:', advertiser, 'Product:', product);
+        function extractTargetPersonaSimple(text) {
+            console.log('👥 EXTRACTING TARGET PERSONA - Looking for explicit persona only...');
             
-            // Method 1: Try to find explicit persona in text first
+            // Only look for explicit persona in text - no recommendations or fallbacks
             const personaPatterns = [
                 /cible[\s\w]*persona[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
                 /persona[\s\w]*:?\s*([A-Za-z0-9\s-–]+)/i,
@@ -863,114 +858,22 @@
             
             for (const pattern of personaPatterns) {
                 const match = text.match(pattern);
-                if (match && match[1] && match[1].trim().length > 5) {
+                if (match && match[1] && match[1].trim().length > 3) {
                     const result = match[1].trim();
                     console.log(`🎯 PERSONA FOUND (explicit):`, result);
                     return result;
-                } else if (match && match[0]) {
+                } else if (match && match[0] && match[0].trim().length > 5) {
                     const result = match[0];
                     console.log(`🎯 PERSONA FOUND (pattern match):`, result);
                     return result;
                 }
             }
             
-            // Method 2: Create intelligent persona based on advertiser + product
-            if (advertiser && product) {
-                const persona = generatePersonaRecommendation(advertiser.toLowerCase(), product.toLowerCase());
-                if (persona) {
-                    console.log(`🎯 PERSONA GENERATED (intelligent):`, persona);
-                    return persona;
-                }
-            }
-            
-            // Method 3: Product-based persona fallback
-            if (product) {
-                const persona = generateProductBasedPersona(product.toLowerCase());
-                if (persona) {
-                    console.log(`🎯 PERSONA GENERATED (product-based):`, persona);
-                    return persona;
-                }
-            }
-            
-            // Method 4: Final fallback - always provide a persona
-            console.log('🔄 PERSONA FALLBACK - Generating default persona');
-            return '18-45 adultes actifs, consommateurs digitaux';
-        }
-        
-        function generatePersonaRecommendation(advertiser, product) {
-            console.log('🧠 GENERATING PERSONA RECOMMENDATION for:', advertiser, '+', product);
-            
-            // Make sure we have strings to work with
-            const adv = advertiser ? advertiser.toLowerCase() : '';
-            const prod = product ? product.toLowerCase() : '';
-            
-            // Coca-Cola + Powerade = Sports audience
-            if (adv.includes('coca') && prod.includes('powerade')) {
-                console.log('✅ MATCHED: Coca-Cola + Powerade → Sports persona');
-                return '18-35 sportifs actifs, pratiquant sport minimum 2x/semaine';
-            }
-            
-            // Sports drinks general (even without advertiser)
-            if (prod.includes('powerade') || prod.includes('gatorade') || prod.includes('aquarius')) {
-                console.log('✅ MATCHED: Sports drink → Sports persona');
-                return '18-40 sportifs et fitness enthusiasts';
-            }
-            
-            // Coca-Cola products general
-            if (adv.includes('coca')) {
-                if (prod.includes('zero') || prod.includes('light')) {
-                    console.log('✅ MATCHED: Coca-Cola diet → Health-conscious persona');
-                    return '25-45 adultes soucieux de leur santé';
-                }
-                console.log('✅ MATCHED: Coca-Cola → General youth persona');
-                return '16-35 jeunes adultes et familles';
-            }
-            
-            // Tech products
-            if (prod.includes('iphone') || prod.includes('samsung') || prod.includes('oneplus')) {
-                console.log('✅ MATCHED: Tech product → Tech enthusiast persona');
-                return '18-45 early adopters et tech enthusiasts';
-            }
-            
-            if (prod.includes('nord')) {
-                console.log('✅ MATCHED: Nord → Young professional persona');
-                return '20-35 jeunes professionnels tech-savvy';
-            }
-            
-            // Generic fallbacks based on advertiser
-            if (adv.includes('nike') || adv.includes('adidas')) {
-                console.log('✅ MATCHED: Sports brand → Active lifestyle persona');
-                return '16-40 sportifs et lifestyle actif';
-            }
-            
-            // If we have any product, try to make a general recommendation
-            if (prod && prod.length > 2) {
-                console.log('✅ MATCHED: Generic product → Active consumer persona');
-                return '18-45 consommateurs actifs et engagés';
-            }
-            
-            console.log('❌ NO SPECIFIC MATCH - Will use fallback');
+            console.log('❌ PERSONA NOT FOUND - Leaving empty as requested');
             return null;
         }
         
-        function generateProductBasedPersona(product) {
-            const productPersonas = {
-                'powerade': '18-35 sportifs actifs',
-                'sprite': '16-30 jeunes rafraîchissement',
-                'fanta': '12-25 familles et jeunes',
-                'iphone': '25-50 premium tech users',
-                'galaxy': '20-45 tech enthusiasts',
-                'oneplus': '20-35 tech early adopters'
-            };
-            
-            for (const [key, persona] of Object.entries(productPersonas)) {
-                if (product.includes(key)) {
-                    return persona;
-                }
-            }
-            
-            return null;
-        }
+        // Removed persona recommendation functions as per user request
         
         function extractPattern(text, patterns, fieldName) {
             for (const pattern of patterns) {
@@ -1498,53 +1401,7 @@
             }
         }
         
-        function exportData() {
-            if (!currentData) {
-                alert('No data to export. Please upload and process a PDF first.');
-                return;
-            }
-            
-            try {
-                // Create export object following CLAUDE.md v4 schema exactly
-                const exportObject = {
-                    meta: currentData.briefing.meta,
-                    contact: currentData.briefing.contact,
-                    advertiser: currentData.briefing.advertiser,
-                    brief: currentData.briefing.brief,
-                    constraints: currentData.briefing.constraints,
-                    creative: currentData.briefing.creative,
-                    internal: {
-                        briefing_acceptance_status: currentData.evaluation.overall_decision,
-                        acceptance_reason: currentData.evaluation.acceptance_reason,
-                        action_recommend_publishers: currentData.evaluation.action_recommend_publishers,
-                        internal_publisher_recommendation: currentData.evaluation.internal_publisher_recommendation,
-                        internal_notes: currentData.evaluation.internal_notes
-                    },
-                    supplemental: {
-                        other_fields: null,
-                        source_field_map: null
-                    }
-                };
-                
-                // Download as JSON
-                const jsonString = JSON.stringify(exportObject, null, 2);
-                const blob = new Blob([jsonString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `briefing-extract-v4-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                console.log('📥 Data exported successfully (CLAUDE.md v4 compliant)');
-                
-            } catch (error) {
-                console.error('❌ Export failed:', error);
-                alert('Failed to export data. Please try again.');
-            }
-        }
+        // Removed exportData function as per user request - system now focuses on extracting FROM PDFs for display
         
         function reset() {
             elements.uploadSection.style.display = 'block';
@@ -1561,7 +1418,6 @@
         }
         
         // Make functions globally available
-        window.exportData = exportData;
         window.reset = reset;
         
         console.log('✅ Brand Studio CREATE v4 Ready! (CLAUDE.md v4 Compliant)');
