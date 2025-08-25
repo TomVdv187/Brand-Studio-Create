@@ -625,11 +625,7 @@
                         /raison[\s\w]*:?\s*([A-Za-z\s-–]+)/i
                     ]),
                     end_date: extractDate(text, /end|fin|termine/i),
-                    key_messages: extractPattern(text, [
-                        /message[\s\w]*cl[eé]s?[\s]*:?\s*([A-Za-z\s,.'!-–]+)/i,
-                        /choississez\s*powerade/i,
-                        /back\s*to\s*school/i
-                    ]),
+                    key_messages: extractKeyMessages(text),
                     media_specific_preferences: extractMediaPreferences(text),
                     history_with_rossel: extractPattern(text, [
                         /historique[\s\w]*rossel[\s]*:?\s*([A-Za-z\s,.'!-–]+)/i
@@ -1049,6 +1045,55 @@
                     return parseInt(match[1]);
                 }
             }
+            return null;
+        }
+        
+        function extractKeyMessages(text) {
+            console.log('💬 EXTRACTING KEY MESSAGES - Looking for specific content...');
+            
+            // Look for specific known key messages first (content, not form labels)
+            const specificMessages = [
+                /choississez\s*powerade\s*quand\s*vous\s*faites\s*du\s*sport/i,
+                /back\s*to\s*school/i,
+                /nouvelle\s*campagne/i,
+                /message\s*principal/i
+            ];
+            
+            for (const pattern of specificMessages) {
+                const match = text.match(pattern);
+                if (match) {
+                    const result = match[0];
+                    console.log('🎯 KEY MESSAGE FOUND (specific):', result);
+                    return result;
+                }
+            }
+            
+            // Look for content after "messages clés" but avoid form labels
+            const messagePatterns = [
+                // More specific pattern that requires actual content after the label
+                /message[\s\w]*cl[eé]s?[\s]*:[\s]*([A-Za-z][A-Za-z\s,.'!-–]{10,200})/i,
+                // Look for quotes or structured content
+                /message[\s\w]*cl[eé]s?[\s]*:[\s]*["']([^"']{10,200})["']/i,
+                // Content in next line after the label
+                /message[\s\w]*cl[eé]s?[\s]*:\s*\n+([A-Za-z][A-Za-z\s,.'!-–]{10,200})/i
+            ];
+            
+            for (const pattern of messagePatterns) {
+                const match = text.match(pattern);
+                if (match && match[1] && match[1].trim().length > 10) {
+                    const result = match[1].trim();
+                    // Additional check to avoid questionnaire content
+                    if (!result.toLowerCase().includes('remplir') && 
+                        !result.toLowerCase().includes('compléter') &&
+                        !result.toLowerCase().includes('question') &&
+                        !result.toLowerCase().includes('formulaire')) {
+                        console.log('🎯 KEY MESSAGE FOUND (pattern):', result);
+                        return result;
+                    }
+                }
+            }
+            
+            console.log('❌ KEY MESSAGES NOT FOUND - No valid content after labels');
             return null;
         }
         
