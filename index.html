@@ -1434,61 +1434,83 @@
             
             console.log('🎯 GENERATING PUBLISHER RECOMMENDATIONS for:', advertiser, product, '€' + budget);
             
-            // KBC/CBC Banking - Premium placements
+            // KBC/CBC Banking - ROSSEL GROUP ONLY
             if (advertiser.includes('kbc') || advertiser.includes('cbc') || advertiser.includes('banque')) {
-                recommendations.push('Le Soir - Business & Finance');
-                recommendations.push('L\'Echo - Secteur Financier');
+                recommendations.push('Le Soir - Business & Finance (premium positioning)');
+                recommendations.push('Le Soir - Économie & Entreprises section');
+                recommendations.push('DH - Business & Finance coverage');
                 
                 if (product.includes('entreprise') || product.includes('business')) {
-                    recommendations.push('Trends-Tendances - Decision Makers');
-                    recommendations.push('Le Soir Entreprises');
+                    recommendations.push('Le Soir Entreprises - Decision makers section');
+                    recommendations.push('DH Économie - Regional business focus');
+                    recommendations.push('Sudinfo Business - Local market reach');
                 }
                 
                 if (budget >= 50000) {
-                    recommendations.push('Le Soir Premium Package');
-                    recommendations.push('Cross-Platform Financial Campaign');
+                    recommendations.push('Le Soir Premium Business Package');
+                    recommendations.push('Multi-Platform Rossel Financial Campaign (Le Soir + DH + Sudinfo)');
+                    recommendations.push('Le Soir Digital + Print Business Combo');
                 }
                 
-                recommendations.push('DH Les Sports+ - Sponsoring Integration');
+                recommendations.push('DH Les Sports+ - Banking sponsorship integration');
+                recommendations.push('Le Soir Weekend - Lifestyle financial planning');
+                recommendations.push('Rossel Digital Network - Online banking campaign');
             }
             
-            // FMCG/Consumer Brands
+            // FMCG/Consumer Brands - ROSSEL GROUP ONLY
             else if (advertiser.includes('coca') || product.includes('boisson') || product.includes('food')) {
-                recommendations.push('Le Soir - Lifestyle & Consumer');
-                recommendations.push('DH - Large Audience Reach');
-                recommendations.push('Sudinfo - Regional Coverage');
+                recommendations.push('Le Soir - Lifestyle & Consumer (weekend supplements)');
+                recommendations.push('DH - Large Audience Reach (family coverage)');
+                recommendations.push('Sudinfo - Regional Coverage (local market penetration)');
+                recommendations.push('Le Soir Mad - Lifestyle integration');
+                recommendations.push('DH Les Sports+ - Active lifestyle connection');
                 
                 if (data.brief.target_persona?.includes('18-') || data.brief.target_persona?.includes('25-')) {
-                    recommendations.push('Kotplanet - Youth Market');
+                    recommendations.push('Kotplanet - Youth Market (student engagement)');
+                    recommendations.push('Le Soir Digital - Young adult targeting');
+                }
+                
+                if (budget >= 30000) {
+                    recommendations.push('Multi-Platform Rossel Consumer Campaign');
+                    recommendations.push('Le Soir + DH + Sudinfo Synchronized Launch');
                 }
             }
             
-            // Tech/Mobile
+            // Tech/Mobile - ROSSEL GROUP ONLY  
             else if (product.includes('mobile') || product.includes('tech') || advertiser.includes('oneplus')) {
-                recommendations.push('Le Soir - Tech & Innovation');
-                recommendations.push('DH Digital Platforms');
-                recommendations.push('Rossel Digital Network');
+                recommendations.push('Le Soir - Tech & Innovation section');
+                recommendations.push('DH Digital Platforms (online focus)');
+                recommendations.push('Rossel Digital Network (cross-platform)');
+                recommendations.push('Le Soir Connect - Technology supplement');
+                recommendations.push('Kotplanet - Tech-savvy student audience');
+                recommendations.push('Sudinfo Digital - Regional tech adoption');
             }
             
-            // Default recommendations
+            // Default recommendations - ROSSEL GROUP ONLY
             else {
-                recommendations.push('Le Soir - Mixed Placement');
-                recommendations.push('DH - Regional Coverage');
+                recommendations.push('Le Soir - Mixed Placement (general audience)');
+                recommendations.push('DH - Regional Coverage (broad reach)');
+                recommendations.push('Sudinfo - Local Market Focus');
+                recommendations.push('Rossel Digital Network - Online campaign');
             }
             
-            // Budget-based additions
+            // Budget-based additions - ROSSEL GROUP PREMIUM
             if (budget >= 100000) {
-                recommendations.push('Multi-Platform Premium Campaign');
-                recommendations.push('Le Soir + DH Synchronized Launch');
+                recommendations.push('🌟 ROSSEL PREMIUM PACKAGE - All platforms integration');
+                recommendations.push('Le Soir + DH + Sudinfo + Kotplanet Synchronized Campaign');
+                recommendations.push('Rossel Digital Network - Complete online ecosystem');
+                recommendations.push('Le Soir Premium Events - Exclusive sponsorship opportunities');
             }
             
-            // Sports focus additions
+            // Sports focus additions - ROSSEL GROUP SPORTS
             if (data.creative?.sports_focus?.length > 0) {
-                recommendations.push('DH Les Sports+ - Sports Integration');
-                recommendations.push('Le Soir Sports Section');
+                recommendations.push('DH Les Sports+ - Comprehensive sports integration');
+                recommendations.push('Le Soir Sports Section - Premium sports coverage');
+                recommendations.push('Sudinfo Sports - Regional sports engagement');
+                recommendations.push('Rossel Sports Network - Multi-platform sports campaign');
             }
             
-            return recommendations.length > 0 ? [...new Set(recommendations)] : ['Le Soir - Standard Placement'];
+            return recommendations.length > 0 ? [...new Set(recommendations)] : ['Le Soir - Standard Placement', 'DH - Regional Focus', 'Sudinfo - Local Coverage'];
         }
         
         function generateInternalNotes(data, evaluation) {
@@ -1506,8 +1528,8 @@
                 // Client-specific briefing notes
                 if (advertiser.toLowerCase().includes('kbc') || advertiser.toLowerCase().includes('cbc')) {
                     notes.push(`🏦 Banking Client: Focus on trust, local economy, expertise`);
-                    notes.push(`📰 Recommend Le Soir Business section + L'Echo financial coverage`);
-                    notes.push(`💼 Decision makers: Target C-suite and financial directors`);
+                    notes.push(`📰 ROSSEL PRIORITY: Le Soir Business + DH Économie + Sudinfo Business`);
+                    notes.push(`💼 Decision makers: Target C-suite via Le Soir premium positioning`);
                 }
                 
                 // Budget-specific recommendations
@@ -1668,7 +1690,8 @@
                 }
             ];
             
-            elements.dataGrid.innerHTML = cards.map(card => `
+            // Create the standard cards
+            let gridHTML = cards.map(card => `
                 <div class="data-card">
                     <div class="data-header">
                         <i class="${card.icon}"></i>
@@ -1684,6 +1707,49 @@
                     </div>
                 </div>
             `).join('');
+            
+            // Add special large publisher recommendations card for accepted briefs
+            if (evaluation.overall_decision === 'accepted' && evaluation.internal_publisher_recommendation && evaluation.internal_publisher_recommendation.length > 0) {
+                const publisherCard = `
+                    <div class="data-card" style="grid-column: span 2; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; margin-bottom: 2rem;">
+                        <div class="data-header" style="background: rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            <i class="fas fa-newspaper" style="color: white; font-size: 2rem;"></i>
+                            <div>
+                                <h3 style="color: white; font-size: 1.5rem;">🏆 ROSSEL GROUP - Publisher Recommendations</h3>
+                                <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem; margin: 0;">Approved brief - Ready for publisher briefing</p>
+                            </div>
+                        </div>
+                        <div class="data-content" style="background: rgba(255,255,255,0.05);">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                                ${evaluation.internal_publisher_recommendation.map((pub, index) => `
+                                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #fbbf24;">
+                                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: #fbbf24;">
+                                            📰 Option ${index + 1}
+                                        </div>
+                                        <div style="color: white; font-size: 1rem;">
+                                            ${pub}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
+                                <div style="font-weight: 600; color: #60a5fa; margin-bottom: 0.5rem;">
+                                    💡 Next Steps - Internal Briefing Process:
+                                </div>
+                                <div style="color: rgba(255,255,255,0.9);">
+                                    1. Contact selected publisher(s) within 24h<br>
+                                    2. Share client brief with Rossel editorial teams<br>
+                                    3. Request media kit and proposal within 48h<br>
+                                    4. Schedule client presentation meeting
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                gridHTML = publisherCard + gridHTML;
+            }
+            
+            elements.dataGrid.innerHTML = gridHTML;
         }
         
         function formatBudgetRange(range) {
