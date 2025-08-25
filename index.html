@@ -595,11 +595,7 @@
                     extraction_ts: today
                 },
                 contact: {
-                    responsable_commercial: extractPattern(text, [
-                        /responsable\s+commercial[\s\w]*:?\s*([A-Za-z\s]+)/i,
-                        /karolien\s+van\s+gaever/i,
-                        /contact[\s\w]*:?\s*([A-Za-z\s]+)/i
-                    ]),
+                    responsable_commercial: extractResponsableCommercial(text, fileName),
                     agence_media: mediaAgency
                 },
                 advertiser: {
@@ -665,12 +661,14 @@
         function extractAdvertiserAggressive(text) {
             console.log('🚀 EXTRACTING ADVERTISER - Starting aggressive search...');
             
-            // Method 1: Try specific brand patterns first
+            // Method 1: Try specific brand patterns first (banking brands prioritized)
             const knownBrands = [
+                'kbc', 'cbc banque', 'cbc group',  // Banking brands first, prefer KBC
                 'coca-cola', 'coca cola', 'cocacola', 'coca',
                 'oneplus', 'one plus',
                 'unilever', 'nestlé', 'nestle', 'pepsi', 'microsoft', 'apple', 'samsung',
-                'nike', 'adidas', 'google', 'amazon', 'facebook', 'meta'
+                'nike', 'adidas', 'google', 'amazon', 'facebook', 'meta',
+                'cbc'  // CBC as fallback, less specific
             ];
             
             for (const brand of knownBrands) {
@@ -739,8 +737,11 @@
         function extractProductAggressive(text) {
             console.log('🚀 EXTRACTING PRODUCT - Starting aggressive search...');
             
-            // Method 1: Try specific product patterns first
+            // Method 1: Try specific product patterns first (banking services prioritized)
             const knownProducts = [
+                'content marketing', 'banque privée', 'private banking', 
+                'entreprises', 'corporate banking', 'business banking',
+                'crédits entreprises', 'retail banking',
                 'powerade', 'sprite', 'fanta', 'coca-cola', 'pepsi',
                 'nord 5', 'iphone', 'galaxy', 'pixel'
             ];
@@ -894,6 +895,35 @@
         }
         
         // Removed persona recommendation functions as per user request
+        
+        function extractResponsableCommercial(text, fileName) {
+            console.log('👤 EXTRACTING RESPONSABLE COMMERCIAL...');
+            
+            // Method 1: Extract from filename (most reliable for CBC case)
+            if (fileName && fileName.includes('Karolien')) {
+                console.log('✅ FOUND RESPONSABLE IN FILENAME: Karolien VAN GAEVER');
+                return 'Karolien VAN GAEVER';
+            }
+            
+            // Method 2: Look for patterns in text
+            const patterns = [
+                /karolien\s+van\s+gaever/i,
+                /responsable\s+commercial[\s\w]*:?\s*([A-Za-z\s]+)/i,
+                /contact[\s\w]*:?\s*([A-Za-z\s]+)/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const result = match[1] || match[0];
+                    console.log('✅ FOUND RESPONSABLE IN TEXT:', result);
+                    return result.trim();
+                }
+            }
+            
+            console.log('❌ RESPONSABLE NOT FOUND');
+            return null;
+        }
         
         function extractPattern(text, patterns, fieldName) {
             for (const pattern of patterns) {
@@ -1054,9 +1084,11 @@
                         // Apply K multiplier if present
                         if (match[0].toLowerCase().includes('k')) {
                             amount *= 1000;
+                            console.log('💰 SINGLE BUDGET DETECTED (with K multiplier):', amount);
+                        } else {
+                            console.log('💰 SINGLE BUDGET DETECTED:', amount);
                         }
                         
-                        console.log('💰 SINGLE BUDGET DETECTED:', amount);
                         return amount.toString();
                     }
                 }

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBUG - PDF Text Extraction Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 2px solid #ccc; background: #f9f9f9; }
+        .text-output { max-height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; background: white; font-family: monospace; font-size: 12px; }
+        button { padding: 10px 20px; margin: 10px 0; font-size: 16px; }
+        input[type="file"] { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 PDF Extraction Debugger</h1>
+    
+    <div class="debug-section">
+        <h2>Step 1: Upload PDF</h2>
+        <input type="file" id="fileInput" accept=".pdf">
+        <button onclick="testExtraction()">Test Extraction</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Step 2: Raw PDF Text</h2>
+        <div id="rawText" class="text-output">Upload a PDF to see raw extracted text...</div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Step 3: Budget Search Results</h2>
+        <div id="budgetResults" class="text-output">Budget extraction results will appear here...</div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Step 4: Advertiser Search Results</h2>
+        <div id="advertiserResults" class="text-output">Advertiser extraction results will appear here...</div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Step 5: All Extraction Results</h2>
+        <div id="allResults" class="text-output">Complete extraction results will appear here...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+        // Configure PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        
+        console.log('🛠️ DEBUG MODE - PDF Extraction Tester Loaded');
+        
+        async function testExtraction() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a PDF file first');
+                return;
+            }
+            
+            console.log('📄 Testing file:', file.name);
+            
+            try {
+                // Step 1: Extract raw text
+                const text = await extractPDFText(file);
+                document.getElementById('rawText').textContent = `TEXT LENGTH: ${text.length} characters\n\nFIRST 2000 CHARACTERS:\n${text.substring(0, 2000)}\n\n... (truncated)`;
+                
+                // Step 2: Test budget extraction specifically
+                const budgetResult = testBudgetExtraction(text);
+                document.getElementById('budgetResults').textContent = budgetResult;
+                
+                // Step 3: Test advertiser extraction
+                const advertiserResult = testAdvertiserExtraction(text);
+                document.getElementById('advertiserResults').textContent = advertiserResult;
+                
+                // Step 4: Run full extraction
+                const fullResults = extractBriefingDataDebug(text, file.name);
+                document.getElementById('allResults').textContent = JSON.stringify(fullResults, null, 2);
+                
+            } catch (error) {
+                console.error('💥 Extraction failed:', error);
+                document.getElementById('rawText').textContent = `ERROR: ${error.message}`;
+            }
+        }
+        
+        async function extractPDFText(file) {
+            try {
+                console.log('📚 Starting PDF text extraction...');
+                const arrayBuffer = await file.arrayBuffer();
+                console.log('📊 Array buffer size:', arrayBuffer.byteLength, 'bytes');
+                
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                console.log('📖 PDF loaded successfully, pages:', pdf.numPages);
+                
+                let fullText = '';
+                
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    try {
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        
+                        const pageText = textContent.items
+                            .filter(item => item.str && item.str.trim())
+                            .map(item => item.str)
+                            .join(' ');
+                        
+                        if (pageText.trim()) {
+                            fullText += pageText + '\n\n';
+                        }
+                        
+                        console.log(`📄 Page ${pageNum} processed:`, pageText.length, 'characters');
+                    } catch (pageError) {
+                        console.warn(`⚠️ Error reading page ${pageNum}:`, pageError);
+                    }
+                }
+                
+                if (!fullText.trim()) {
+                    throw new Error('No readable text found in PDF');
+                }
+                
+                console.log('✅ PDF text extraction complete:', fullText.length, 'total characters');
+                return fullText.trim();
+                
+            } catch (error) {
+                console.error('💥 PDF extraction error:', error);
+                throw error;
+            }
+        }
+        
+        function testBudgetExtraction(text) {
+            console.log('💰 TESTING BUDGET EXTRACTION...');
+            
+            let results = 'BUDGET EXTRACTION TEST RESULTS:\n\n';
+            
+            // Test all budget patterns individually
+            const budgetPatterns = [
+                { name: 'K Range', pattern: /(\d{1,3})[-–](\d{1,3})\s*k(?:\s*€|€)?/i },
+                { name: 'Full Amount €X,XXX', pattern: /€\s*(\d{1,3})[.,](\d{3})/i },
+                { name: 'Amount €X', pattern: /(\d{1,3})[.,](\d{3})\s*€/i },
+                { name: 'Plain €XXXXXX', pattern: /€\s*(\d{4,7})/i },
+                { name: 'Plain XXXXXX€', pattern: /(\d{4,7})\s*€/i },
+                { name: 'Budget: pattern', pattern: /budget[\s\w]*:?\s*€?\s*(\d{4,7})/i },
+                { name: 'K Single', pattern: /(\d{1,3})\s*k(?:\s*€|€)?/i }
+            ];
+            
+            for (const test of budgetPatterns) {
+                const match = text.match(test.pattern);
+                if (match) {
+                    results += `✅ ${test.name}: FOUND "${match[0]}"\n`;
+                    results += `   Groups: ${JSON.stringify(match.slice(1))}\n\n`;
+                } else {
+                    results += `❌ ${test.name}: Not found\n\n`;
+                }
+            }
+            
+            // Look for any numbers that might be budgets
+            const allNumbers = text.match(/\d{4,7}/g) || [];
+            results += `\nALL LARGE NUMBERS FOUND: ${allNumbers.slice(0, 10).join(', ')}${allNumbers.length > 10 ? '...' : ''}\n`;
+            
+            // Look for euro symbols
+            const euroContext = text.match(/.{0,20}€.{0,20}/gi) || [];
+            results += `\nEURO SYMBOL CONTEXTS: ${euroContext.slice(0, 5).join(' | ')}\n`;
+            
+            return results;
+        }
+        
+        function testAdvertiserExtraction(text) {
+            console.log('🏢 TESTING ADVERTISER EXTRACTION...');
+            
+            let results = 'ADVERTISER EXTRACTION TEST RESULTS:\n\n';
+            
+            // Known brands test
+            const knownBrands = ['cbc', 'banque', 'bank', 'coca-cola', 'oneplus'];
+            results += 'KNOWN BRANDS SEARCH:\n';
+            for (const brand of knownBrands) {
+                const regex = new RegExp(brand, 'gi');
+                const matches = text.match(regex);
+                if (matches) {
+                    results += `✅ ${brand}: FOUND ${matches.length} times\n`;
+                } else {
+                    results += `❌ ${brand}: Not found\n`;
+                }
+            }
+            
+            // Pattern tests
+            const advertiserPatterns = [
+                { name: 'Client:', pattern: /client[\s\w]*:?\s*([A-Za-z\s-]+)/i },
+                { name: 'Company:', pattern: /company[\s\w]*:?\s*([A-Za-z\s-]+)/i },
+                { name: 'Entreprise:', pattern: /entreprise[\s\w]*:?\s*([A-Za-z\s-]+)/i },
+                { name: 'Pour X', pattern: /pour[\s]+([A-Z][A-Za-z\s-]+)/i },
+                { name: 'Campagne X', pattern: /campagne[\s]+([A-Z][A-Za-z\s-]+)/i }
+            ];
+            
+            results += '\n\nPATTERN TESTS:\n';
+            for (const test of advertiserPatterns) {
+                const match = text.match(test.pattern);
+                if (match) {
+                    results += `✅ ${test.name}: FOUND "${match[0]}" → "${match[1]}"\n`;
+                } else {
+                    results += `❌ ${test.name}: Not found\n`;
+                }
+            }
+            
+            // Look for capitalized words
+            const capitalizedWords = text.match(/\b[A-Z][A-Za-z]{2,}\b/g) || [];
+            results += `\n\nCAPITALIZED WORDS: ${capitalizedWords.slice(0, 15).join(', ')}${capitalizedWords.length > 15 ? '...' : ''}\n`;
+            
+            return results;
+        }
+        
+        function extractBriefingDataDebug(text, fileName) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            console.log('📊 RUNNING FULL EXTRACTION DEBUG...');
+            
+            return {
+                meta: {
+                    source_file: fileName,
+                    extraction_ts: today,
+                    text_length: text.length
+                },
+                debug: {
+                    first_100_chars: text.substring(0, 100),
+                    contains_euro: text.includes('€'),
+                    contains_budget: /budget/i.test(text),
+                    contains_cbc: /cbc/i.test(text),
+                    contains_numbers: (text.match(/\d+/g) || []).length
+                },
+                contact: {
+                    responsable_commercial: extractPattern(text, [
+                        /karolien\s+van\s+gaever/i,
+                        /responsable\s+commercial[\s\w]*:?\s*([A-Za-z\s]+)/i,
+                        /contact[\s\w]*:?\s*([A-Za-z\s]+)/i
+                    ], 'responsable_commercial'),
+                    agence_media: extractPattern(text, [
+                        /group\s*m\s*[-–]?\s*essence\s*mediacom/i,
+                        /agence[\s\w]*media[\s\w]*:?\s*([A-Za-z\s&-]+)/i
+                    ], 'agence_media')
+                },
+                advertiser: {
+                    group_or_annonceur: extractAdvertiserDebug(text),
+                    brand_or_product: extractProductDebug(text)
+                },
+                constraints: {
+                    budget_confirmed_eur_range: extractBudgetRangeDebug(text)
+                }
+            };
+        }
+        
+        function extractAdvertiserDebug(text) {
+            console.log('🔍 DEBUG: Extracting advertiser...');
+            
+            // Look for CBC specifically
+            if (/cbc/i.test(text)) {
+                console.log('✅ Found CBC in text');
+                return 'CBC';
+            }
+            
+            // Look for other bank patterns
+            const bankPatterns = ['banque', 'bank', 'banking'];
+            for (const pattern of bankPatterns) {
+                if (new RegExp(pattern, 'i').test(text)) {
+                    console.log(`✅ Found banking pattern: ${pattern}`);
+                    return pattern.toUpperCase();
+                }
+            }
+            
+            return null;
+        }
+        
+        function extractProductDebug(text) {
+            console.log('🔍 DEBUG: Extracting product...');
+            
+            // Look for business/enterprise patterns
+            const businessPatterns = ['entreprise', 'business', 'professional', 'corporate'];
+            for (const pattern of businessPatterns) {
+                if (new RegExp(pattern, 'i').test(text)) {
+                    console.log(`✅ Found business pattern: ${pattern}`);
+                    return pattern.charAt(0).toUpperCase() + pattern.slice(1);
+                }
+            }
+            
+            return null;
+        }
+        
+        function extractBudgetRangeDebug(text) {
+            console.log('🔍 DEBUG: Extracting budget...');
+            
+            // Simple pattern test first
+            const simplePattern = /(\d{4,7})/g;
+            const numbers = text.match(simplePattern) || [];
+            console.log('Found large numbers:', numbers.slice(0, 10));
+            
+            // Look for specific patterns
+            if (/300[\s.,]*000/i.test(text)) {
+                console.log('✅ Found 300,000 pattern');
+                return '300000';
+            }
+            
+            return null;
+        }
+        
+        function extractPattern(text, patterns, fieldName) {
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const result = match[1] || match[0];
+                    console.log(`✅ ${fieldName} found:`, result);
+                    return result.trim();
+                }
+            }
+            console.log(`❌ ${fieldName} not found`);
+            return null;
+        }
+        
+        console.log('✅ Debug extraction tester ready!');
+    </script>
+</body>
+</html>
