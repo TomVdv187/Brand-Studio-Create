@@ -1434,83 +1434,93 @@
             
             console.log('🎯 GENERATING PUBLISHER RECOMMENDATIONS for:', advertiser, product, '€' + budget);
             
-            // KBC/CBC Banking - ROSSEL GROUP ONLY
+            // KBC/CBC Banking - CREATIVE ROSSEL CONCEPTS 💡
             if (advertiser.includes('kbc') || advertiser.includes('cbc') || advertiser.includes('banque')) {
-                recommendations.push('Le Soir - Business & Finance (premium positioning)');
-                recommendations.push('Le Soir - Économie & Entreprises section');
-                recommendations.push('DH - Business & Finance coverage');
+                recommendations.push('🏆 LE SOIR "ÉCONOMIE LOCALE" - Positionnement premium sur la finance de proximité');
+                recommendations.push('💼 LE SOIR "SUCCESS STORIES" - Série éditoriale sur les entrepreneurs belges');
+                recommendations.push('📊 LE SOIR "BUSINESS WEEK" - Rubrique dédiée économie régionale');
                 
                 if (product.includes('entreprise') || product.includes('business')) {
-                    recommendations.push('Le Soir Entreprises - Decision makers section');
-                    recommendations.push('DH Économie - Regional business focus');
-                    recommendations.push('Sudinfo Business - Local market reach');
+                    recommendations.push('🚀 LE SOIR "FUTURS LEADERS" - Supplément décideurs & innovation');
+                    recommendations.push('💡 SUDINFO "ENTREPRENDRE LOCAL" - Focus PME & startups régionales');
+                    recommendations.push('🌟 SUDINFO "BUSINESS LOCAL" - Portraits d\'entrepreneurs de proximité');
                 }
                 
                 if (budget >= 50000) {
-                    recommendations.push('Le Soir Premium Business Package');
-                    recommendations.push('Multi-Platform Rossel Financial Campaign (Le Soir + DH + Sudinfo)');
-                    recommendations.push('Le Soir Digital + Print Business Combo');
+                    recommendations.push('🎯 "TRUST CAMPAIGN" - Campagne multi-supports sur la confiance bancaire');
+                    recommendations.push('📰 "ROSSEL FINANCIAL WEEK" - Semaine spéciale économie sur tous supports');
+                    recommendations.push('💻 "DIGITAL TRUST HUB" - Plateforme éditoriale finance + native');
                 }
                 
-                recommendations.push('DH Les Sports+ - Banking sponsorship integration');
-                recommendations.push('Le Soir Weekend - Lifestyle financial planning');
-                recommendations.push('Rossel Digital Network - Online banking campaign');
+                recommendations.push('⚽ LE SOIR SPORTS "INVESTIR DANS LE SPORT" - Partenariat éditorial sport/finance');
+                recommendations.push('🏠 LE SOIR WEEKEND "VIE PRATIQUE FINANCE" - Conseils patrimoine & lifestyle');
+                recommendations.push('🌐 ROSSEL DIGITAL "BANQUE 3.0" - Série vidéo innovation bancaire');
             }
             
-            // FMCG/Consumer Brands - ROSSEL GROUP ONLY
+            // FMCG/Consumer Brands - CREATIVE LIFESTYLE CONCEPTS 🎨
             else if (advertiser.includes('coca') || product.includes('boisson') || product.includes('food')) {
-                recommendations.push('Le Soir - Lifestyle & Consumer (weekend supplements)');
-                recommendations.push('DH - Large Audience Reach (family coverage)');
-                recommendations.push('Sudinfo - Regional Coverage (local market penetration)');
-                recommendations.push('Le Soir Mad - Lifestyle integration');
-                recommendations.push('DH Les Sports+ - Active lifestyle connection');
+                recommendations.push('🍹 LE SOIR WEEKEND "ART DE VIVRE" - Intégration lifestyle & gastronomie');
+                recommendations.push('👨‍👩‍👧‍👦 LE SOIR "MOMENTS EN FAMILLE" - Série éditoriale convivialité & partage');
+                recommendations.push('🏠 SUDINFO "SAVEURS LOCALES" - Focus produits & traditions régionales');
+                recommendations.push('💫 LE SOIR MAD "TENDANCES & PLAISIR" - Magazine lifestyle premium');
+                recommendations.push('🏃‍♂️ LE SOIR SPORTS "ÉNERGIE & PERFORMANCE" - Partenariat sport & nutrition');
                 
                 if (data.brief.target_persona?.includes('18-') || data.brief.target_persona?.includes('25-')) {
-                    recommendations.push('Kotplanet - Youth Market (student engagement)');
-                    recommendations.push('Le Soir Digital - Young adult targeting');
+                    recommendations.push('🎓 KOTPLANET "CAMPUS LIFE" - Campagne immersive étudiante');
+                    recommendations.push('📱 LE SOIR DIGITAL "YOUNG & FRESH" - Contenu natif jeune adulte');
                 }
                 
                 if (budget >= 30000) {
-                    recommendations.push('Multi-Platform Rossel Consumer Campaign');
-                    recommendations.push('Le Soir + DH + Sudinfo Synchronized Launch');
+                    recommendations.push('🌟 "ROSSEL LIFESTYLE TOUR" - Événements multi-villes & digital');
+                    recommendations.push('📺 "SAVEUR AUTHENTIQUE" - Série vidéo & articles synchronisés');
                 }
             }
             
-            // Tech/Mobile - ROSSEL GROUP ONLY  
+            // Tech/Mobile - CREATIVE ROSSEL TECH CONCEPTS 📱
             else if (product.includes('mobile') || product.includes('tech') || advertiser.includes('oneplus')) {
-                recommendations.push('Le Soir - Tech & Innovation section');
-                recommendations.push('DH Digital Platforms (online focus)');
-                recommendations.push('Rossel Digital Network (cross-platform)');
-                recommendations.push('Le Soir Connect - Technology supplement');
-                recommendations.push('Kotplanet - Tech-savvy student audience');
-                recommendations.push('Sudinfo Digital - Regional tech adoption');
+                recommendations.push('📱 LE SOIR "TECH & SOCIÉTÉ" - Innovation et impact sociétal');
+                recommendations.push('💻 LE SOIR DIGITAL "CONNECTÉS BELGIQUE" - Tests et comparatifs tech');
+                recommendations.push('🌐 ROSSEL DIGITAL "FUTURE IS NOW" - Série vidéo innovation belge');
+                recommendations.push('🎮 LE SOIR CONNECT "DIGITAL NATIVES" - Supplément technologie');
+                recommendations.push('🚀 KOTPLANET "CAMPUS TECH" - Tech étudiante et startups');
+                recommendations.push('📊 SUDINFO DIGITAL "TECH PROXIMITÉ" - Adoption technologique régionale');
+                
+                if (budget >= 40000) {
+                    recommendations.push('🏆 "ROSSEL TECH SUMMIT" - Événement innovation multi-supports');
+                    recommendations.push('💡 "FUTURE MAKERS" - Série portraits entrepreneurs tech belges');
+                }
             }
             
-            // Default recommendations - ROSSEL GROUP ONLY
+            // Default Creative Recommendations - ROSSEL GROUP EXCELLENCE 🌟
             else {
-                recommendations.push('Le Soir - Mixed Placement (general audience)');
-                recommendations.push('DH - Regional Coverage (broad reach)');
-                recommendations.push('Sudinfo - Local Market Focus');
-                recommendations.push('Rossel Digital Network - Online campaign');
+                recommendations.push('🏛️ LE SOIR "EXCELLENCE BELGE" - Positionnement premium qualité');
+                recommendations.push('🌍 LE SOIR "PROXIMITÉ & CONFIANCE" - Campagne territoire et valeurs');
+                recommendations.push('🏠 SUDINFO "PARTENAIRE LOCAL" - Ancrage communautaire fort');
+                recommendations.push('📺 ROSSEL DIGITAL "ENSEMBLE PLUS FORT" - Campagne cross-média');
+                
+                if (budget >= 25000) {
+                    recommendations.push('🎯 "ROSSEL IMPACT" - Package premium tous supports');
+                    recommendations.push('✨ "MADE IN BELGIUM" - Série éditoriale excellence locale');
+                }
             }
             
             // Budget-based additions - ROSSEL GROUP PREMIUM
             if (budget >= 100000) {
                 recommendations.push('🌟 ROSSEL PREMIUM PACKAGE - All platforms integration');
-                recommendations.push('Le Soir + DH + Sudinfo + Kotplanet Synchronized Campaign');
+                recommendations.push('Le Soir + Sudinfo + Kotplanet Synchronized Campaign');
                 recommendations.push('Rossel Digital Network - Complete online ecosystem');
                 recommendations.push('Le Soir Premium Events - Exclusive sponsorship opportunities');
             }
             
             // Sports focus additions - ROSSEL GROUP SPORTS
             if (data.creative?.sports_focus?.length > 0) {
-                recommendations.push('DH Les Sports+ - Comprehensive sports integration');
-                recommendations.push('Le Soir Sports Section - Premium sports coverage');
-                recommendations.push('Sudinfo Sports - Regional sports engagement');
-                recommendations.push('Rossel Sports Network - Multi-platform sports campaign');
+                recommendations.push('⚽ LE SOIR SPORTS - Premium sports coverage integration');
+                recommendations.push('🏃‍♂️ SUDINFO SPORTS - Regional sports engagement');
+                recommendations.push('🏆 ROSSEL SPORTS NETWORK - Multi-platform sports campaign');
+                recommendations.push('🎯 KOTPLANET SPORTS - Student athlete community');
             }
             
-            return recommendations.length > 0 ? [...new Set(recommendations)] : ['Le Soir - Standard Placement', 'DH - Regional Focus', 'Sudinfo - Local Coverage'];
+            return recommendations.length > 0 ? [...new Set(recommendations)] : ['Le Soir - Standard Placement', 'Sudinfo - Local Coverage', 'Rossel Digital - Online Focus'];
         }
         
         function generateInternalNotes(data, evaluation) {
@@ -1528,7 +1538,7 @@
                 // Client-specific briefing notes
                 if (advertiser.toLowerCase().includes('kbc') || advertiser.toLowerCase().includes('cbc')) {
                     notes.push(`🏦 Banking Client: Focus on trust, local economy, expertise`);
-                    notes.push(`📰 ROSSEL PRIORITY: Le Soir Business + DH Économie + Sudinfo Business`);
+                    notes.push(`📰 ROSSEL PRIORITY: Le Soir Business + Sudinfo Business + Rossel Digital`);
                     notes.push(`💼 Decision makers: Target C-suite via Le Soir premium positioning`);
                 }
                 
@@ -1711,36 +1721,52 @@
             // Add special large publisher recommendations card for accepted briefs
             if (evaluation.overall_decision === 'accepted' && evaluation.internal_publisher_recommendation && evaluation.internal_publisher_recommendation.length > 0) {
                 const publisherCard = `
-                    <div class="data-card" style="grid-column: span 2; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; margin-bottom: 2rem;">
-                        <div class="data-header" style="background: rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.2);">
-                            <i class="fas fa-newspaper" style="color: white; font-size: 2rem;"></i>
+                    <div class="data-card" style="grid-column: span 2; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                        <div class="data-header" style="background: rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.3); padding: 2rem;">
+                            <i class="fas fa-rocket" style="color: #fbbf24; font-size: 3rem; margin-right: 1rem;"></i>
                             <div>
-                                <h3 style="color: white; font-size: 1.5rem;">🏆 ROSSEL GROUP - Publisher Recommendations</h3>
-                                <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem; margin: 0;">Approved brief - Ready for publisher briefing</p>
+                                <h2 style="color: white; font-size: 2rem; margin-bottom: 0.5rem; text-shadow: 0 4px 8px rgba(0,0,0,0.3);">🚀 ROSSEL GROUP - CREATIVE EDITORIAL CONCEPTS</h2>
+                                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin: 0; font-weight: 500;">Brief approved • Ready for internal publisher coordination • Budget: €${parseInt(briefing.constraints.budget_confirmed_eur_range).toLocaleString()}</p>
                             </div>
                         </div>
-                        <div class="data-content" style="background: rgba(255,255,255,0.05);">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                        <div class="data-content" style="background: rgba(255,255,255,0.1); padding: 2rem;">
+                            <div style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 1rem; border-left: 6px solid #fbbf24;">
+                                <div style="font-size: 1.2rem; font-weight: 700; color: #fbbf24; margin-bottom: 0.5rem; display: flex; align-items: center;">
+                                    🎯 <span style="margin-left: 0.5rem;">CLIENT: ${briefing.advertiser.group_or_annonceur || 'Advertiser'} • PRODUCT: ${briefing.advertiser.brand_or_product || 'Product'}</span>
+                                </div>
+                                <div style="color: rgba(255,255,255,0.95); font-size: 1rem;">
+                                    TARGET: ${briefing.brief.target_persona || 'General audience'} • 
+                                    BUDGET: €${parseInt(briefing.constraints.budget_confirmed_eur_range).toLocaleString()} • 
+                                    DEADLINE: ${briefing.constraints.proposal_deadline || 'TBD'}
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
                                 ${evaluation.internal_publisher_recommendation.map((pub, index) => `
-                                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #fbbf24;">
-                                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: #fbbf24;">
-                                            📰 Option ${index + 1}
+                                    <div style="background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%); padding: 1.5rem; border-radius: 1rem; border: 2px solid rgba(251, 191, 36, 0.3); transition: all 0.3s ease; backdrop-filter: blur(10px);">
+                                        <div style="font-weight: 700; margin-bottom: 1rem; color: #fbbf24; font-size: 1.1rem; display: flex; align-items: center;">
+                                            <span style="background: #fbbf24; color: #1f2937; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; margin-right: 0.75rem;">${index + 1}</span>
+                                            CONCEPT ÉDITORIAL
                                         </div>
-                                        <div style="color: white; font-size: 1rem;">
+                                        <div style="color: white; font-size: 1.1rem; line-height: 1.5; font-weight: 500;">
                                             ${pub}
                                         </div>
                                     </div>
                                 `).join('')}
                             </div>
-                            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
-                                <div style="font-weight: 600; color: #60a5fa; margin-bottom: 0.5rem;">
-                                    💡 Next Steps - Internal Briefing Process:
+                            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 1rem; border-left: 6px solid #fbbf24;">
+                                <div style="font-weight: 700; color: #fbbf24; margin-bottom: 1rem; font-size: 1.2rem; display: flex; align-items: center;">
+                                    💡 <span style="margin-left: 0.5rem;">WORKFLOW INTERNE - PROCESSUS ÉDITORIAL ROSSEL</span>
                                 </div>
-                                <div style="color: rgba(255,255,255,0.9);">
-                                    1. Contact selected publisher(s) within 24h<br>
-                                    2. Share client brief with Rossel editorial teams<br>
-                                    3. Request media kit and proposal within 48h<br>
-                                    4. Schedule client presentation meeting
+                                <div style="color: rgba(255,255,255,0.95); font-size: 1rem; line-height: 1.6;">
+                                    <strong>🔥 ACTIONS IMMÉDIATES:</strong><br>
+                                    • Contact rédaction(s) sélectionnée(s) dans les 24h<br>
+                                    • Briefing éditorial détaillé avec équipes créatives<br>
+                                    • Validation concepts avec directeur(s) de publication<br>
+                                    • Proposition média kit + tarifs sous 48h maximum<br><br>
+                                    <strong>📋 LIVRABLES ATTENDUS:</strong><br>
+                                    • Kit de présentation client (concepts + exemples)<br>
+                                    • Planning de production éditorial détaillé<br>
+                                    • Proposition budgétaire avec recommandations
                                 </div>
                             </div>
                         </div>
@@ -1875,14 +1901,14 @@
             const adv = advertiser.toLowerCase();
             
             if (adv.includes('kbc') || adv.includes('cbc') || adv.includes('banque')) {
-                return ['Le Soir', 'L\'Echo', 'Trends-Tendances', 'DH Les Sports+'];
+                return ['Le Soir Business', 'Le Soir Digital', 'Sudinfo Business', 'Rossel Digital'];
             }
             
             if (adv.includes('coca') || adv.includes('food') || adv.includes('drink')) {
-                return ['Le Soir', 'DH', 'Sudinfo', 'Kotplanet'];
+                return ['Le Soir Lifestyle', 'Sudinfo Local', 'Kotplanet Youth', 'Le Soir Weekend'];
             }
             
-            return ['Le Soir', 'DH', 'Sudinfo'];
+            return ['Le Soir', 'Sudinfo', 'Rossel Digital'];
         }
         
         function generateSportsFocus(advertiser, product) {
