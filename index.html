@@ -683,13 +683,26 @@
                 }
             }
             
-            // Method 2: Look for formal field patterns
+            // Method 2: Look for formal field patterns and presentation contexts
             const fieldPatterns = [
+                // Traditional form patterns
                 /groupe[\s\w]*annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
                 /annonceur[\s\w]*:?\s*([A-Za-z\s-]+)/i,
                 /groupe[\s]*:?\s*([A-Za-z\s-]+)/i,
                 /client[\s\w]*:?\s*([A-Za-z\s-]+)/i,
-                /advertiser[\s\w]*:?\s*([A-Za-z\s-]+)/i
+                /advertiser[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                
+                // Client presentation patterns
+                /company[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /entreprise[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /société[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /marque[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                /brand[\s\w]*:?\s*([A-Za-z\s-]+)/i,
+                
+                // Context-based patterns (for presentations)
+                /pour[\s]+([A-Z][A-Za-z\s-]+)/i,                // "pour Coca-Cola"
+                /présent[eé][\s]*par[\s]+([A-Z][A-Za-z\s-]+)/i,  // "présenté par X"
+                /campagne[\s]+([A-Z][A-Za-z\s-]+)/i             // "campagne Coca-Cola"
             ];
             
             for (const pattern of fieldPatterns) {
@@ -742,13 +755,24 @@
                 }
             }
             
-            // Method 2: Look for formal field patterns
+            // Method 2: Look for formal field patterns and presentation contexts
             const fieldPatterns = [
+                // Traditional form patterns  
                 /marque[\s\w\/]*produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                 /produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                 /marque[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
                 /product[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
-                /brand[\s\w]*:?\s*([A-Za-z\s0-9]+)/i
+                /brand[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                
+                // Client presentation patterns
+                /gamme[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                /ligne[\s\w]*produit[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                /service[\s\w]*:?\s*([A-Za-z\s0-9]+)/i,
+                
+                // Context-based patterns (presentations often mention products in context)
+                /lancement[\s]+([A-Za-z\s0-9]+)/i,              // "lancement Powerade"
+                /nouveau[\s]+([A-Za-z\s0-9]+)/i,                // "nouveau iPhone" 
+                /promouvoir[\s]+([A-Za-z\s0-9]+)/i             // "promouvoir Powerade"
             ];
             
             for (const pattern of fieldPatterns) {
@@ -960,37 +984,85 @@
         }
         
         function extractBudgetRange(text) {
+            console.log('💰 EXTRACTING BUDGET - Starting comprehensive search...');
+            
+            // Enhanced patterns for various budget formats used in client presentations
             const patterns = [
-                /(\d{1,3})[-–](\d{1,3})\s*k/i,
+                // Range patterns with K notation
+                /(\d{1,3})[-–](\d{1,3})\s*k(?:\s*€|€)?/i,
                 /(\d{1,3})\s*k\s*[-–]\s*(\d{1,3})\s*k/i,
-                /€\s*(\d{1,3})[.,](\d{3})\s*[-–]\s*€\s*(\d{1,3})[.,](\d{3})/i,
-                /budget[\s\w]*:?\s*(\d+)\s*[-–]\s*(\d+)/i
+                
+                // Full amount ranges with currency symbols and separators
+                /€\s*(\d{1,3})[.,](\d{3})\s*[-–]\s*€?\s*(\d{1,3})[.,](\d{3})/i,
+                /(\d{1,3})[.,](\d{3})\s*€\s*[-–]\s*(\d{1,3})[.,](\d{3})\s*€/i,
+                
+                // Budget field patterns
+                /budget[\s\w]*:?\s*€?\s*(\d+)\s*[-–]\s*€?\s*(\d+)/i,
+                
+                // Single large amounts (client presentation format)
+                /€\s*(\d{1,3})[.,](\d{3})/i,                    // €300,000 or €300.000
+                /(\d{1,3})[.,](\d{3})\s*€/i,                    // 300,000€ or 300.000€
+                /€\s*(\d{4,7})/i,                               // €300000
+                /(\d{4,7})\s*€/i,                               // 300000€
+                
+                // K notation single amounts
+                /(\d{1,3})\s*k(?:\s*€|€)?/i,                    // 300K€ or 300K
+                
+                // Budget context patterns
+                /budget[\s\w]*:?\s*€?\s*(\d{4,7})/i,            // Budget: 300000
+                /budget[\s\w]*:?\s*(\d{1,3})[.,](\d{3})/i,      // Budget: 300,000
+                
+                // General numeric patterns for budgets
+                /coût[\s\w]*:?\s*€?\s*(\d{4,7})/i,              // Coût: 300000
+                /montant[\s\w]*:?\s*€?\s*(\d{4,7})/i            // Montant: 300000
             ];
             
             for (const pattern of patterns) {
                 const match = text.match(pattern);
                 if (match) {
-                    let low = parseInt(match[1]);
-                    let high = parseInt(match[2]);
+                    console.log('🎯 BUDGET PATTERN MATCHED:', pattern, '→', match[0]);
                     
-                    // Handle K multiplier
-                    if (match[0].toLowerCase().includes('k')) {
-                        low *= 1000;
-                        high *= 1000;
+                    // Handle different match group structures
+                    if (match[3]) {
+                        // Range with full amounts like €100,000 - €200,000
+                        let low = parseInt(match[1] + match[2]);
+                        let high = parseInt(match[3] + match[4] || match[3]);
+                        console.log('📊 BUDGET RANGE DETECTED:', low, '-', high);
+                        return `${low}-${high}`;
+                    } else if (match[2] && match[1].length <= 3) {
+                        // Check if this is a range (two numbers) or a formatted single amount
+                        if (match[0].includes('-') || match[0].includes('–')) {
+                            // Range like 20-25K
+                            let low = parseInt(match[1]);
+                            let high = parseInt(match[2]);
+                            if (match[0].toLowerCase().includes('k')) {
+                                low *= 1000;
+                                high *= 1000;
+                            }
+                            console.log('📊 BUDGET RANGE DETECTED (K):', low, '-', high);
+                            return `${low}-${high}`;
+                        } else {
+                            // Single formatted amount like €300,000
+                            let amount = parseInt(match[1] + match[2]);
+                            console.log('💰 SINGLE BUDGET DETECTED (formatted):', amount);
+                            return amount.toString();
+                        }
+                    } else if (match[1]) {
+                        // Single amount
+                        let amount = parseInt(match[1]);
+                        
+                        // Apply K multiplier if present
+                        if (match[0].toLowerCase().includes('k')) {
+                            amount *= 1000;
+                        }
+                        
+                        console.log('💰 SINGLE BUDGET DETECTED:', amount);
+                        return amount.toString();
                     }
-                    
-                    return `${low}-${high}`;
                 }
             }
             
-            // Single budget amounts
-            const singlePattern = /(\d{1,3})\s*k/i;
-            const singleMatch = text.match(singlePattern);
-            if (singleMatch) {
-                const amount = parseInt(singleMatch[1]) * 1000;
-                return amount.toString();
-            }
-            
+            console.log('❌ BUDGET NOT FOUND - No patterns matched');
             return null;
         }
         
