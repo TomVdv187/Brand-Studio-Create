@@ -1362,21 +1362,22 @@
                     evaluation.issues.push('Insufficient lead time');
                 }
             } else {
+                // For manual input, assume reasonable timeline if no deadline specified
                 evaluation.criteria.timeline = {
-                    status: 'FAIL',
-                    score: 0,
-                    message: 'No deadline specified'
+                    status: 'PASS',
+                    score: 25, // Reduced points but still passing
+                    message: 'No deadline specified - assuming adequate timeline'
                 };
-                evaluation.issues.push('Missing deadline');
+                console.log('ℹ️ No deadline provided, assuming adequate timeline for manual entry');
             }
             
-            // Required fields (30 points)
-            const requiredFields = ['responsable_commercial', 'group_or_annonceur', 'target_persona'];
+            // Required fields (30 points) - target_persona optional for manual entry
+            const requiredFields = ['responsable_commercial', 'group_or_annonceur'];
             const missingFields = [];
             
             if (!data.contact.responsable_commercial) missingFields.push('responsable commercial');
             if (!data.advertiser.group_or_annonceur) missingFields.push('group annonceur');
-            if (!data.brief.target_persona) missingFields.push('target persona');
+            // target_persona is now optional (removed from required fields)
             
             if (missingFields.length === 0) {
                 evaluation.criteria.required_fields = {
@@ -1683,6 +1684,16 @@
             
             // Create briefing data structure
             const today = new Date().toISOString().split('T')[0];
+            
+            // If no deadline provided, set a reasonable default (30 days from now)
+            let finalDeadline = deadline;
+            if (!deadline) {
+                const futureDate = new Date();
+                futureDate.setDate(futureDate.getDate() + 30);
+                finalDeadline = futureDate.toISOString().split('T')[0];
+                console.log('ℹ️ No deadline provided, using default:', finalDeadline);
+            }
+            
             const briefingData = {
                 meta: {
                     source_file: 'Manual Input',
@@ -1705,7 +1716,7 @@
                     target_persona: persona || null,
                     objectives: null,
                     start_momentum_reason: null,
-                    end_date: deadline || null,
+                    end_date: finalDeadline,
                     key_messages: messages || null,
                     media_specific_preferences: null,
                     history_with_rossel: null,
@@ -1715,7 +1726,7 @@
                 constraints: {
                     min_budget_create_eur: 10000,
                     budget_confirmed_eur_range: budget.toString(),
-                    proposal_deadline: deadline || null,
+                    proposal_deadline: finalDeadline,
                     lead_time_business_days_after_valid_brief: 10,
                     do_not: null,
                     prefer: null
