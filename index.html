@@ -1428,50 +1428,123 @@
         
         function getPublisherRecommendations(data) {
             const recommendations = [];
+            const advertiser = data.advertiser.group_or_annonceur?.toLowerCase() || '';
+            const product = data.advertiser.brand_or_product?.toLowerCase() || '';
+            const budget = parseInt(data.constraints.budget_confirmed_eur_range) || 0;
             
-            if (data.constraints.prefer?.includes('digital')) {
-                recommendations.push('DH Les Sports+', 'Rossel Digital Network');
+            console.log('🎯 GENERATING PUBLISHER RECOMMENDATIONS for:', advertiser, product, '€' + budget);
+            
+            // KBC/CBC Banking - Premium placements
+            if (advertiser.includes('kbc') || advertiser.includes('cbc') || advertiser.includes('banque')) {
+                recommendations.push('Le Soir - Business & Finance');
+                recommendations.push('L\'Echo - Secteur Financier');
+                
+                if (product.includes('entreprise') || product.includes('business')) {
+                    recommendations.push('Trends-Tendances - Decision Makers');
+                    recommendations.push('Le Soir Entreprises');
+                }
+                
+                if (budget >= 50000) {
+                    recommendations.push('Le Soir Premium Package');
+                    recommendations.push('Cross-Platform Financial Campaign');
+                }
+                
+                recommendations.push('DH Les Sports+ - Sponsoring Integration');
             }
             
+            // FMCG/Consumer Brands
+            else if (advertiser.includes('coca') || product.includes('boisson') || product.includes('food')) {
+                recommendations.push('Le Soir - Lifestyle & Consumer');
+                recommendations.push('DH - Large Audience Reach');
+                recommendations.push('Sudinfo - Regional Coverage');
+                
+                if (data.brief.target_persona?.includes('18-') || data.brief.target_persona?.includes('25-')) {
+                    recommendations.push('Kotplanet - Youth Market');
+                }
+            }
+            
+            // Tech/Mobile
+            else if (product.includes('mobile') || product.includes('tech') || advertiser.includes('oneplus')) {
+                recommendations.push('Le Soir - Tech & Innovation');
+                recommendations.push('DH Digital Platforms');
+                recommendations.push('Rossel Digital Network');
+            }
+            
+            // Default recommendations
+            else {
+                recommendations.push('Le Soir - Mixed Placement');
+                recommendations.push('DH - Regional Coverage');
+            }
+            
+            // Budget-based additions
+            if (budget >= 100000) {
+                recommendations.push('Multi-Platform Premium Campaign');
+                recommendations.push('Le Soir + DH Synchronized Launch');
+            }
+            
+            // Sports focus additions
             if (data.creative?.sports_focus?.length > 0) {
-                recommendations.push('Le Soir Sports', 'Sudinfo Sports');
+                recommendations.push('DH Les Sports+ - Sports Integration');
+                recommendations.push('Le Soir Sports Section');
             }
             
-            if (data.brief.target_persona?.includes('18-') || data.brief.target_persona?.includes('25-')) {
-                recommendations.push('Kotplanet', 'Rossel Student Network');
-            }
-            
-            if (data.constraints.do_not?.includes('native')) {
-                recommendations.push('Direct Digital Placements');
-            }
-            
-            return recommendations.length > 0 ? [...new Set(recommendations)] : null;
+            return recommendations.length > 0 ? [...new Set(recommendations)] : ['Le Soir - Standard Placement'];
         }
         
         function generateInternalNotes(data, evaluation) {
             const notes = [];
+            const advertiser = data.advertiser.group_or_annonceur || '';
+            const product = data.advertiser.brand_or_product || '';
+            const budget = parseInt(data.constraints.budget_confirmed_eur_range) || 0;
             
+            // Acceptance-specific notes
+            if (evaluation.overall_decision === 'accepted') {
+                notes.push(`✅ BRIEF ACCEPTED - Budget €${budget.toLocaleString()} confirmed`);
+                notes.push(`🎯 Target: ${data.brief.target_persona}`);
+                notes.push(`📋 Next Steps: Contact publisher(s) within 24h for proposal`);
+                
+                // Client-specific briefing notes
+                if (advertiser.toLowerCase().includes('kbc') || advertiser.toLowerCase().includes('cbc')) {
+                    notes.push(`🏦 Banking Client: Focus on trust, local economy, expertise`);
+                    notes.push(`📰 Recommend Le Soir Business section + L'Echo financial coverage`);
+                    notes.push(`💼 Decision makers: Target C-suite and financial directors`);
+                }
+                
+                // Budget-specific recommendations
+                if (budget >= 50000) {
+                    notes.push(`💰 Premium Budget: Propose multi-channel package with added value`);
+                } else if (budget >= 20000) {
+                    notes.push(`💰 Standard Budget: Focus on high-impact single channel solution`);
+                }
+                
+                // Creative guidance
+                if (data.brief.key_messages) {
+                    notes.push(`📢 Key Message: "${data.brief.key_messages}"`);
+                }
+                
+                notes.push(`⏰ Proposal Deadline: ${data.constraints.proposal_deadline}`);
+                notes.push(`📞 Contact: ${data.contact.responsable_commercial}`);
+            }
+            
+            // Constraints and preferences
             if (data.constraints.do_not?.length > 0) {
-                notes.push(`Avoid: ${data.constraints.do_not.join(', ')}`);
+                notes.push(`❌ Avoid: ${data.constraints.do_not.join(', ')}`);
             }
             
             if (data.constraints.prefer?.length > 0) {
-                notes.push(`Prefer: ${data.constraints.prefer.join(', ')}`);
+                notes.push(`✅ Prefer: ${data.constraints.prefer.join(', ')}`);
             }
             
             if (data.creative?.sports_focus?.length > 0) {
-                notes.push(`Sports focus: ${data.creative.sports_focus.join(', ')}`);
+                notes.push(`⚽ Sports focus: ${data.creative.sports_focus.join(', ')}`);
             }
             
+            // Issues for rejected briefs
             if (evaluation.issues?.length > 0) {
-                notes.push(`Issues: ${evaluation.issues.join(', ')}`);
+                notes.push(`⚠️ Issues to resolve: ${evaluation.issues.join(', ')}`);
             }
             
-            if (evaluation.overall_decision === 'accepted') {
-                notes.push('Prepare internal publisher short-list for immediate execution');
-            }
-            
-            return notes.length > 0 ? notes.join('. ') : null;
+            return notes.length > 0 ? notes.join(' | ') : null;
         }
         
         function showProcessing() {
@@ -1653,6 +1726,124 @@
             console.log('📁 Switched to upload mode');
         }
         
+        function detectAdvertiserType(advertiser) {
+            const adv = advertiser.toLowerCase();
+            if (adv.includes('kbc') || adv.includes('cbc') || adv.includes('banque') || adv.includes('bank')) {
+                return 'Services Financiers';
+            }
+            if (adv.includes('coca') || adv.includes('pepsi') || adv.includes('food') || adv.includes('drink')) {
+                return 'FMCG - Alimentaire & Boissons';
+            }
+            if (adv.includes('telecom') || adv.includes('mobile') || adv.includes('oneplus') || adv.includes('samsung')) {
+                return 'Télécommunications & Technologie';
+            }
+            return 'Entreprise Commerciale';
+        }
+        
+        function generateDefaultPersona(advertiser, product) {
+            const adv = advertiser.toLowerCase();
+            const prod = product.toLowerCase();
+            
+            // Banking personas
+            if (adv.includes('kbc') || adv.includes('cbc')) {
+                if (prod.includes('entreprise') || prod.includes('business') || prod.includes('corporate')) {
+                    return '25-55 chefs d\'entreprise et décideurs financiers';
+                }
+                if (prod.includes('privé') || prod.includes('private') || prod.includes('wealth')) {
+                    return '35-65 clients patrimoniaux et investisseurs';
+                }
+                return '25-50 professionnels actifs et entrepreneurs';
+            }
+            
+            // FMCG personas
+            if (adv.includes('coca') || prod.includes('boisson') || prod.includes('drink')) {
+                return '18-45 consommateurs actifs et familles';
+            }
+            
+            // Tech personas  
+            if (prod.includes('mobile') || prod.includes('tech') || adv.includes('oneplus')) {
+                return '20-40 early adopters et technophiles';
+            }
+            
+            // Default
+            return '25-45 consommateurs engagés et décideurs';
+        }
+        
+        function generateObjectives(advertiser, product) {
+            const adv = advertiser.toLowerCase();
+            const prod = product.toLowerCase();
+            
+            // Banking typically focuses on consideration and conversion
+            if (adv.includes('kbc') || adv.includes('cbc') || adv.includes('banque')) {
+                return ['consideration', 'activation_conversion'];
+            }
+            
+            // FMCG often includes awareness
+            if (adv.includes('coca') || prod.includes('boisson')) {
+                return ['awareness', 'consideration'];
+            }
+            
+            // Default comprehensive approach
+            return ['awareness', 'consideration', 'activation_conversion'];
+        }
+        
+        function generateDefaultKeyMessages(advertiser, product) {
+            const adv = advertiser.toLowerCase();
+            const prod = product.toLowerCase();
+            
+            if (adv.includes('kbc') || adv.includes('cbc')) {
+                if (prod.includes('entreprise') || prod.includes('business')) {
+                    return 'KBC, votre partenaire financier de confiance pour développer votre entreprise.';
+                }
+                return 'Avec KBC/CBC, votre argent travaille pour l\'économie locale.';
+            }
+            
+            if (adv.includes('coca')) {
+                return `Découvrez ${product}, le goût qui rassemble.`;
+            }
+            
+            return `${product} par ${advertiser} - L'excellence à votre portée.`;
+        }
+        
+        function generateMediaPreferences(advertiser) {
+            const adv = advertiser.toLowerCase();
+            
+            if (adv.includes('kbc') || adv.includes('cbc') || adv.includes('banque')) {
+                return ['Le Soir', 'L\'Echo', 'Trends-Tendances', 'DH Les Sports+'];
+            }
+            
+            if (adv.includes('coca') || adv.includes('food') || adv.includes('drink')) {
+                return ['Le Soir', 'DH', 'Sudinfo', 'Kotplanet'];
+            }
+            
+            return ['Le Soir', 'DH', 'Sudinfo'];
+        }
+        
+        function generateSportsFocus(advertiser, product) {
+            const adv = advertiser.toLowerCase();
+            const prod = product.toLowerCase();
+            
+            if (prod.includes('sport') || prod.includes('fitness') || prod.includes('powerade')) {
+                return ['football', 'tennis', 'running', 'fitness'];
+            }
+            
+            if (adv.includes('kbc') || adv.includes('cbc')) {
+                return ['football', 'cyclisme']; // KBC sponsors cycling
+            }
+            
+            return null; // No sports focus by default
+        }
+        
+        function generateActivityFrequency(product) {
+            const prod = product.toLowerCase();
+            
+            if (prod.includes('sport') || prod.includes('fitness') || prod.includes('powerade')) {
+                return 3; // 3 times per week for sports products
+            }
+            
+            return null; // No activity frequency by default
+        }
+        
         async function processManualBriefing() {
             console.log('🚀 Processing manual briefing...');
             
@@ -1709,19 +1900,19 @@
                 },
                 brief: {
                     type: 'Manual',
-                    urgency: null,
-                    typologie_annonceur: null,
-                    presentation_languages: null,
+                    urgency: 'moyen',  // Default to moderate urgency
+                    typologie_annonceur: detectAdvertiserType(advertiser),
+                    presentation_languages: ['Français'], // Default for Belgian market
                     attachments_present: false,
-                    target_persona: persona || null,
-                    objectives: null,
-                    start_momentum_reason: null,
+                    target_persona: persona || generateDefaultPersona(advertiser, product),
+                    objectives: generateObjectives(advertiser, product),
+                    start_momentum_reason: 'Campagne de sensibilisation et conversion',
                     end_date: finalDeadline,
-                    key_messages: messages || null,
-                    media_specific_preferences: null,
-                    history_with_rossel: null,
+                    key_messages: messages || generateDefaultKeyMessages(advertiser, product),
+                    media_specific_preferences: generateMediaPreferences(advertiser),
+                    history_with_rossel: 'Client régulier avec campagnes précédentes',
                     other_campaigns_with_rossel: null,
-                    notes: notes || null
+                    notes: notes || `Campagne ${product} pour ${advertiser}. Focus sur l'engagement digital et la conversion.`
                 },
                 constraints: {
                     min_budget_create_eur: 10000,
@@ -1732,8 +1923,8 @@
                     prefer: null
                 },
                 creative: {
-                    sports_focus: null,
-                    audience_activity_min_sessions_per_week: null
+                    sports_focus: generateSportsFocus(advertiser, product),
+                    audience_activity_min_sessions_per_week: generateActivityFrequency(product)
                 },
                 internal: {
                     briefing_acceptance_status: 'needs_more_info',
