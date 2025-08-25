@@ -371,9 +371,81 @@
                                 </div>
                                 <h2>Upload Your Briefing</h2>
                                 <p>Drag and drop your PDF briefing here</p>
-                                <div style="margin-top: 1.5rem; color: var(--gray-600); font-size: 0.875rem;">
-                                    <small><i class="fas fa-info-circle"></i> Supports PDF files up to 10MB</small>
+                                <div style="margin-top: 1.5rem;">
+                                    <button onclick="showManualSection()" class="btn-secondary" style="margin-bottom: 1rem;">
+                                        <i class="fas fa-keyboard"></i>
+                                        Manual Input Mode
+                                    </button>
+                                    <div style="color: var(--gray-600); font-size: 0.875rem;">
+                                        <small><i class="fas fa-info-circle"></i> Supports PDF files up to 10MB</small>
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Manual Briefing Input Section -->
+                <section class="manual-section" id="manualSection" style="display: none;">
+                    <div class="upload-card">
+                        <div style="padding: 2rem;">
+                            <div style="text-align: center; margin-bottom: 2rem;">
+                                <i class="fas fa-edit" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                                <h2>Manual Briefing Input</h2>
+                                <p style="color: var(--gray-600);">Enter briefing details to test the acceptance workflow</p>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Client/Advertiser *</label>
+                                    <input type="text" id="manualAdvertiser" placeholder="e.g., KBC, Coca-Cola" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem;">
+                                </div>
+                                
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product/Service *</label>
+                                    <input type="text" id="manualProduct" placeholder="e.g., Content Marketing, Powerade" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem;">
+                                </div>
+                                
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Budget (€) *</label>
+                                    <input type="number" id="manualBudget" placeholder="e.g., 300000" min="1000" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem;">
+                                </div>
+                                
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Contact Person *</label>
+                                    <input type="text" id="manualContact" placeholder="e.g., Karolien VAN GAEVER" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem;">
+                                </div>
+                                
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Target Persona</label>
+                                    <input type="text" id="manualPersona" placeholder="e.g., 25-45 business professionals" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem;">
+                                </div>
+                                
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Proposal Deadline</label>
+                                    <input type="date" id="manualDeadline" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem;">
+                                </div>
+                            </div>
+                            
+                            <div style="margin: 1.5rem 0;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Key Messages</label>
+                                <textarea id="manualMessages" placeholder="Enter key campaign messages..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem; height: 80px; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <div style="margin: 1.5rem 0;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Additional Notes</label>
+                                <textarea id="manualNotes" placeholder="Campaign preferences, restrictions, special requirements..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem; height: 80px; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <button onclick="processManualBriefing()" class="btn-primary">
+                                    <i class="fas fa-rocket"></i>
+                                    Process Manual Briefing
+                                </button>
+                                <button onclick="showUploadSection()" class="btn-secondary" style="margin-left: 1rem;">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Back to Upload
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -433,6 +505,7 @@
         // DOM elements
         const elements = {
             uploadSection: document.getElementById('uploadSection'),
+            manualSection: document.getElementById('manualSection'),
             processingSection: document.getElementById('processingSection'),
             resultsSection: document.getElementById('resultsSection'),
             uploadArea: document.getElementById('uploadArea'),
@@ -1554,6 +1627,7 @@
         
         function reset() {
             elements.uploadSection.style.display = 'block';
+            elements.manualSection.style.display = 'none';
             elements.processingSection.style.display = 'none';
             elements.resultsSection.style.display = 'none';
             elements.fileInput.value = '';
@@ -1562,12 +1636,131 @@
             console.log('🔄 Reset complete');
         }
         
+        function showManualSection() {
+            elements.uploadSection.style.display = 'none';
+            elements.manualSection.style.display = 'block';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'none';
+            console.log('📝 Switched to manual input mode');
+        }
+        
+        function showUploadSection() {
+            elements.uploadSection.style.display = 'block';
+            elements.manualSection.style.display = 'none';
+            elements.processingSection.style.display = 'none';
+            elements.resultsSection.style.display = 'none';
+            console.log('📁 Switched to upload mode');
+        }
+        
+        async function processManualBriefing() {
+            console.log('🚀 Processing manual briefing...');
+            
+            // Get input values
+            const advertiser = document.getElementById('manualAdvertiser').value.trim();
+            const product = document.getElementById('manualProduct').value.trim();
+            const budget = parseInt(document.getElementById('manualBudget').value);
+            const contact = document.getElementById('manualContact').value.trim();
+            const persona = document.getElementById('manualPersona').value.trim();
+            const deadline = document.getElementById('manualDeadline').value;
+            const messages = document.getElementById('manualMessages').value.trim();
+            const notes = document.getElementById('manualNotes').value.trim();
+            
+            // Validate required fields
+            if (!advertiser || !product || !budget || !contact) {
+                alert('Please fill in all required fields (marked with *)');
+                return;
+            }
+            
+            if (budget < 1000) {
+                alert('Budget must be at least €1,000');
+                return;
+            }
+            
+            // Show processing
+            showProcessing();
+            updateStatus('Creating manual briefing...');
+            await delay(500);
+            
+            // Create briefing data structure
+            const today = new Date().toISOString().split('T')[0];
+            const briefingData = {
+                meta: {
+                    source_file: 'Manual Input',
+                    extraction_ts: today
+                },
+                contact: {
+                    responsable_commercial: contact,
+                    agence_media: null
+                },
+                advertiser: {
+                    group_or_annonceur: advertiser,
+                    brand_or_product: product
+                },
+                brief: {
+                    type: 'Manual',
+                    urgency: null,
+                    typologie_annonceur: null,
+                    presentation_languages: null,
+                    attachments_present: false,
+                    target_persona: persona || null,
+                    objectives: null,
+                    start_momentum_reason: null,
+                    end_date: deadline || null,
+                    key_messages: messages || null,
+                    media_specific_preferences: null,
+                    history_with_rossel: null,
+                    other_campaigns_with_rossel: null,
+                    notes: notes || null
+                },
+                constraints: {
+                    min_budget_create_eur: 10000,
+                    budget_confirmed_eur_range: budget.toString(),
+                    proposal_deadline: deadline || null,
+                    lead_time_business_days_after_valid_brief: 10,
+                    do_not: null,
+                    prefer: null
+                },
+                creative: {
+                    sports_focus: null,
+                    audience_activity_min_sessions_per_week: null
+                },
+                internal: {
+                    briefing_acceptance_status: 'needs_more_info',
+                    acceptance_reason: null,
+                    action_recommend_publishers: false,
+                    internal_publisher_recommendation: null,
+                    internal_notes: null
+                },
+                supplemental: {
+                    other_fields: null,
+                    source_field_map: null
+                }
+            };
+            
+            updateStatus('Evaluating CREATE criteria...');
+            await delay(800);
+            
+            // Evaluate the briefing
+            const evaluation = evaluateCreateCriteriaV4(briefingData);
+            console.log('🎯 Manual briefing evaluation:', evaluation);
+            
+            updateStatus('Finalizing results...');
+            await delay(600);
+            
+            // Store and show results
+            currentData = { briefing: briefingData, evaluation, originalText: `Manual briefing for ${advertiser} - ${product}` };
+            showResults();
+        }
+        
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
         
         // Make functions globally available
         window.reset = reset;
+        window.showManualSection = showManualSection;
+        window.showUploadSection = showUploadSection;
+        window.processManualBriefing = processManualBriefing;
         
         console.log('✅ Brand Studio CREATE v4 Ready! (CLAUDE.md v4 Compliant)');
     </script>
